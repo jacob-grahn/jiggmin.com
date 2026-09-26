@@ -1,25 +1,45 @@
 import * as THREE from 'three';
+import {createPropReactions} from './prop-reactions.js';
 import {mergeGeometries} from './vendor/three/BufferGeometryUtils.js';
 
 // A camera-space light bake on actual 3D surfaces: the depth buffer, not DOM order,
 // determines whether the rack, TV, or table hides a moving cartridge.
-export function prepareRoom(gltf, camera, lighting) {
+export function prepareRoom(gltf, camera, lighting, propLighting=lighting) {
   lighting.colorSpace = THREE.SRGBColorSpace;
   lighting.minFilter = THREE.LinearFilter;
+  propLighting.colorSpace=THREE.SRGBColorSpace;propLighting.minFilter=THREE.LinearFilter;
+  lighting.wrapS=lighting.wrapT=propLighting.wrapS=propLighting.wrapT=THREE.ClampToEdgeWrapping;
   camera.updateMatrixWorld(true);
   const projection = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);
+  let shell,glass;const props=[];
+  gltf.scene.traverse(o=>{if(!o.isMesh)return;if(o.userData.role==='room_geometry')shell=o;else if(o.userData.role==='crt_depth_surface')glass=o;else if(o.userData.role==='reactive_prop')props.push(o);});
+  const [sx,sy]=shell.userData.bakeScale||[1,1];projection.premultiply(new THREE.Matrix4().makeScale(sx,sy,1));
   const material = new THREE.ShaderMaterial({
     uniforms:{lighting:{value:lighting},bakeProjection:{value:projection}},
     vertexShader:`varying vec4 bakePosition;
       uniform mat4 bakeProjection;
       void main(){vec4 world=modelMatrix*vec4(position,1.0);bakePosition=bakeProjection*world;gl_Position=projectionMatrix*viewMatrix*world;}`,
     fragmentShader:`uniform sampler2D lighting;varying vec4 bakePosition;
-      void main(){vec2 uv=bakePosition.xy/bakePosition.w*.5+.5;gl_FragColor=vec4(texture2D(lighting,uv).rgb,1.0);
+      void main(){vec2 uv=bakePosition.xy/bakePosition.w*.5+.5;vec3 color=texture2D(lighting,clamp(uv,vec2(.0001),vec2(.9999))).rgb;
+      float edge=max(abs(uv.x-.5),abs(uv.y-.5));
+      gl_FragColor=vec4(mix(color,vec3(.003,.005,.007),smoothstep(.485,.505,edge)),1.0);
       #include <colorspace_fragment>
       }`,side:THREE.DoubleSide
   });
-  let shell, glass;
-  gltf.scene.traverse(o=>{if(o.isMesh){o.material=material;o.castShadow=false;o.receiveShadow=false;if(o.userData.role==='crt_depth_surface')glass=o;else shell=o;}});
+  gltf.scene.updateMatrixWorld(true);
+  gltf.scene.traverse(o=>{if(o.isMesh){o.material=material;o.castShadow=false;o.receiveShadow=false;}});
+  for(const prop of props){
+    const mat=material.clone();mat.uniforms.lighting.value=propLighting;
+    if(shell.userData.propBakeRect){
+      const [x,y,w,h]=shell.userData.propBakeRect;
+      const crop=new THREE.Matrix4().set(1/w,0,0,(1-2*x-w)/w,0,1/h,0,(1-2*y-h)/h,0,0,1,0,0,0,0,1);
+      mat.uniforms.bakeProjection.value.premultiply(crop);
+    }
+    mat.uniforms.bakeModelMatrix={value:prop.matrixWorld.clone()};
+    mat.vertexShader=material.vertexShader.replace('uniform mat4 bakeProjection;','uniform mat4 bakeProjection;uniform mat4 bakeModelMatrix;').replace('bakePosition=bakeProjection*world;','bakePosition=bakeProjection*bakeModelMatrix*vec4(position,1.0);');
+    prop.material=mat;
+  }
+  const reactions=createPropReactions(props);
   // Only the moving objects cast onto this duplicate receiver. The static lighting
   // and contact shadows are already baked, so they must not be applied twice.
   const shadows=new THREE.Mesh(shell.geometry,new THREE.ShadowMaterial({opacity:.42,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));
@@ -47,7 +67,7 @@ export function prepareRoom(gltf, camera, lighting) {
   let playing=false,lastTick=-1;
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   glass.material=idle;glass.renderOrder=1;
-  return {group:gltf.scene,shell,glass,
+  return {group:gltf.scene,shell,glass,props,reactions,occluders:[shell,...props],
     setPlaying(value){playing=value;glass.material=playing?aperture:idle;},
     updateIdle(time){
       if(playing)return false;

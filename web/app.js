@@ -1,38 +1,49 @@
 import * as THREE from 'three';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
-import {inSlot,playbackFile} from './interaction.js';
+import {inSlot,playbackFile} from './interaction.js?v=taller-slot-1';
 import {resolveRoute,writeGameUrl} from './routes.js';
 import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
-import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=crt-flicker-1';
+import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=detailed-den-1';
 import {createControllerCord} from './controller-cord.js?v=2';
-import {remodelCartridge} from './cartridge-model.js?v=1';
+import {remodelCartridge} from './cartridge-model.js?v=screenprint-3';
 import {SHELF_SLOTS,shuffled,RestTimer,ease} from './library-behavior.js?v=visibility-1';
-import {UPPER_SLOTS,framing,captureSceneAnchors,composeCamera,projectWorld,createUpperShelf,cartridgeVisible} from './responsive-scene.js?v=lower-camera-1';
-import {createMobileController} from './mobile-controller.js?v=1';
+import {UPPER_SLOTS,framing,captureSceneAnchors,composeCamera,projectWorld,createUpperShelf,cartridgeVisible} from './responsive-scene.js?v=controller-zoom-2';
+import {createControllerDock} from './controller-dock.js';
+import {detailController} from './controller-detail.js';
+import {addSurfacePatina} from './surface-patina.js';
+import {createMobileController} from './mobile-controller.js?v=profiles-2';
 const $=id=>document.getElementById(id),room=$('room'),canvas=$('cartridges'),status=$('status'),screen=$('screen'),slot=$('slot'),tip=$('tooltip');
 const say=text=>status.textContent=text;
 let renderer,camera,scene,environment,physics,cord,roots=[],games,meta,drag=null,inserted=null,player=null,loadId=0,lastTime=0,dirty=true;
 const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),intersection=new THREE.Vector3();
 const motions=new Map(),restTimer=new RestTimer();
 let anchors,baseCameraHeight,cameraDrop=0,audioContext,controller,upperShelf,upperBodies=[],upperMode=false,shelfSlots=SHELF_SLOTS,mobileControls;
-let focusY=.41,visibilityTick=0,controllerRestPose=null;
+let focusY=.41,visibilityTick=0,controllerDock=null;
 const stored=new Map(),visibility=new Map();
 const touchLayout=matchMedia('(max-width:900px), (pointer:coarse)');
 const touchSurface=document.createElement('div');touchSurface.id='touch-screen';room.append(touchSurface);
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const dockPose={position:{x:-.13,y:.94,z:1.17},quaternion:{x:0,y:0,z:0,w:1}};
 const gameId=root=>root.userData.game_id||'controller';
+const currentGame=()=>games?.find(g=>g.id===inserted?.userData.game_id);
+const currentMode=()=>currentGame()?.gameplay.mode||'controller';
 const isCartridge=root=>root.userData.role==='draggable_cartridge';
 function coords(e){const r=room.getBoundingClientRect();return [(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height];}
 function setRay(e){const [x,y]=coords(e);pointer.set(x*2-1,1-y*2);ray.setFromCamera(pointer,camera);}
 function pick(e){
- setRay(e);const hit=ray.intersectObjects(roots.filter(r=>r.visible),true)[0];if(!hit)return null;
+ setRay(e);const hit=ray.intersectObjects(roots.filter(r=>r.visible&&!(r===controller&&controllerDock?.active)),true)[0];if(!hit)return null;
  // Furniture blocks selection as well as rendering: no grabbing through the TV.
- const wall=ray.intersectObjects([environment.shell,...(upperMode?[upperShelf.group]:[])],true)[0];if(wall&&wall.distance<hit.distance-.008)return null;
+ const wall=ray.intersectObjects([...environment.occluders,...(upperMode?[upperShelf.group]:[])],true)[0];if(wall&&wall.distance<hit.distance-.008)return null;
  let root=hit.object;while(root&&!roots.includes(root))root=root.parent;
  return root?{root,point:hit.point}:null;
 }
-function syncObjects(){for(const root of roots){const pose=physics.pose(gameId(root));if(root.position.distanceToSquared(pose.position)>1e-10||Math.abs(root.quaternion.x-pose.quaternion.x)+Math.abs(root.quaternion.y-pose.quaternion.y)+Math.abs(root.quaternion.z-pose.quaternion.z)+Math.abs(root.quaternion.w-pose.quaternion.w)>1e-7)dirty=true;root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);}}
+function pickProp(e){
+ setRay(e);const hit=ray.intersectObjects(environment.props,false)[0];if(!hit)return null;
+ const blockers=ray.intersectObjects([environment.shell,...roots.filter(r=>r.visible&&!(r===controller&&controllerDock?.active)),...(upperMode?[upperShelf.group]:[])],true);
+ if(blockers[0]?.distance<hit.distance-.008)return null;
+ return hit;
+}
+function syncObjects(){for(const root of roots){if(root===controller&&controllerDock?.active)continue;const pose=physics.pose(gameId(root));if(root.position.distanceToSquared(pose.position)>1e-10||Math.abs(root.quaternion.x-pose.quaternion.x)+Math.abs(root.quaternion.y-pose.quaternion.y)+Math.abs(root.quaternion.z-pose.quaternion.z)+Math.abs(root.quaternion.w-pose.quaternion.w)>1e-7)dirty=true;root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);}}
 function showError(message){say(message);$('error').textContent=message;$('error').hidden=false;}
 function unlockAudio(){try{audioContext ||= new AudioContext();audioContext.resume().catch(()=>{});}catch{}}
 function clickIn(){
@@ -81,7 +92,7 @@ function emptyShelfSlot(root){return shelfSlots.findIndex((_,i)=>shelfSlotFree(r
 function recoverCartridges(dt){
  if(inserted)return;
  visibilityTick+=dt;const check=visibilityTick>=.2;if(check)visibilityTick=0;
- const occluders=[environment.shell,...(upperMode?[upperShelf.group]:[])];
+ const occluders=[...environment.occluders,...(upperMode?[upperShelf.group]:[])];
  for(const root of roots){
   if(!isCartridge(root))continue;
   const id=gameId(root),item=physics.items.get(id),body=item.body;
@@ -124,7 +135,7 @@ function updateProjection(){
  screenTransform();updateTouchSurface();dirty=true;
 }
 function updateZoom(dt,immediate=false){
- const target=framing(room.clientWidth/room.clientHeight,!!inserted);setShelfLayout(target.upper);
+ const target=framing(room.clientWidth/room.clientHeight,!!inserted,currentMode(),currentGame()?currentGame().embedWidth/currentGame().embedHeight:null,touchLayout.matches?room.clientHeight:0);setShelfLayout(target.upper);
  const blend=immediate||reducedMotion.matches?1:1-Math.exp(-dt/1.25);
  if(!immediate&&Math.abs(camera.zoom-target.zoom)+Math.abs(focusY-target.focusY)+Math.abs(cameraDrop-target.cameraDrop)<.00001)return;
  camera.zoom+=(target.zoom-camera.zoom)*blend;focusY+=(target.focusY-focusY)*blend;cameraDrop+=(target.cameraDrop-cameraDrop)*blend;updateProjection();
@@ -136,24 +147,27 @@ function updateTouchSurface(){
   const p=meta.screen.map(([x,y])=>`${x*100}% ${y*100}%`);
   touchSurface.style.clipPath=`polygon(evenodd,0% 0%,100% 0%,100% 100%,0% 100%,0% 0%,${p[0]},${p[3]},${p[2]},${p[1]},${p[0]})`;
  }else touchSurface.style.clipPath='none';
- const raised=enabled&&!!player&&!screen.hidden;
- mobileControls?.setVisible(raised);
- if(controller){
-  const item=physics.items.get('controller');
-  if(raised&&!controllerRestPose){controllerRestPose=physics.pose('controller');item.cord.disable();physics.pin('controller',controllerRestPose);}
-  else if(!raised&&controllerRestPose){physics.place('controller',controllerRestPose);item.cord.enable();controllerRestPose=null;}
-  controller.visible=!raised;cord.mesh.visible=!raised;
+ const raised=!!player&&!screen.hidden&&currentMode()==='controller';
+ $('eject-game').hidden=!inserted||raised;
+ controllerDock?.setRaised(raised);
+ const glassBottom=Math.max(...meta.screen.map(p=>p[1]))*room.clientHeight;
+ const panel=$('mobile-controller');
+ if(enabled&&raised){
+  const compact=room.clientWidth/room.clientHeight>1.38&&room.clientHeight<600;
+  panel.style.setProperty('--pad-top',`${room.clientHeight-(compact?158:196)}px`);
+  panel.style.setProperty('--pad-scale',compact?.8:1);
+  panel.style.left='50%';panel.style.width='';return;
  }
- const top=Math.max(...meta.screen.map(p=>p[1]),meta.slot[1]+.09)*room.clientHeight;
+ const desiredTop=Math.max(glassBottom+18,(meta.slot[1]+.09)*room.clientHeight);
+ const top=Math.max(glassBottom+18,Math.min(desiredTop,room.clientHeight-200));
  const landscape=room.clientWidth/room.clientHeight>1.38&&room.clientHeight<600;
  const scale=landscape?.8:Math.min(1,Math.max(.25,(room.clientHeight-top-12)/178));
- const panel=$('mobile-controller');
  panel.style.setProperty('--pad-top',`${landscape?room.clientHeight-156:top}px`);
  panel.style.setProperty('--pad-scale',scale);
  panel.style.left=landscape?`${room.clientWidth-154}px`:'50%';
  panel.style.width=landscape?'360px':'';
 }
-function stop(){mobileControls?.release();loadId++;for(const [root,m] of motions)if(m.kind==='dock')cancelMotion(root);if(player){try{player.ruffle().suspend();}catch{}player.remove();player=null;}screen.hidden=true;$('player').replaceChildren();environment?.setPlaying(false);dirty=true;updateTouchSurface();}
+function stop(){mobileControls?.release();loadId++;for(const [root,m] of motions)if(m.kind==='dock')cancelMotion(root);if(player){try{player.ruffle?.().suspend();}catch{}player.remove();player=null;}screen.hidden=true;$('player').replaceChildren();environment?.setPlaying(false);dirty=true;updateTouchSurface();}
 function eject({updateUrl=true}={}){
  if(drag)finishDrag({pointerId:drag.id},true);
  if(updateUrl)writeGameUrl(null);document.title='Jiggmin — Midnight Den';
@@ -171,18 +185,26 @@ async function insert(root,{updateUrl=true}={}){
  for(const [cart,motion] of [...motions])if(motion.kind==='return')cancelMotion(cart);
  restTimer.elapsed.clear();visibility.clear();visibilityTick=0;
  const game=games.find(g=>g.id===gameId(root)),ticket=++loadId;
+ screen.classList.toggle('broken',game.gameplay.mode==='broken');mobileControls.configure(game.gameplay.controller);updateTouchSurface();
  const hover={position:{x:-.13,y:1.3,z:1.17},quaternion:dockPose.quaternion};
  const seated=await animate(root,[hover,{position:{...dockPose.position,y:1.01},quaternion:dockPose.quaternion},dockPose],[.6,.7,.18],'dock');
  if(!seated||ticket!==loadId||inserted!==root)return;
  clickIn();
  document.title=`${game.title} — Jiggmin`;say(`Loading ${game.title}…`);screen.hidden=false;environment.setPlaying(true);dirty=true;
  try{
+  if(game.playerType==='iframe'){
+   player=document.createElement('iframe');player.title=game.title;player.src=game.embedUrl;
+   player.allow='autoplay; fullscreen';player.allowFullscreen=true;
+   $('player').append(player);updateTouchSurface();
+   say(`${game.title} — live HTML5 game; eject to return to the den.`);
+   return;
+  }
   if(!window.RufflePlayer?.newest)throw new Error('The Flash player could not start. Refresh and try again.');
   player=window.RufflePlayer.newest().createPlayer();const active=player;$('player').append(active);updateTouchSurface();
   await active.ruffle().load({url:new URL('/'+playbackFile(game),location.origin).href,autoplay:'on',unmuteOverlay:'visible',scale:'showAll',letterbox:'on',backgroundColor:'#000000',allowScriptAccess:false,logLevel:'error'});
   if(ticket!==loadId)return;
-  say(`${game.title}${game.entryPointKind==='loader'?' — this game may need its original online services.':' — pull out its cartridge to stop.'}`);
- }catch(error){if(ticket!==loadId)return;showError(`Couldn’t load ${game.title}. ${error.message||'Try another cartridge.'}`);screen.hidden=true;environment.setPlaying(false);updateTouchSurface();dirty=true;}
+  say(`${game.title}${game.entryPointKind==='loader'?' — this game may need its original online services.':' — eject or pull out its cartridge to stop.'}`);
+ }catch(error){if(ticket!==loadId)return;showError(`Couldn’t load ${game.title}. ${error.message||'Try another cartridge.'}`);screen.hidden=game.gameplay.mode!=='broken';environment.setPlaying(!screen.hidden);updateTouchSurface();dirty=true;}
 }
 function finishDrag(e,cancel=false,interrupted=false){
  if(!drag||e.pointerId!==drag.id)return;
@@ -202,7 +224,9 @@ function finishDrag(e,cancel=false,interrupted=false){
  say(`${d.root.userData.title} — ${velocity.length()>1.4?'nice throw.':isCartridge(d.root)?'place it gently in the slot to play.':'the cord keeps it within reach.'}`);
 }
 for(const surface of [canvas,touchSurface])surface.addEventListener('pointerdown',e=>{
- if(e.button!==0||drag||!physics)return;const hit=pick(e);if(!hit)return;e.preventDefault();
+ if(e.button!==0||drag||!physics)return;const hit=pick(e);
+ if(!hit){const prop=pickProp(e);if(prop){e.preventDefault();environment.reactions.kick(prop.object,prop.point,reducedMotion.matches);say(`${prop.object.userData.title} — ${reducedMotion.matches?'hello there.':'a little nudge.'}`);dirty=true;}return;}
+ e.preventDefault();
  const {root,point}=hit,wasInserted=root===inserted;
  unlockAudio();stored.delete(root);cancelMotion(root);restTimer.clear(gameId(root));
  if(wasInserted){inserted=null;stop();}
@@ -227,11 +251,11 @@ function moveGrip(e,first=false){
 room.addEventListener('pointermove',e=>{
  if(!physics)return;
  if(drag){if(e.pointerId===drag.id)moveGrip(e);return;}
- const hit=pick(e);canvas.style.cursor=hit?'grab':'default';tip.hidden=!hit;
+ const hit=pick(e),prop=!hit?pickProp(e):null;canvas.style.cursor=hit?'grab':prop?'pointer':'default';tip.hidden=!hit&&!prop;
  // Let ordinary mouse input reach Ruffle through the transparent CRT aperture.
- const onGlass=!screen.hidden&&!hit&&ray.intersectObject(environment.glass,false).length>0;
+ const onGlass=!screen.hidden&&!hit&&!prop&&ray.intersectObject(environment.glass,false).length>0;
  if(!touchLayout.matches)canvas.style.pointerEvents=onGlass?'none':'auto';
- if(hit){tip.textContent=hit.root.userData.title;const [x,y]=coords(e);tip.style.left=`${Math.min(x*100,75)}%`;tip.style.top=`${Math.max(2,y*100-8)}%`;}
+ if(hit||prop){tip.textContent=hit?hit.root.userData.title:`${prop.object.userData.title} · tap to nudge`;const [x,y]=coords(e);tip.style.left=`${Math.min(x*100,75)}%`;tip.style.top=`${Math.max(2,y*100-8)}%`;}
 },{capture:true});
 room.addEventListener('wheel',e=>{if(!drag)return;e.preventDefault();drag.plane.translate(drag.normal.clone().multiplyScalar(THREE.MathUtils.clamp(e.deltaY*.002,-.25,.25)));moveGrip(e,true);},{passive:false});
 for(const surface of [canvas,touchSurface]){surface.addEventListener('pointerup',e=>finishDrag(e));surface.addEventListener('pointercancel',e=>finishDrag(e,false,true));surface.addEventListener('lostpointercapture',e=>{if(drag)finishDrag(e,false,true);});}
@@ -257,12 +281,12 @@ function screenTransform(){
 async function init(){
  const loader=new GLTFLoader();
  const json=async path=>{const r=await fetch(path);if(!r.ok)throw Error(`Could not load ${path}`);return r.json();};
- const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel]=await Promise.all([
-  json('/data/games.json'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=controller-1'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=controller-final'),json('/web/assets/colliders.json?v=controller-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled')
+ const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel,propLighting,profiles]=await Promise.all([
+  json('/data/games.json?v=screenprint-3'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=detailed-den-1'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=detailed-den-1'),json('/web/assets/colliders.json?v=detailed-den-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=detailed-den-1'),json('/data/gameplay.json?v=bubble-racing-1')
  ]);
- games=manifest.games;meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+ games=manifest.games;for(const game of games){game.gameplay=profiles.games[game.id];if(!game.gameplay)throw Error(`Missing gameplay profile: ${game.id}`);}meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;
- environment=prepareRoom(roomModel,camera,lighting);scene.add(environment.group);
+ environment=prepareRoom(roomModel,camera,lighting,propLighting);scene.add(environment.group);
  physics=new CartridgePhysics(colliders);
  upperShelf=createUpperShelf();scene.add(upperShelf.group);upperShelf.group.visible=false;
  upperBodies=physics.addStatic(upperShelf.colliders);for(const b of upperBodies)b.collisionFilterMask=0;
@@ -270,6 +294,12 @@ async function init(){
   if(o.userData.role==='draggable_cartridge')roots.push(o);
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}
  });
+ // New catalog entries use the same runtime cartridge mold as the original GLB.
+ for(const game of games)if(!roots.some(root=>gameId(root)===game.id)){
+  const root=new THREE.Group();root.name=game.title;
+  root.userData={role:'draggable_cartridge',game_id:game.id,title:game.title,storage:'rack'};
+  scene.add(root);roots.push(root);
+ }
  const tablePoses=roots.filter(r=>r.userData.storage==='table').map(r=>({position:r.position.clone(),quaternion:r.quaternion.clone()}));
  await Promise.all(roots.map(root=>remodelCartridge(root,games.find(g=>g.id===gameId(root)))));
  const order=shuffled(roots);
@@ -290,9 +320,10 @@ async function init(){
 
  controllerModel.scene.traverse(o=>{
   if(o.userData.role==='mobile_controller')controller=o;
-  if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}
+  if(o.isMesh){o.castShadow=true;o.receiveShadow=true;for(const mat of (Array.isArray(o.material)?o.material:[o.material]))addSurfacePatina(mat,{grain:.09,wear:.06});}
  });
  if(!controller)throw Error('Controller model is missing');
+ detailController(controller);
  controller.userData.title='J/01 controller';roots.push(controller);
  physics.addController(gameId(controller),{position:controller.position,quaternion:controller.quaternion});
  cord=createControllerCord(controller);scene.add(cord.mesh);
@@ -300,14 +331,16 @@ async function init(){
  addCartridgeLighting(scene,renderer);
  document.querySelector('.backdrop').hidden=true;
  slot.style.left=`${meta.slot[0]*100}%`;slot.style.top=`${meta.slot[1]*100}%`;
- mobileControls=createMobileController({getPlayer:()=>player,onQuit:()=>eject(),onGesture:unlockAudio});
+ mobileControls=createMobileController({getPlayer:()=>player,getAspect:()=>{const g=currentGame();return g?g.embedWidth/g.embedHeight:4/3;},onQuit:()=>eject(),onGesture:unlockAudio});
+ controllerDock=createControllerDock({controller,physics,cord,camera,room,panel:$('mobile-controller'),controls:mobileControls,reducedMotion});
+ $('eject-game').addEventListener('click',()=>eject());
  touchLayout.addEventListener('change',()=>{mobileControls.release();updateTouchSurface();});
- new ResizeObserver(()=>{mobileControls.release();if(drag)finishDrag({pointerId:drag.id},false,true);renderer.setSize(room.clientWidth,room.clientHeight,false);updateZoom(0,true);}).observe(room);
+ new ResizeObserver(()=>{tip.hidden=true;mobileControls.release();if(drag)finishDrag({pointerId:drag.id},false,true);renderer.setSize(room.clientWidth,room.clientHeight,false);updateZoom(0,true);}).observe(room);
  updateZoom(0,true);
 
  renderer.setAnimationLoop(time=>{
   const dt=lastTime?Math.min((time-lastTime)/1000,.08):0;lastTime=time;
-  if(!document.hidden){physics.step(dt);updateMotions(dt);syncObjects();recoverCartridges(dt);updateZoom(dt);const flicker=environment.updateIdle(time/1000);if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
+  if(!document.hidden){mobileControls.update(dt);physics.step(dt);updateMotions(dt);syncObjects();recoverCartridges(dt);updateZoom(dt);dirty=controllerDock.update(dt)||dirty;const flicker=environment.updateIdle(time/1000);dirty=environment.reactions.update(dt,reducedMotion.matches)||dirty;if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
  });
  if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
  applyRoute();

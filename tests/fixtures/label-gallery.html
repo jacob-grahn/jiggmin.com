@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Screen-print cartridge labels</title>
+<style>body{margin:0;padding:30px;background:#122025;color:#f4ecd5;font:16px system-ui}h1{margin:0 0 8px}p{color:#c8cebe}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px}figure{margin:0}img{display:block;width:100%;aspect-ratio:5/4;object-fit:contain;background:#071012}figcaption{padding:8px 0}a{color:inherit}</style>
+<h1>Screen-print cartridge labels</h1><p>24 illustrated labels · select a title to play</p><main></main>
+<script type="module">
+const {games}=await(await fetch('/data/games.json?v=screenprint-3')).json();
+for(const g of games){const f=document.createElement('figure'),i=document.createElement('img'),c=document.createElement('figcaption'),a=document.createElement('a');i.src='/'+g.cartridgeLabel.file;i.alt=g.title+' cartridge artwork';a.href='/'+g.id;a.textContent=g.title;c.append(a);f.append(i,c);document.querySelector('main').append(f);}
+</script>

@@ -1,8 +1,28 @@
 import * as THREE from 'three';
+import {addSurfacePatina} from './surface-patina.js';
 export const UPPER_SLOTS=Array.from({length:27},(_,i)=>({position:{x:-.975+(i%14)*.15,y:3.30+Math.floor(i/14)*.57,z:.02},quaternion:{x:0,y:Math.SQRT1_2,z:0,w:Math.SQRT1_2}}));
 // Limit viewpoint travel to a modest dip; the room lighting remains tied to its bake.
-export function framing(aspect,playing){
+export function framing(aspect,playing,mode='controller',gameAspect=null,mobileHeight=0){
  const upper=aspect<1.38;
+ if(playing&&mode==='controller'&&mobileHeight>0){
+  const shortLandscape=aspect>1.38&&mobileHeight<600;
+  const reserved=shortLandscape?174:212;
+  const available=Math.max(.2,(mobileHeight-reserved-24)/mobileHeight);
+  const ratio=Number.isFinite(gameAspect)&&gameAspect>0?gameAspect:.318*1.6/.332;
+  const width=Math.min(.318*1.6,.332*ratio),height=width/ratio;
+  const zoom=Math.min(.95*aspect/width,available/height);
+  return {upper,zoom,cameraDrop:0,focusY:12/mobileHeight+available/2+.014*zoom};
+ }
+ if(playing&&mode==='touch'){
+  // Ruffle contains the game inside the CRT. Fit that content rectangle, allowing
+  // unused letterboxing and the TV casing to extend beyond the viewport.
+  const crtWidth=.318*1.6,crtHeight=.332;
+  const ratio=Number.isFinite(gameAspect)&&gameAspect>0?gameAspect:crtWidth/crtHeight;
+  const width=Math.min(crtWidth,crtHeight*ratio),height=width/ratio;
+  const zoom=Math.min(.95*aspect/width,.86/height);
+  return {upper,zoom,cameraDrop:0,focusY:.5+.014*zoom};
+ }
+
  const zoom=upper?Math.min(playing?1.32:1,aspect/1.6*(playing?2.65:2.35)):(playing?1.32:1);
  return {upper,zoom,cameraDrop:playing?0:.35,focusY:upper?(playing?.32:.47):.41};
 }
@@ -24,6 +44,7 @@ export function createUpperShelf(){
  const wood=new THREE.MeshStandardMaterial({color:0x36271d,roughness:.79});
  const edge=new THREE.MeshStandardMaterial({color:0x493428,roughness:.67});
  const metal=new THREE.MeshStandardMaterial({color:0x252e30,roughness:.49,metalness:.65});
+ for(const mat of [wood,edge,metal])addSurfacePatina(mat,{grain:.12,wear:.12});
  function box(name,size,position,material=wood,solid=true){const mesh=new THREE.Mesh(new THREE.BoxGeometry(...size),material);mesh.position.set(...position);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);if(solid)colliders.push({name:'Upper library '+name,center:position,halfExtents:size.map(n=>n/2),quaternion:[0,0,0,1]});return mesh;}
  for(const y of [3.275,3.845,4.415]){box('board',[2.24,.05,.68],[0,y,.02]);box('front lip',[2.24,.025,.025],[0,y-.01,.365],edge,false);}
  for(const x of [-1.095,1.095])box('side',[.05,1.19,.68],[x,3.845,.02]);

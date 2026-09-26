@@ -40,6 +40,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/effing-meteors-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -114,6 +118,10 @@
         },
         "descriptorSource": "https://pr3hub.com/swf_info.txt",
         "descriptorFile": "games/platform-racing-3/swf-info.txt"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/platform-racing-3-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -155,6 +163,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/the-great-red-herring-chase-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -194,6 +206,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/effing-hail-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -240,6 +256,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/neverending-light-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -291,6 +311,10 @@
         },
         "descriptorSource": "https://pr2hub.com/version.txt",
         "descriptorFile": "games/platform-racing-2/version.json"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/platform-racing-2-screenprint-v3.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -331,6 +355,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/musical-evenizer-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -370,6 +398,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/uber-space-shooter-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -412,6 +444,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/platform-racing-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -455,6 +491,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/kongregate-racing-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -500,6 +540,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/orbit-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -543,6 +587,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/beat-master-3000-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -585,6 +633,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/click-upon-dots-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -630,6 +682,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/rolley-ball-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -678,6 +734,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/the-game-of-disorientation-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -727,6 +787,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/uber-pool-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -776,6 +840,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/mines-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -821,6 +889,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/cooties-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -864,6 +936,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/uber-breakout-2-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -916,6 +992,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/uber-breakout-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -963,6 +1043,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/kimblis-the-blue-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -1003,6 +1087,10 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/red-earth-2-screenprint.webp",
+        "style": "screenprint"
       }
     },
     {
@@ -1042,15 +1130,32 @@
       },
       "embedParameters": {
         "scale": "noscale"
+      },
+      "cartridgeLabel": {
+        "file": "web/assets/labels/red-earth-screenprint.webp",
+        "style": "screenprint"
+      }
+    },
+    {
+      "id": "bubble-racing",
+      "title": "Bubble Racing",
+      "sourcePage": "https://bubbleracing.com/",
+      "playerType": "iframe",
+      "embedUrl": "https://bubbleracing.com/",
+      "embedWidth": 640,
+      "embedHeight": 420,
+      "thumbnail": {
+        "file": "web/assets/bubble-racing/art.png",
+        "source": "https://bubbleracing.com/index-1713290967.apple-touch-icon.png"
+      },
+      "offlineCompleteness": "Online HTML5 game, loaded from bubbleracing.com; requires an internet connection.",
+      "cartridgeLabel": {
+        "file": "web/assets/labels/bubble-racing-screenprint-v2.webp",
+        "style": "screenprint"
       }
     }
   ],
   "excluded": [
-    {
-      "title": "Bubble Racing (WIP)",
-      "sourcePage": "https://bubbleracing.com/",
-      "reason": "Separate non-Ruffle web game; excluded from this fetch."
-    },
     {
       "title": "Volly-Bounce",
       "sourcePage": "https://vb.jiggmin2.com/",

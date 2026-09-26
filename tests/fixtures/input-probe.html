@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><title>Ruffle controller probe</title><link rel="stylesheet" href="/web/style.css"><style>body{overflow:auto}#screen{position:absolute;top:20px;left:20px;width:640px;height:360px;transform:matrix3d(1,0,0,0.0001,0,1,0,0,0,0,1,0,0,0,0,1)}#events{position:absolute;top:410px;left:20px;font:14px monospace}#mobile-controller{top:440px!important;left:850px!important;width:360px!important}#mode{position:absolute;top:390px;left:20px}</style><div id="screen"><div id="player"></div></div><button id="mode">Switch to arrows / Space / P</button><pre id="events"></pre><script src="/web/vendor/ruffle/ruffle.js"></script><script type="module">
+import {createMobileController} from '/web/mobile-controller.js?v=profiles-1';
+const html=await(await fetch('/index.html')).text(),dom=new DOMParser().parseFromString(html,'text/html');document.body.append(dom.querySelector('#mobile-controller'));
+const player=window.RufflePlayer.newest().createPlayer();document.querySelector('#player').append(player);
+await player.ruffle().load({url:'/tests/fixtures/input-probe.swf',autoplay:'on',unmuteOverlay:'hidden'});
+player.ruffle().traceObserver=m=>{const e=document.querySelector('#events');e.textContent=(e.textContent+m+'\n').split('\n').slice(-12).join('\n');};
+const controls=createMobileController({getPlayer:()=>player,getAspect:()=>16/9,onQuit:()=>controls.release(),onGesture:()=>{}});controls.configure({stick:'mouse',a:['MouseLeft'],b:['ArrowRight']});controls.setVisible(true);
+document.querySelector('#mode').onclick=()=>controls.configure({stick:'arrows',a:['Space'],b:['KeyP']});
+let last;function frame(t){controls.update(last?Math.min((t-last)/1000,.08):0);last=t;requestAnimationFrame(frame);}requestAnimationFrame(frame);
+</script>

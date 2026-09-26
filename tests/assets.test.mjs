@@ -28,3 +28,10 @@ test('The movable controller has its own model and no duplicate static collision
  const colliders=JSON.parse(readFileSync('web/assets/colliders.json'));
  assert.ok(!colliders.some(c=>c.name.startsWith('Pad •')));
 });
+test('The detailed room keeps reactive props separate and all assets within the host limit',()=>{
+ const b=readFileSync('web/assets/room.glb'),g=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)));
+ const room=g.nodes.find(n=>n.extras?.role==='room_geometry');
+ assert.ok(room.extras.bakeScale[0]<.5,'The light bake must cover ultrawide framing');
+ assert.deepEqual(g.nodes.filter(n=>n.extras?.role==='reactive_prop').map(n=>n.extras.prop).sort(),['lamp','mug','plant']);
+ for(const name of ['room.glb','room-lighting.webp','room-props.webp'])assert.ok(readFileSync(`web/assets/${name}`).length<25*1024*1024,name);
+});

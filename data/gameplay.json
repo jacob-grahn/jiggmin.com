@@ -1,0 +1,364 @@
+{
+  "reviewedAt": "2026-09-26",
+  "description": "Editable profiles. Broken means unavailable in the current archive, not necessarily an engine bug. See docs/gameplay-review.md.",
+  "games": {
+    "effing-meteors": {
+      "mode": "touch",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Cursor attracts meteors. Pointer-only instructions; menu/tutorial opened in Ruffle.",
+        "provisional": false
+      }
+    },
+    "effing-hail": {
+      "mode": "touch",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Hold left mouse to control wind. Menu, instructions and level opened in Ruffle.",
+        "provisional": false
+      }
+    },
+    "platform-racing-3": {
+      "mode": "broken",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "Space"
+        ],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Remains at checking your login. Intended arrows/Space controls; requires online services.",
+        "provisional": true
+      }
+    },
+    "platform-racing-2": {
+      "mode": "broken",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "Space"
+        ],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Main payload reports Loader IO Error while loading download locations. Intended arrows/Space controls.",
+        "provisional": true
+      }
+    },
+    "platform-racing": {
+      "mode": "broken",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "Space"
+        ],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Instructions: arrows/WASD move, up jumps, down charges, Space uses item. Online availability pending. Local menu works, but attempting to connect reports Could not connect to the server.",
+        "provisional": true
+      }
+    },
+    "kongregate-racing": {
+      "mode": "broken",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Online racing; controller assignment provisional until server availability is checked. Local menu works, but attempting to connect reports Could not connect to the server.",
+        "provisional": true
+      }
+    },
+    "musical-evenizer": {
+      "mode": "broken",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "KeyZ"
+        ],
+        "b": [
+          "KeyX"
+        ]
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Blank white player during local review. Embedded Z/X controls; song list is an external PHP endpoint.",
+        "provisional": true
+      }
+    },
+    "uber-space-shooter": {
+      "mode": "controller",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "Space"
+        ],
+        "b": [
+          "KeyP"
+        ]
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Instructions: arrows move, Space shoots; Pause button labelled P. Reaches click-to-play loader.",
+        "provisional": false
+      }
+    },
+    "orbit": {
+      "mode": "controller",
+      "controller": {
+        "stick": "mouse",
+        "a": [
+          "ArrowLeft"
+        ],
+        "b": [
+          "ArrowRight"
+        ]
+      },
+      "review": {
+        "source": "user",
+        "notes": "User-confirmed. Instructions: mouse moves the core; arrows/WASD spin.",
+        "provisional": false
+      }
+    },
+    "beat-master-3000": {
+      "mode": "controller",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": [],
+        "layout": "arrows"
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "User-selected four discrete arrow keys. Choose Arrows in the game menu.",
+        "provisional": false
+      }
+    },
+    "click-upon-dots": {
+      "mode": "broken",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Pointer-only intended controls, but Connect reports Could not connect to the server in the local archive.",
+        "provisional": true
+      }
+    },
+    "rolley-ball": {
+      "mode": "touch",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Menu offers mouse or arrow play. Touch assumes mouse mode; P is optional pause. Mouse-mode first level starts.",
+        "provisional": false
+      }
+    },
+    "the-game-of-disorientation": {
+      "mode": "broken",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Arrow-key instructions recovered from SWF; fresh local player remains blank white. Provisional broken pending compatibility investigation.",
+        "provisional": true
+      }
+    },
+    "uber-pool": {
+      "mode": "controller",
+      "controller": {
+        "stick": "mouse",
+        "a": [
+          "MouseLeft"
+        ],
+        "b": [
+          "KeyP"
+        ]
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Move pointer to strike; hold left mouse to keep cue steady. Joystick avoids touch-drag acting as a brake.",
+        "provisional": false
+      }
+    },
+    "mines": {
+      "mode": "touch",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": []
+      },
+      "review": {
+        "source": "user",
+        "notes": "User-confirmed. Click mines and powerups. P is optional pause.",
+        "provisional": false
+      }
+    },
+    "cooties": {
+      "mode": "controller",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "MouseLeft"
+        ],
+        "b": [],
+        "layout": "twin-sticks"
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Arrows/A/D move; mouse aims hand; hold click to grab, release to throw. Direct screen aiming remains available. Animated Play menu opens in Ruffle. Twin sticks: left moves, right aims and holds left mouse while deflected; releasing throws/stops firing. A also clicks at the retained cursor. User confirms P does not pause.",
+        "provisional": true
+      }
+    },
+    "uber-breakout-2": {
+      "mode": "broken",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "Space"
+        ],
+        "b": [
+          "KeyP"
+        ]
+      },
+      "review": {
+        "source": "user",
+        "notes": "User-confirmed broken. Instructions: left/right paddles, P to resume.",
+        "provisional": false
+      }
+    },
+    "uber-breakout": {
+      "mode": "controller",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "KeyP"
+        ],
+        "b": []
+      },
+      "review": {
+        "source": "user",
+        "notes": "User-confirmed joystick arrows, A P, B disabled.",
+        "provisional": false
+      }
+    },
+    "kimblis-the-blue": {
+      "mode": "controller",
+      "controller": {
+        "stick": "wasd",
+        "a": [
+          "MouseLeft"
+        ],
+        "b": [],
+        "layout": "twin-sticks"
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Live instructions confirm WASD movement, E health potion and Q magic potion. Mouse aims/attacks; potions and attack selection have clickable UI. Hybrid touch ergonomics need review. Twin sticks: left moves, right aims and holds left mouse while deflected; releasing throws/stops firing. A also clicks at the retained cursor.",
+        "provisional": true
+      }
+    },
+    "red-earth-2": {
+      "mode": "controller",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "MouseLeft"
+        ],
+        "b": [],
+        "layout": "twin-sticks"
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Live instructions confirm arrows or ASDW movement and clickable weapon selection (also 1\u20134). First level starts. Mouse attack confirmed by user and repeated A presses verified locally. Twin sticks: left moves, right aims and holds left mouse while deflected; releasing throws/stops firing. A also clicks at the retained cursor. User confirms click attacks.",
+        "provisional": true
+      }
+    },
+    "red-earth": {
+      "mode": "controller",
+      "controller": {
+        "stick": "wasd",
+        "a": [
+          "Space"
+        ],
+        "b": [
+          "ShiftLeft"
+        ]
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "WASD moves, Space fires, Shift interacts, X/Z zoom. Zoom keys omitted from two-button pad. Menu opens in Ruffle.",
+        "provisional": false
+      }
+    },
+    "neverending-light": {
+      "mode": "controller",
+      "controller": {
+        "stick": "arrows",
+        "a": [
+          "MouseLeft"
+        ],
+        "b": [],
+        "layout": "twin-sticks"
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Arrow movement, mouse aim, left-click attack. Direct touch aiming plus joystick suggested on mobile. Title screen opens in Ruffle. Twin sticks: left moves, right aims and holds left mouse while deflected; releasing throws/stops firing. A also clicks at the retained cursor.",
+        "provisional": true
+      }
+    },
+    "the-great-red-herring-chase": {
+      "mode": "broken",
+      "controller": {
+        "stick": "mouse",
+        "a": [
+          "MouseLeft"
+        ],
+        "b": []
+      },
+      "review": {
+        "source": "instructions-and-local-review",
+        "notes": "Black screen with sound icon persists. Embedded text describes typing commands and mentions a click mode.",
+        "provisional": true
+      }
+    },
+    "bubble-racing": {
+      "mode": "touch",
+      "controller": {
+        "stick": "arrows",
+        "a": [],
+        "b": []
+      },
+      "review": {
+        "source": "user",
+        "notes": "HTML5 iframe hosted on bubbleracing.com. Native touch/mouse input; no controller."
+      }
+    }
+  }
+}
