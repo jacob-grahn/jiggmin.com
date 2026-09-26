@@ -1,6 +1,9 @@
 # Local dependencies and generated deployment output
 /node_modules/
 /dist/
+/.wrangler/
+.dev.vars
+.dev.vars.*
 
 # Source art and intermediate renders; optimized web/assets are versioned
 /scene/mockups/

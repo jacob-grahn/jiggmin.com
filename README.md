@@ -74,6 +74,8 @@ Not every archived game is guaranteed compatible with Ruffle. Platform Racing 3 
 
 ## Game URLs
 
+Cloudflare Workers Builds uses `npm run build` as the build command and `npx wrangler deploy` as the deploy command. The checked-in `wrangler.jsonc` deploys only `dist/` to the `jiggmin-com` Worker as static assets; no Worker script is needed. Do not set the asset directory to the repository root, which also contains development dependencies and source files. The generated game directories support direct game links with the default trailing-slash handling.
+
 Open `/effing-meteors`, `/uber-breakout`, or any other ID from `data/games.json` to automatically insert that cartridge and load its game when the scene is ready. Inserting another cartridge updates the URL; completing a drag out of the console returns it to `/`. Back/Forward restores the corresponding game or empty console. Cancelling a drag keeps the same URL. Query strings and hashes are preserved. Browser autoplay policy may still require a click to enable sound.
 
 `npm run build` assembles the deployable site in `dist/`, including the 23 static `<slug>/index.html` entry pages, web assets, game catalog, and local game files. Run it after changing `index.html` or adding a game. `npm start` serves both `/slug` and `/slug/` directly. Ordinary static directory hosts may redirect `/slug` to `/slug/`; both work. Deploy the contents of `dist/` at the domain root. No server-side game runtime is needed. Unknown routes return the static host's 404; if the host rewrites them to `index.html`, the app shows a game-not-found message.
