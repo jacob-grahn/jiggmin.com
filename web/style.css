@@ -3,3 +3,26 @@
 .backdrop[hidden]{display:none}#room{background:#080d11}#cartridges{background:transparent}#room.dragging #cartridges{pointer-events:auto!important}
 
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}#error{position:fixed;bottom:16px;left:16px;right:16px;padding:16px;background:#17242a;color:#e6dfcb;z-index:10}
+
+#mobile-controller{display:none}
+@media(max-width:900px), (pointer:coarse){
+ #tooltip{display:none}#screen,ruffle-player{touch-action:none}
+ #mobile-controller{display:block;position:absolute;width:min(410px,calc(100% - 28px));height:178px;left:50%;top:var(--pad-top,68%);margin:0;z-index:8;opacity:0;pointer-events:none;transform:translate(-65%,100px) scale(.55) rotate(-8deg);transition:transform 1.1s cubic-bezier(.22,.8,.24,1),opacity .5s;filter:drop-shadow(0 18px 15px #0009)}
+ #mobile-controller.raised{opacity:1;transform:translate(-50%,0) scale(var(--pad-scale,1));transform-origin:top center;pointer-events:auto}
+ .pad-face{position:absolute;inset:0;border:2px solid #5c6e6d;border-bottom:12px solid #17232a;border-radius:25px 25px 32px 32px;background:linear-gradient(155deg,#788d88,#4b6666 42%,#354b50);box-shadow:inset 0 2px 2px #becfc56b,0 6px 0 #0d161c,0 9px 0 #26383d}
+ #mobile-controller button{position:absolute;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;padding:0;min-width:44px;min-height:44px;outline-offset:5px}
+ #touch-stick{width:112px;height:112px;left:15px;top:27px;border-radius:50%;border:3px solid #263940;background:radial-gradient(ellipse,#121b24 25%,#3c5158 64%,#1e3036 66%);box-shadow:inset 0 5px 10px #07111c,0 2px 0 #91a5a255}
+ #touch-stick span{position:absolute;width:69px;height:69px;left:18px;top:16px;border-radius:50%;background:radial-gradient(ellipse at 45% 30%,#6b7e83,#354854 58%,#132531 64%);box-shadow:0 12px 0 -5px #101a24,0 16px 12px #07111eb3;pointer-events:none}
+ #mobile-controller .pad-action{width:60px;height:60px;border-radius:50%;border:2px solid #779b96;background:radial-gradient(ellipse at 40% 20%,#679b8e,#315e59);box-shadow:0 7px 0 #192f33,0 10px 9px #0e20288c;color:#e2e4ca;font-size:22px;font-weight:bold}
+ #touch-a{right:84px;top:82px}#mobile-controller #touch-b{right:15px;top:43px;background:radial-gradient(ellipse at 40% 20%,#b6a37e,#746143);border-color:#b8a685}
+ #mobile-controller .pad-action[aria-pressed=true]{transform:translateY(5px);box-shadow:0 2px 0 #192f33}
+ #mobile-controller #touch-quit{left:calc(50% - 27px);top:20px;width:54px;height:44px;background:#253940;border-color:#607777;font-size:9px;letter-spacing:1px;border-radius:8px}
+ .pad-brand{position:absolute;left:calc(50% - 24px);bottom:13px;font-size:9px;color:#a3b6ad;letter-spacing:3px}.pad-led{position:absolute;left:calc(50% - 3px);top:75px;width:5px;height:5px;border-radius:50%;background:#94e4bd;box-shadow:0 0 8px #74eac4}
+
+}
+@media(prefers-reduced-motion:reduce){#mobile-controller{transition:none}}
+
+body{display:block;overflow:hidden}main{position:relative;width:100%;height:100svh;margin:0}#room{width:100%;height:100%;aspect-ratio:auto}.backdrop{object-fit:cover}
+#screen{touch-action:none}#player,ruffle-player{touch-action:none}
+/* The hit surface follows the CRT, but the rendered depth buffer stays intact. */
+#touch-screen{position:absolute;inset:0;z-index:4;pointer-events:none;touch-action:none}

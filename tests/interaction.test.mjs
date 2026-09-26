@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import * as THREE from 'three';
+import {framing,captureSceneAnchors,composeCamera,projectWorld} from '../web/responsive-scene.js';
 import {inSlot,playbackFile} from '../web/interaction.js';
 const manifest=JSON.parse(readFileSync(new URL('../data/games.json',import.meta.url)));
 const bytes=readFileSync(new URL('../web/assets/cartridges.glb',import.meta.url));
@@ -28,4 +29,21 @@ test('Only validated standalone main payloads bypass a loader',()=>{
  const pr2=manifest.games.find(g=>g.id==='platform-racing-2');
  assert.equal(playbackFile(pr3),pr3.mainPayload.file);
  assert.equal(playbackFile(pr2),pr2.file);
+});
+
+test('Lower browsing camera preserves TV focus and projects the real slot throughout the transition',()=>{
+ const node=gltf.nodes.find(n=>'camera' in n),data=gltf.cameras[node.camera].perspective;
+ const camera=new THREE.PerspectiveCamera(THREE.MathUtils.radToDeg(data.yfov),1.6,data.znear,data.zfar);
+ camera.position.fromArray(node.translation);camera.quaternion.fromArray(node.rotation);camera.updateMatrixWorld();
+ const anchors=captureSceneAnchors(camera,meta.screen,meta.slot),height=camera.position.y;
+ for(const aspect of [390/844,1.6,844/390])for(const progress of [0,.25,.5,.75,1]){
+  const browse=framing(aspect,false),play=framing(aspect,true);
+  const zoom=THREE.MathUtils.lerp(browse.zoom,play.zoom,progress),focusY=THREE.MathUtils.lerp(browse.focusY,play.focusY,progress);
+  composeCamera(camera,{aspect,zoom,focusY,height:height-.35*(1-progress)},anchors.focus);
+  assert.equal(camera.position.y,height-.35*(1-progress));
+  assert.ok(Math.abs(projectWorld(anchors.focus,camera)[1]-focusY)<1e-10);
+  const actualSlot=projectWorld(new THREE.Vector3(-.13,1.04,1.17),camera),trackedSlot=projectWorld(anchors.slot,camera);
+  assert.ok(Math.hypot(actualSlot[0]-trackedSlot[0],actualSlot[1]-trackedSlot[1])<.0001);
+  for(const [x,y] of [...anchors.screen,anchors.slot].map(p=>projectWorld(p,camera)))assert.ok(x>0&&x<1&&y>0&&y<1);
+ }
 });

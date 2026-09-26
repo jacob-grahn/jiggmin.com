@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ruffle keyboard probe</title>
+<link rel="stylesheet" href="/web/style.css"><script src="/web/vendor/ruffle/ruffle.js"></script>
+<style>body{padding:20px;overflow:auto}#probe{width:100%;height:180px}#mobile-controller{display:block!important;top:260px!important;left:50%;width:360px}p{max-width:600px;font-size:14px}</style>
+<h2>Ruffle keyboard probe</h2><p>The SWF listens through AVM1 Key.addListener. Use A, B and the joystick, then inspect the output below beginning PROBE. DOWN and UP must report 32 for either button and 37–40 for directions. This tests the Flash runtime, not a JavaScript event listener.</p><div id="probe"></div><pre id="events" style="position:absolute;top:480px;left:20px"></pre>
+<script type="module">
+import {createMobileController} from '/web/mobile-controller.js';
+const source=await (await fetch('/index.html')).text();const template=new DOMParser().parseFromString(source,'text/html');document.body.append(template.querySelector('#mobile-controller'));
+const player=window.RufflePlayer.newest().createPlayer();document.querySelector('#probe').append(player);
+// Embedded two-callback AVM1 movie: _root.onKeyDown/onKeyUp trace Key.getCode(),
+// then Key.addListener(_root). This contains no game assets or external calls.
+await player.ruffle().load({data:new Uint8Array('46575308070100007800064000000e1000001e010043021929303f03e3000000960d000050524f42452052454144590026960700005f726f6f74001c960b00006f6e4b6579446f776e009b05000000003100960d000050524f424520444f574e20009605000700000000960500004b6579001c96090000676574436f646500524726004f960700005f726f6f74001c960900006f6e4b65795570009b05000000002f00960b000050524f424520555020009605000700000000960500004b6579001c96090000676574436f646500524726004f960700005f726f6f74001c9605000701000000960500004b6579001c960d00006164644c697374656e6572005226070040000000'.match(/../g).map(v=>parseInt(v,16))),autoplay:'on',unmuteOverlay:'hidden'});
+player.ruffle().traceObserver=message=>{document.querySelector('#events').textContent+=message+'\n';};
+createMobileController({getPlayer:()=>player,onQuit:()=>{},onGesture:()=>{}}).setVisible(true);
+</script>

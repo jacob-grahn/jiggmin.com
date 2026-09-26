@@ -40,12 +40,7 @@ export class CartridgePhysics {
     this.world.defaultContactMaterial.contactEquationStiffness = 1e7;
     this.world.defaultContactMaterial.contactEquationRelaxation = 4;
     this.items = new Map(); this.accumulator = 0; this.held = null;
-    for(const c of colliders) {
-      const body = new CANNON.Body({mass: 0, shape: new CANNON.Box(new CANNON.Vec3(...c.halfExtents))});
-      body.position.set(...c.center); body.quaternion.set(...c.quaternion); body.name = c.name; body.aabbNeedsUpdate = true;
-      body.safeSupport=/^(Coffee table top|CRT |Library •|Console )/.test(c.name);
-      this.world.addBody(body);
-    }
+    this.addStatic(colliders);
     // Keep throws in the room with collisions, never by teleporting them home.
     // These outer boundaries sit beyond the visible furniture and inside the floor.
     for(const [x,z,hx,hz] of [[-5.2,0,.5,5.7],[5.2,0,.5,5.7],[0,-5.2,5.7,.5],[0,5.2,5.7,.5]]) {
@@ -56,6 +51,14 @@ export class CartridgePhysics {
     floor.position.y=-.02;floor.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
     floor.aabbNeedsUpdate=true;this.world.addBody(floor);
     this.onImpact = onImpact;
+  }
+  addStatic(colliders) {
+    return colliders.map(c=>{
+      const body=new CANNON.Body({mass:0,shape:new CANNON.Box(new CANNON.Vec3(...c.halfExtents))});
+      body.position.set(...c.center);body.quaternion.set(...c.quaternion);body.name=c.name;body.aabbNeedsUpdate=true;
+      body.safeSupport=/^(Coffee table top|CRT |Library •|Console |Upper library)/.test(c.name);
+      this.world.addBody(body);return body;
+    });
   }
   add(id, pose, {mass=.32, size=CARTRIDGE_SIZE, center=CENTER}={}) {
     const body = new CANNON.Body({mass, shape: new CANNON.Box(new CANNON.Vec3(...size.map(size => size / 2))), linearDamping: .12, angularDamping: .3, allowSleep: true, sleepSpeedLimit: .09, sleepTimeLimit: .8});

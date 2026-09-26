@@ -11,11 +11,11 @@ test('Shelf holds the full collection with thinner, separated cartridges',()=>{
  const ids=Array.from({length:23},(_,i)=>i),order=shuffled(ids,()=>.4);
  assert.equal(new Set(order).size,23);assert.deepEqual([...order].sort((a,b)=>a-b),ids);assert.notDeepEqual(order,ids);
 });
-test('Recovery requires five uninterrupted resting seconds away from valid surfaces',()=>{
- const timer=new RestTimer(),lost={resting:true,supported:false,excluded:false};
+test('Recovery requires five uninterrupted resting seconds out of view',()=>{
+ const timer=new RestTimer(),lost={resting:true,visible:false,excluded:false};
  assert.equal(timer.update('a',4.9,lost),false);
  assert.equal(timer.update('a',.11,lost),true);
- for(const interruption of [{supported:true},{resting:false},{excluded:true}]){
+ for(const interruption of [{visible:true},{resting:false},{excluded:true}]){
   timer.update('a',0,{...lost,...interruption});assert.equal(timer.update('a',4.9,lost),false);
  }
 });

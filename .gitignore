@@ -2,9 +2,6 @@
 /node_modules/
 /dist/
 
-# Downloaded Flash games and their thumbnail/source payloads
-/games/
-
 # Source art and intermediate renders; optimized web/assets are versioned
 /scene/mockups/
 /scene/textures/

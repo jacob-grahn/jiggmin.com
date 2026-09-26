@@ -8,8 +8,8 @@ export function shuffled(items,random=Math.random){
 export class RestTimer {
  constructor(){this.elapsed=new Map();}
  clear(id){this.elapsed.delete(id);}
- update(id,dt,{resting,supported,excluded}){
-  if(!resting||supported||excluded){this.clear(id);return false;}
+ update(id,dt,{resting,visible,excluded}){
+  if(!resting||visible||excluded){this.clear(id);return false;}
   const time=(this.elapsed.get(id)||0)+dt;this.elapsed.set(id,time);return time>=5;
  }
 }

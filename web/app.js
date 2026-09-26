@@ -2,26 +2,33 @@ import * as THREE from 'three';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
 import {inSlot,playbackFile} from './interaction.js';
 import {resolveRoute,writeGameUrl} from './routes.js';
-import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=archive-2';
+import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
 import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=crt-flicker-1';
 import {createControllerCord} from './controller-cord.js?v=2';
 import {remodelCartridge} from './cartridge-model.js?v=1';
-import {SHELF_SLOTS,shuffled,RestTimer,ease,zoomPoint} from './library-behavior.js';
+import {SHELF_SLOTS,shuffled,RestTimer,ease} from './library-behavior.js?v=visibility-1';
+import {UPPER_SLOTS,framing,captureSceneAnchors,composeCamera,projectWorld,createUpperShelf,cartridgeVisible} from './responsive-scene.js?v=lower-camera-1';
+import {createMobileController} from './mobile-controller.js?v=1';
 const $=id=>document.getElementById(id),room=$('room'),canvas=$('cartridges'),status=$('status'),screen=$('screen'),slot=$('slot'),tip=$('tooltip');
 const say=text=>status.textContent=text;
 let renderer,camera,scene,environment,physics,cord,roots=[],games,meta,drag=null,inserted=null,player=null,loadId=0,lastTime=0,dirty=true;
 const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),intersection=new THREE.Vector3();
 const motions=new Map(),restTimer=new RestTimer();
-let baseScreen,baseSlot,audioContext;
+let anchors,baseCameraHeight,cameraDrop=0,audioContext,controller,upperShelf,upperBodies=[],upperMode=false,shelfSlots=SHELF_SLOTS,mobileControls;
+let focusY=.41,visibilityTick=0,controllerRestPose=null;
+const stored=new Map(),visibility=new Map();
+const touchLayout=matchMedia('(max-width:900px), (pointer:coarse)');
+const touchSurface=document.createElement('div');touchSurface.id='touch-screen';room.append(touchSurface);
+const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const dockPose={position:{x:-.13,y:.94,z:1.17},quaternion:{x:0,y:0,z:0,w:1}};
 const gameId=root=>root.userData.game_id||'controller';
 const isCartridge=root=>root.userData.role==='draggable_cartridge';
 function coords(e){const r=room.getBoundingClientRect();return [(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height];}
 function setRay(e){const [x,y]=coords(e);pointer.set(x*2-1,1-y*2);ray.setFromCamera(pointer,camera);}
 function pick(e){
- setRay(e);const hit=ray.intersectObjects(roots,true)[0];if(!hit)return null;
+ setRay(e);const hit=ray.intersectObjects(roots.filter(r=>r.visible),true)[0];if(!hit)return null;
  // Furniture blocks selection as well as rendering: no grabbing through the TV.
- const wall=ray.intersectObject(environment.shell,false)[0];if(wall&&wall.distance<hit.distance-.008)return null;
+ const wall=ray.intersectObjects([environment.shell,...(upperMode?[upperShelf.group]:[])],true)[0];if(wall&&wall.distance<hit.distance-.008)return null;
  let root=hit.object;while(root&&!roots.includes(root))root=root.parent;
  return root?{root,point:hit.point}:null;
 }
@@ -56,45 +63,97 @@ function updateMotions(dt){
   if(m.kind==='return'){
    if(!shelfSlotFree(root,m.slotIndex)){
     const index=emptyShelfSlot(root),front={position:{...b.position,z:.85},quaternion:b.quaternion};
-    if(index>=0){const target=SHELF_SLOTS[index];animate(root,[front,{position:{...target.position,z:.85},quaternion:target.quaternion},target],[.4,.7,.5],'return',index);}
-    else animate(root,[front,SHELF_SLOTS[m.slotIndex]],[1,.5],'return',m.slotIndex);
+    if(index>=0){const target=shelfSlots[index];animate(root,[front,{position:{...target.position,z:.85},quaternion:target.quaternion},target],[.4,.7,.5],'return',index);}
+    else animate(root,[front,shelfSlots[m.slotIndex]],[1,.5],'return',m.slotIndex);
     m.resolve(false);continue;
    }
-   physics.place(gameId(root),b,true);physics.items.get(gameId(root)).supported=true;say(`${root.userData.title} returned to an empty bookshelf space.`);
+   physics.place(gameId(root),b,true);stored.set(root,m.slotIndex);physics.items.get(gameId(root)).supported=true;say(`${root.userData.title} returned to an empty bookshelf space.`);
   }
   m.resolve(true);
  }
 }
 function shelfSlotFree(root,index){
  if([...motions].some(([other,m])=>other!==root&&m.slotIndex===index))return false;
- const p=SHELF_SLOTS[index].position,box=new THREE.Box3(new THREE.Vector3(p.x-.057,p.y+.01,p.z-.26),new THREE.Vector3(p.x+.057,p.y+.455,p.z+.26));
+ const p=shelfSlots[index].position,box=new THREE.Box3(new THREE.Vector3(p.x-.057,p.y+.01,p.z-.26),new THREE.Vector3(p.x+.057,p.y+.455,p.z+.26));
  return !roots.some(other=>other!==root&&other!==inserted&&box.intersectsBox(new THREE.Box3().setFromObject(other)));
 }
-function emptyShelfSlot(root){return SHELF_SLOTS.findIndex((_,i)=>shelfSlotFree(root,i));}
+function emptyShelfSlot(root){return shelfSlots.findIndex((_,i)=>shelfSlotFree(root,i));}
 function recoverCartridges(dt){
+ if(inserted)return;
+ visibilityTick+=dt;const check=visibilityTick>=.2;if(check)visibilityTick=0;
+ const occluders=[environment.shell,...(upperMode?[upperShelf.group]:[])];
  for(const root of roots){
   if(!isCartridge(root))continue;
   const id=gameId(root),item=physics.items.get(id),body=item.body;
   const resting=body.sleepState===2||(body.velocity.length()<.07&&body.angularVelocity.length()<.15);
-  if(!restTimer.update(id,dt,{resting,supported:item.supported,excluded:root===inserted||drag?.root===root||motions.has(root)}))continue;
+  if(stored.has(root)){
+   const home=shelfSlots[stored.get(root)].position;
+   if(root.position.distanceTo(new THREE.Vector3().copy(home))<.10)continue;
+   stored.delete(root);
+  }
+  if(check&&resting){
+   const index=shelfSlots.findIndex(p=>root.position.distanceTo(new THREE.Vector3().copy(p.position))<.06&&Math.abs(root.quaternion.dot(new THREE.Quaternion().copy(p.quaternion)))>.98);
+   if(index>=0){stored.set(root,index);restTimer.clear(id);continue;}
+  }
+  if(check)visibility.set(root,cartridgeVisible(root,camera,occluders));
+  if(!restTimer.update(id,dt,{resting,visible:visibility.get(root)!==false,excluded:root===inserted||drag?.root===root||motions.has(root)}))continue;
   const index=emptyShelfSlot(root);if(index<0)continue;
-  const destination=SHELF_SLOTS[index],start=physics.pose(id),q=destination.quaternion;
+  const destination=shelfSlots[index],start=physics.pose(id),q=destination.quaternion;
   say(`${root.userData.title} is returning to the bookshelf.`);
-  // Lift clear of furniture, travel in front of the rack, then slide into a gap.
-  animate(root,[{position:{x:start.position.x,y:2.55,z:2.9},quaternion:start.quaternion},
-   {position:{x:destination.position.x,y:2.55,z:.85},quaternion:q},
+  // Travel in front of furniture before sliding into a free shelf space.
+  const travelY=upperMode?Math.max(3.1,destination.position.y):2.55;
+  animate(root,[{position:{x:start.position.x,y:travelY,z:2.9},quaternion:start.quaternion},
+   {position:{x:destination.position.x,y:travelY,z:.85},quaternion:q},
    {position:{x:destination.position.x,y:destination.position.y,z:.85},quaternion:q},destination],[.9,1,.8,.55],'return',index);
  }
 }
-function updateZoom(dt){
- const target=inserted?1.32:1,next=camera.zoom+(target-camera.zoom)*(1-Math.exp(-dt/1.25));
- if(Math.abs(camera.zoom-target)<.0001)return;
- camera.zoom=Math.abs(next-target)<.0001?target:next;camera.updateProjectionMatrix();
- meta.screen=baseScreen.map(p=>zoomPoint(p,camera.zoom));meta.slot=zoomPoint(baseSlot,camera.zoom);
- slot.style.left=`${meta.slot[0]*100}%`;slot.style.top=`${meta.slot[1]*100}%`;slot.style.width=`${15*camera.zoom}%`;
- screenTransform();dirty=true;
+function setShelfLayout(upper){
+ if(upper===upperMode)return;
+ if(drag)finishDrag({pointerId:drag.id},false,true);
+ for(const [root,m] of [...motions])if(m.kind==='return')cancelMotion(root);
+ upperMode=upper;shelfSlots=upper?UPPER_SLOTS:SHELF_SLOTS;
+ upperShelf.group.visible=upper;for(const body of upperBodies)body.collisionFilterMask=upper?-1:0;
+ for(const [root,index] of stored){const pose=shelfSlots[index];physics.place(gameId(root),pose,true);root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);}
+ restTimer.elapsed.clear();visibility.clear();dirty=true;
 }
-function stop(){loadId++;for(const [root,m] of motions)if(m.kind==='dock')cancelMotion(root);if(player){try{player.ruffle().suspend();}catch{}player.remove();player=null;}screen.hidden=true;$('player').replaceChildren();environment?.setPlaying(false);dirty=true;canvas.style.pointerEvents='auto';}
+function updateProjection(){
+ composeCamera(camera,{aspect:room.clientWidth/room.clientHeight,zoom:camera.zoom,focusY,height:baseCameraHeight-cameraDrop},anchors.focus);
+ meta.screen=anchors.screen.map(p=>projectWorld(p,camera));
+ meta.slot=projectWorld(anchors.slot,camera);
+ slot.style.left=`${meta.slot[0]*100}%`;slot.style.top=`${meta.slot[1]*100}%`;slot.style.width=`${15*camera.zoom*1.6/camera.aspect}%`;
+ screenTransform();updateTouchSurface();dirty=true;
+}
+function updateZoom(dt,immediate=false){
+ const target=framing(room.clientWidth/room.clientHeight,!!inserted);setShelfLayout(target.upper);
+ const blend=immediate||reducedMotion.matches?1:1-Math.exp(-dt/1.25);
+ if(!immediate&&Math.abs(camera.zoom-target.zoom)+Math.abs(focusY-target.focusY)+Math.abs(cameraDrop-target.cameraDrop)<.00001)return;
+ camera.zoom+=(target.zoom-camera.zoom)*blend;focusY+=(target.focusY-focusY)*blend;cameraDrop+=(target.cameraDrop-cameraDrop)*blend;updateProjection();
+}
+function updateTouchSurface(){
+ const enabled=touchLayout.matches;
+ touchSurface.style.pointerEvents=enabled?'auto':'none';canvas.style.pointerEvents=enabled?'none':'auto';
+ if(enabled&&!screen.hidden&&!drag){
+  const p=meta.screen.map(([x,y])=>`${x*100}% ${y*100}%`);
+  touchSurface.style.clipPath=`polygon(evenodd,0% 0%,100% 0%,100% 100%,0% 100%,0% 0%,${p[0]},${p[3]},${p[2]},${p[1]},${p[0]})`;
+ }else touchSurface.style.clipPath='none';
+ const raised=enabled&&!!player&&!screen.hidden;
+ mobileControls?.setVisible(raised);
+ if(controller){
+  const item=physics.items.get('controller');
+  if(raised&&!controllerRestPose){controllerRestPose=physics.pose('controller');item.cord.disable();physics.pin('controller',controllerRestPose);}
+  else if(!raised&&controllerRestPose){physics.place('controller',controllerRestPose);item.cord.enable();controllerRestPose=null;}
+  controller.visible=!raised;cord.mesh.visible=!raised;
+ }
+ const top=Math.max(...meta.screen.map(p=>p[1]),meta.slot[1]+.09)*room.clientHeight;
+ const landscape=room.clientWidth/room.clientHeight>1.38&&room.clientHeight<600;
+ const scale=landscape?.8:Math.min(1,Math.max(.25,(room.clientHeight-top-12)/178));
+ const panel=$('mobile-controller');
+ panel.style.setProperty('--pad-top',`${landscape?room.clientHeight-156:top}px`);
+ panel.style.setProperty('--pad-scale',scale);
+ panel.style.left=landscape?`${room.clientWidth-154}px`:'50%';
+ panel.style.width=landscape?'360px':'';
+}
+function stop(){mobileControls?.release();loadId++;for(const [root,m] of motions)if(m.kind==='dock')cancelMotion(root);if(player){try{player.ruffle().suspend();}catch{}player.remove();player=null;}screen.hidden=true;$('player').replaceChildren();environment?.setPlaying(false);dirty=true;updateTouchSurface();}
 function eject({updateUrl=true}={}){
  if(drag)finishDrag({pointerId:drag.id},true);
  if(updateUrl)writeGameUrl(null);document.title='Jiggmin — Midnight Den';
@@ -107,7 +166,10 @@ function eject({updateUrl=true}={}){
 async function insert(root,{updateUrl=true}={}){
  if(!root||!isCartridge(root))return;if(updateUrl)writeGameUrl(gameId(root));if(inserted===root)return;
  if(inserted)eject({updateUrl:false});else stop();
- inserted=root;$('error').hidden=true;
+ stored.delete(root);inserted=root;$('error').hidden=true;
+ // Stop automatic returns during play; interrupted carts settle naturally.
+ for(const [cart,motion] of [...motions])if(motion.kind==='return')cancelMotion(cart);
+ restTimer.elapsed.clear();visibility.clear();visibilityTick=0;
  const game=games.find(g=>g.id===gameId(root)),ticket=++loadId;
  const hover={position:{x:-.13,y:1.3,z:1.17},quaternion:dockPose.quaternion};
  const seated=await animate(root,[hover,{position:{...dockPose.position,y:1.01},quaternion:dockPose.quaternion},dockPose],[.6,.7,.18],'dock');
@@ -116,20 +178,21 @@ async function insert(root,{updateUrl=true}={}){
  document.title=`${game.title} — Jiggmin`;say(`Loading ${game.title}…`);screen.hidden=false;environment.setPlaying(true);dirty=true;
  try{
   if(!window.RufflePlayer?.newest)throw new Error('The Flash player could not start. Refresh and try again.');
-  player=window.RufflePlayer.newest().createPlayer();const active=player;$('player').append(active);
+  player=window.RufflePlayer.newest().createPlayer();const active=player;$('player').append(active);updateTouchSurface();
   await active.ruffle().load({url:new URL('/'+playbackFile(game),location.origin).href,autoplay:'on',unmuteOverlay:'visible',scale:'showAll',letterbox:'on',backgroundColor:'#000000',allowScriptAccess:false,logLevel:'error'});
   if(ticket!==loadId)return;
   say(`${game.title}${game.entryPointKind==='loader'?' — this game may need its original online services.':' — pull out its cartridge to stop.'}`);
- }catch(error){if(ticket!==loadId)return;showError(`Couldn’t load ${game.title}. ${error.message||'Try another cartridge.'}`);screen.hidden=true;environment.setPlaying(false);dirty=true;}
+ }catch(error){if(ticket!==loadId)return;showError(`Couldn’t load ${game.title}. ${error.message||'Try another cartridge.'}`);screen.hidden=true;environment.setPlaying(false);updateTouchSurface();dirty=true;}
 }
 function finishDrag(e,cancel=false,interrupted=false){
  if(!drag||e.pointerId!==drag.id)return;
  const d=drag;drag=null;room.classList.remove('dragging','over-slot');tip.hidden=true;canvas.style.cursor='grab';
- if(canvas.hasPointerCapture(d.id))canvas.releasePointerCapture(d.id);
+ if(d.surface.hasPointerCapture(d.id))d.surface.releasePointerCapture(d.id);
+ updateTouchSurface();
  if(cancel){physics.cancel();syncObjects();if(d.wasInserted)insert(d.root,{updateUrl:false});else say(`${d.root.userData.title} returned to where you picked it up.`);return;}
  const velocity=performance.now()-d.lastMove>120?new THREE.Vector3():d.velocity;
  const body=physics.items.get(gameId(d.root)).body;
- const nearDock=new THREE.Vector3(body.position.x,body.position.y,body.position.z).distanceTo(new THREE.Vector3(-.13,1.25,1.17))<1;
+ const nearDock=new THREE.Vector3(body.position.x,body.position.y,body.position.z).distanceTo(new THREE.Vector3(-.13,1.25,1.17))<(touchLayout.matches?1.8:1);
  const [x,y]=interrupted?[-1,-1]:coords(e);
  const centered=Math.abs(x-meta.slot[0])<.045&&Math.abs(y-meta.slot[1])<.025;
  const shouldDock=isCartridge(d.root)&&inSlot(x,y,meta.slot)&&nearDock&&(velocity.length()<3||centered);
@@ -138,21 +201,24 @@ function finishDrag(e,cancel=false,interrupted=false){
  if(d.wasInserted){writeGameUrl(null);document.title='Jiggmin — Midnight Den';}
  say(`${d.root.userData.title} — ${velocity.length()>1.4?'nice throw.':isCartridge(d.root)?'place it gently in the slot to play.':'the cord keeps it within reach.'}`);
 }
-canvas.addEventListener('pointerdown',e=>{
+for(const surface of [canvas,touchSurface])surface.addEventListener('pointerdown',e=>{
  if(e.button!==0||drag||!physics)return;const hit=pick(e);if(!hit)return;e.preventDefault();
  const {root,point}=hit,wasInserted=root===inserted;
- unlockAudio();cancelMotion(root);restTimer.clear(gameId(root));
+ unlockAudio();stored.delete(root);cancelMotion(root);restTimer.clear(gameId(root));
  if(wasInserted){inserted=null;stop();}
  physics.grab(gameId(root),point);
  const normal=camera.getWorldDirection(new THREE.Vector3());
  const gripPlane=new THREE.Plane().setFromNormalAndCoplanarPoint(normal,new THREE.Vector3(point.x,point.y,Math.max(point.z,1.65)));
- drag={root,id:e.pointerId,wasInserted,plane:gripPlane,normal,velocity:new THREE.Vector3(),lastPoint:point.clone(),lastMove:performance.now()};
- canvas.setPointerCapture(e.pointerId);room.classList.add('dragging');canvas.style.cursor='grabbing';tip.hidden=true;
+ drag={root,surface,id:e.pointerId,wasInserted,plane:gripPlane,normal,velocity:new THREE.Vector3(),lastPoint:point.clone(),lastMove:performance.now()};
+ surface.setPointerCapture(e.pointerId);updateTouchSurface();room.classList.add('dragging');canvas.style.cursor='grabbing';tip.hidden=true;
  moveGrip(e,true);say(`Holding ${root.userData.title}. Flick to throw; scroll to move closer or farther.`);
 });
 function moveGrip(e,first=false){
  setRay(e);if(!ray.ray.intersectPlane(drag.plane,intersection))return;
  intersection.x=THREE.MathUtils.clamp(intersection.x,-3.6,3.8);intersection.y=THREE.MathUtils.clamp(intersection.y,.13,4.5);intersection.z=THREE.MathUtils.clamp(intersection.z,-1.7,4);
+ // Touch has no scroll wheel for depth. Guide the grip toward the physical
+ // slot when the finger enters its projected target, including from the high rack.
+ if(touchLayout.matches&&isCartridge(drag.root)&&inSlot(...coords(e),meta.slot))intersection.z=1.35;
  const now=performance.now(),dt=Math.max((now-drag.lastMove)/1000,.008);
  if(!first){const speed=intersection.clone().sub(drag.lastPoint).divideScalar(dt);drag.velocity.lerp(speed,.45);if(drag.velocity.length()>8)drag.velocity.setLength(8);}
  drag.lastPoint.copy(intersection);drag.lastMove=now;physics.move(intersection);
@@ -164,12 +230,12 @@ room.addEventListener('pointermove',e=>{
  const hit=pick(e);canvas.style.cursor=hit?'grab':'default';tip.hidden=!hit;
  // Let ordinary mouse input reach Ruffle through the transparent CRT aperture.
  const onGlass=!screen.hidden&&!hit&&ray.intersectObject(environment.glass,false).length>0;
- canvas.style.pointerEvents=onGlass?'none':'auto';
+ if(!touchLayout.matches)canvas.style.pointerEvents=onGlass?'none':'auto';
  if(hit){tip.textContent=hit.root.userData.title;const [x,y]=coords(e);tip.style.left=`${Math.min(x*100,75)}%`;tip.style.top=`${Math.max(2,y*100-8)}%`;}
 },{capture:true});
 room.addEventListener('wheel',e=>{if(!drag)return;e.preventDefault();drag.plane.translate(drag.normal.clone().multiplyScalar(THREE.MathUtils.clamp(e.deltaY*.002,-.25,.25)));moveGrip(e,true);},{passive:false});
-canvas.addEventListener('pointerup',e=>finishDrag(e));canvas.addEventListener('pointercancel',e=>finishDrag(e,false,true));canvas.addEventListener('lostpointercapture',e=>{if(drag)finishDrag(e,false,true);});
-room.addEventListener('pointerleave',()=>{tip.hidden=true;if(!drag)canvas.style.pointerEvents='auto';});
+for(const surface of [canvas,touchSurface]){surface.addEventListener('pointerup',e=>finishDrag(e));surface.addEventListener('pointercancel',e=>finishDrag(e,false,true));surface.addEventListener('lostpointercapture',e=>{if(drag)finishDrag(e,false,true);});}
+room.addEventListener('pointerleave',()=>{tip.hidden=true;if(!drag&&!touchLayout.matches)canvas.style.pointerEvents='auto';});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&drag)finishDrag({pointerId:drag.id},true);});
 window.addEventListener('blur',()=>{if(drag)finishDrag({pointerId:drag.id},false,true);});
 document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden&&drag)finishDrag({pointerId:drag.id},false,true);});
@@ -194,9 +260,12 @@ async function init(){
  const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel]=await Promise.all([
   json('/data/games.json'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=controller-1'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=controller-final'),json('/web/assets/colliders.json?v=controller-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled')
  ]);
- games=manifest.games;meta=metadata;baseScreen=meta.screen.map(p=>[...p]);baseSlot=[...meta.slot];scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+ games=manifest.games;meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+ anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;
  environment=prepareRoom(roomModel,camera,lighting);scene.add(environment.group);
  physics=new CartridgePhysics(colliders);
+ upperShelf=createUpperShelf();scene.add(upperShelf.group);upperShelf.group.visible=false;
+ upperBodies=physics.addStatic(upperShelf.colliders);for(const b of upperBodies)b.collisionFilterMask=0;
  carts.scene.traverse(o=>{
   if(o.userData.role==='draggable_cartridge')roots.push(o);
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}
@@ -207,13 +276,18 @@ async function init(){
  for(let i=0;i<order.length;i++){
   const root=order[i];optimizeCartridge(root);root.scale.z*=CARTRIDGE_DEPTH_SCALE;
   const index=i-5,pose=i<5?tablePoses[i]:SHELF_SLOTS[(index%3)*9+Math.floor(index/3)];
-  root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);root.userData.storage=i<5?'table':'rack';
-  if(i<5)root.position.y+=.697-new THREE.Box3().setFromObject(root).min.y;
+  root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);root.userData.storage=i<5?'table':'rack';if(i>=5)stored.set(root,(index%3)*9+Math.floor(index/3));
+  if(i<5){
+   if(framing(room.clientWidth/room.clientHeight,false).upper){
+    const [x,z]=[[-.87,1.8],[.87,1.8],[-.6,2.18],[0,2.18],[.6,2.18]][i];root.position.x=x;root.position.z=z;
+   }
+   root.position.y+=.697-new THREE.Box3().setFromObject(root).min.y;
+  }
   physics.add(gameId(root),{position:root.position,quaternion:root.quaternion});
   physics.items.get(gameId(root)).supported=true;
  }
  scene.add(controllerModel.scene);
- let controller;
+
  controllerModel.scene.traverse(o=>{
   if(o.userData.role==='mobile_controller')controller=o;
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}
@@ -226,11 +300,14 @@ async function init(){
  addCartridgeLighting(scene,renderer);
  document.querySelector('.backdrop').hidden=true;
  slot.style.left=`${meta.slot[0]*100}%`;slot.style.top=`${meta.slot[1]*100}%`;
- new ResizeObserver(()=>{renderer.setSize(room.clientWidth,room.clientHeight,false);screenTransform();dirty=true;}).observe(room);
+ mobileControls=createMobileController({getPlayer:()=>player,onQuit:()=>eject(),onGesture:unlockAudio});
+ touchLayout.addEventListener('change',()=>{mobileControls.release();updateTouchSurface();});
+ new ResizeObserver(()=>{mobileControls.release();if(drag)finishDrag({pointerId:drag.id},false,true);renderer.setSize(room.clientWidth,room.clientHeight,false);updateZoom(0,true);}).observe(room);
+ updateZoom(0,true);
 
  renderer.setAnimationLoop(time=>{
   const dt=lastTime?Math.min((time-lastTime)/1000,.08):0;lastTime=time;
-  if(!document.hidden){physics.step(dt);updateMotions(dt);recoverCartridges(dt);syncObjects();updateZoom(dt);const flicker=environment.updateIdle(time/1000);if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
+  if(!document.hidden){physics.step(dt);updateMotions(dt);syncObjects();recoverCartridges(dt);updateZoom(dt);const flicker=environment.updateIdle(time/1000);if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
  });
  if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
  applyRoute();
