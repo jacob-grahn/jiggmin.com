@@ -3,7 +3,7 @@ import {GLTFLoader} from './vendor/three/GLTFLoader.js';
 import {inSlot,playbackFile} from './interaction.js?v=taller-slot-1';
 import {resolveRoute,writeGameUrl} from './routes.js';
 import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
-import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=detailed-den-1';
+import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=grounded-props-2';
 import {createControllerCord} from './controller-cord.js?v=2';
 import {remodelCartridge} from './cartridge-model.js?v=screenprint-3';
 import {SHELF_SLOTS,shuffled,RestTimer,ease} from './library-behavior.js?v=visibility-1';
@@ -251,11 +251,11 @@ function moveGrip(e,first=false){
 room.addEventListener('pointermove',e=>{
  if(!physics)return;
  if(drag){if(e.pointerId===drag.id)moveGrip(e);return;}
- const hit=pick(e),prop=!hit?pickProp(e):null;canvas.style.cursor=hit?'grab':prop?'pointer':'default';tip.hidden=!hit&&!prop;
+ const hit=pick(e),prop=!hit?pickProp(e):null;canvas.style.cursor=hit?'grab':prop?'pointer':'default';tip.hidden=!hit;
  // Let ordinary mouse input reach Ruffle through the transparent CRT aperture.
  const onGlass=!screen.hidden&&!hit&&!prop&&ray.intersectObject(environment.glass,false).length>0;
  if(!touchLayout.matches)canvas.style.pointerEvents=onGlass?'none':'auto';
- if(hit||prop){tip.textContent=hit?hit.root.userData.title:`${prop.object.userData.title} · tap to nudge`;const [x,y]=coords(e);tip.style.left=`${Math.min(x*100,75)}%`;tip.style.top=`${Math.max(2,y*100-8)}%`;}
+ if(hit){tip.textContent=hit.root.userData.title;const [x,y]=coords(e);tip.style.left=`${Math.min(x*100,75)}%`;tip.style.top=`${Math.max(2,y*100-8)}%`;}
 },{capture:true});
 room.addEventListener('wheel',e=>{if(!drag)return;e.preventDefault();drag.plane.translate(drag.normal.clone().multiplyScalar(THREE.MathUtils.clamp(e.deltaY*.002,-.25,.25)));moveGrip(e,true);},{passive:false});
 for(const surface of [canvas,touchSurface]){surface.addEventListener('pointerup',e=>finishDrag(e));surface.addEventListener('pointercancel',e=>finishDrag(e,false,true));surface.addEventListener('lostpointercapture',e=>{if(drag)finishDrag(e,false,true);});}
@@ -282,7 +282,7 @@ async function init(){
  const loader=new GLTFLoader();
  const json=async path=>{const r=await fetch(path);if(!r.ok)throw Error(`Could not load ${path}`);return r.json();};
  const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel,propLighting,profiles]=await Promise.all([
-  json('/data/games.json?v=screenprint-3'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=detailed-den-1'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=detailed-den-1'),json('/web/assets/colliders.json?v=detailed-den-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=detailed-den-1'),json('/data/gameplay.json?v=bubble-racing-1')
+  json('/data/games.json?v=pr2-html5-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=grounded-props-2'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=grounded-props-2'),json('/web/assets/colliders.json?v=grounded-props-2'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=grounded-props-2'),json('/data/gameplay.json?v=disorientation-arrows-1')
  ]);
  games=manifest.games;for(const game of games){game.gameplay=profiles.games[game.id];if(!game.gameplay)throw Error(`Missing gameplay profile: ${game.id}`);}meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;

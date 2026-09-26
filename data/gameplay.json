@@ -44,7 +44,7 @@
       }
     },
     "platform-racing-2": {
-      "mode": "broken",
+      "mode": "touch",
       "controller": {
         "stick": "arrows",
         "a": [
@@ -53,9 +53,9 @@
         "b": []
       },
       "review": {
-        "source": "instructions-and-local-review",
-        "notes": "Main payload reports Loader IO Error while loading download locations. Intended arrows/Space controls.",
-        "provisional": true
+        "source": "user",
+        "notes": "HTML5 port embedded from https://pr2hub.com/client/. Touch mode selected by the author in anticipation of upcoming touch controls; keyboard input is still needed for now.",
+        "provisional": false
       }
     },
     "platform-racing": {
@@ -178,16 +178,17 @@
       }
     },
     "the-game-of-disorientation": {
-      "mode": "broken",
+      "mode": "controller",
       "controller": {
         "stick": "arrows",
         "a": [],
-        "b": []
+        "b": [],
+        "layout": "arrows"
       },
       "review": {
-        "source": "instructions-and-local-review",
-        "notes": "Arrow-key instructions recovered from SWF; fresh local player remains blank white. Provisional broken pending compatibility investigation.",
-        "provisional": true
+        "source": "user",
+        "notes": "User-confirmed working. Four discrete arrow buttons for movement.",
+        "provisional": false
       }
     },
     "uber-pool": {

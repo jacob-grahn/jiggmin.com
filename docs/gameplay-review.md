@@ -11,7 +11,7 @@ All 23 games were inspected using their embedded instructions and local Ruffle l
 | the Great Red Herring Chase | broken (provisional) | — | — | Black screen with sound icon persists. Embedded text describes typing commands and mentions a click mode. |
 | Effing Hail | touch | — | — | Hold left mouse to control wind. Menu, instructions and level opened in Ruffle. |
 | Neverending Light | controller/twin-sticks (provisional) | arrows | Left click / — | Arrow movement, mouse aim, left-click attack. Direct touch aiming plus joystick suggested on mobile. Title screen opens in Ruffle. Twin sticks: left moves, right aims and holds left mouse while deflected; releasing throws/stops firing. A also clicks at the retained cursor. |
-| Platform Racing 2 | broken (provisional) | — | — | Main payload reports Loader IO Error while loading download locations. Intended arrows/Space controls. |
+| Platform Racing 2 | touch | — | — | Live HTML5 port at https://pr2hub.com/client/. Author-selected touch framing; keyboard input still needed until the port adds touch controls. |
 | Musical Evenizer | broken (provisional) | — | — | Blank white player during local review. Embedded Z/X controls; song list is an external PHP endpoint. |
 | Uber Space Shooter | controller | arrows | Space / P | Instructions: arrows move, Space shoots; Pause button labelled P. Reaches click-to-play loader. |
 | Platform Racing | broken (provisional) | — | — | Instructions: arrows/WASD move, up jumps, down charges, Space uses item. Online availability pending. Local menu works, but attempting to connect reports Could not connect to the server. |
@@ -20,7 +20,7 @@ All 23 games were inspected using their embedded instructions and local Ruffle l
 | Beat Master 3000 | controller/arrows | arrows | — / — | User-selected four discrete arrow keys. Choose Arrows in the game menu. |
 | Click Upon Dots | broken (provisional) | — | — | Pointer-only intended controls, but Connect reports Could not connect to the server in the local archive. |
 | Rolley-Ball | touch | — | — | Menu offers mouse or arrow play. Touch assumes mouse mode; P is optional pause. Mouse-mode first level starts. |
-| the Game of Disorientation | broken (provisional) | — | — | Arrow-key instructions recovered from SWF; fresh local player remains blank white. Provisional broken pending compatibility investigation. |
+| the Game of Disorientation | controller/arrows | four arrow buttons | — | User-confirmed working; four discrete arrow buttons for movement. |
 | Uber Pool | controller | mouse | Left click / P | Move pointer to strike; hold left mouse to keep cue steady. Joystick avoids touch-drag acting as a brake. |
 | Mines | touch | — | — | User-confirmed. Click mines and powerups. P is optional pause. |
 | Cooties | controller/twin-sticks (provisional) | arrows | Left click / — | Arrows/A/D move; mouse aims hand; hold click to grab, release to throw. Direct screen aiming remains available. Animated Play menu opens in Ruffle. Twin sticks: left moves, right aims and holds left mouse while deflected; releasing throws/stops firing. A also clicks at the retained cursor. User confirms P does not pause. |

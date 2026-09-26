@@ -4,7 +4,7 @@ import * as THREE from 'three';
 // the pose, and frame stalls cannot make the spring unstable.
 export class PropSpring {
  constructor(frequency=15,damping=4,limit=.075){Object.assign(this,{frequency,damping,limit,angle:0,velocity:0});}
- kick(impulse){this.velocity=THREE.MathUtils.clamp(this.velocity+impulse,-.9,.9);}
+ kick(impulse){this.velocity=THREE.MathUtils.clamp(this.velocity+impulse,-1.5,1.5);}
  step(dt){
   if(!this.angle&&!this.velocity)return false;
   const t=Math.max(0,dt),w=Math.sqrt(this.frequency**2-this.damping**2),decay=Math.exp(-this.damping*t),c=Math.cos(w*t),s=Math.sin(w*t),a=this.angle,v=this.velocity;
@@ -17,9 +17,9 @@ export class PropSpring {
  reset(){this.angle=this.velocity=0;}
 }
 const personalities={
- mug:{title:'Late-night coffee',frequency:22,damping:5.5,limit:.045,impulse:.52},
- plant:{title:'Pothos',frequency:10,damping:2.7,limit:.065,impulse:.48},
- lamp:{title:'Reading lamp',frequency:15,damping:4,limit:.023,impulse:.28}
+ mug:{title:'Late-night coffee',frequency:22,damping:5.5,limit:.075,impulse:1.05},
+ plant:{title:'Pothos',frequency:10,damping:2.7,limit:.12,impulse:.9},
+ lamp:{title:'Reading lamp',frequency:15,damping:4,limit:.055,impulse:.65}
 };
 export function createPropReactions(meshes){
  const entries=new Map(meshes.map(mesh=>{

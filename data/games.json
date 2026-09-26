@@ -278,7 +278,7 @@
       "sourceCompatibilityWarning": true,
       "entryPointKind": "loader",
       "playbackTested": false,
-      "offlineCompleteness": "Main payload and loader fetched; online services and other runtime assets not mirrored.",
+      "offlineCompleteness": "Online HTML5 port, loaded from pr2hub.com/client/; requires an internet connection. Legacy Flash files retained as archive metadata.",
       "swf": {
         "signature": "CWS",
         "version": 43,
@@ -315,7 +315,9 @@
       "cartridgeLabel": {
         "file": "web/assets/labels/platform-racing-2-screenprint-v3.webp",
         "style": "screenprint"
-      }
+      },
+      "playerType": "iframe",
+      "embedUrl": "https://pr2hub.com/client/"
     },
     {
       "id": "musical-evenizer",

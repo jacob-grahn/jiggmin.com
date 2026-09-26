@@ -58,8 +58,8 @@ next(n for n in S.world.node_tree.nodes if n.type=='BACKGROUND').inputs['Strengt
 # A small pile of handwritten notes and a pencil, partly in shadow.
 g['C']=bpy.data.collections['06 • Late-night belongings']
 for i in range(3):
- o=box('Loose game sketches',(1.42,-.54,1.112+i*.003),(.36,.27,.002),M['Old paper'],.001);o.rotation_euler.z=.08+i*.05
-line('Pencil on cabinet',[(1.20,-.56,1.13),(1.58,-.45,1.13)],.008,M['Brass'])
+ o=box('Loose game sketches',(1.18,.10,1.112+i*.003),(.36,.27,.002),M['Old paper'],.001);o.rotation_euler.z=.08+i*.05
+line('Pencil on cabinet',[(.96,.08,1.13),(1.34,.19,1.13)],.008,M['Brass'])
 # Light fabric blanket draped across chair: continuous curved mesh with irregular folds.
 verts=[];faces=[]
 for j in range(29):

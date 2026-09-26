@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {createPropReactions} from './prop-reactions.js';
+import {createPropReactions} from './prop-reactions.js?v=stronger-wiggle-2';
 import {mergeGeometries} from './vendor/three/BufferGeometryUtils.js';
 
 // A camera-space light bake on actual 3D surfaces: the depth buffer, not DOM order,
