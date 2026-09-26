@@ -1,0 +1,26 @@
+# Local dependencies and generated deployment output
+/node_modules/
+/dist/
+
+# Downloaded Flash games and their thumbnail/source payloads
+/games/
+
+# Source art and intermediate renders; optimized web/assets are versioned
+/scene/mockups/
+/scene/textures/
+/scene/renders/
+*.blend
+*.blend[0-9]*
+*.blend@
+*.psd
+*.psb
+*.xcf
+
+# Machine-local files and caches
+.DS_Store
+__pycache__/
+*.py[cod]
+*.log
+.env
+.env.*
+!.env.example

@@ -1,0 +1,33 @@
+"""Assemble a self-contained static site under dist/, including game deep links."""
+import json
+import shutil
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]
+OUTPUT = ROOT / 'dist'
+
+def game_slugs():
+    games = json.loads((ROOT / 'data/games.json').read_text())['games']
+    slugs = {game['id'] for game in games}
+    for slug in slugs:
+        if not slug or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789-' for c in slug):
+            raise ValueError(f'Invalid route slug: {slug}')
+    return slugs
+
+def build(output=OUTPUT):
+    slugs = game_slugs()
+    if not (ROOT / 'games').is_dir():
+        raise FileNotFoundError('Restore the local games/ archive before building. See README.md.')
+    output.mkdir(parents=True, exist_ok=True)
+    html = (ROOT / 'index.html').read_text()
+    (output / 'index.html').write_text(html)
+    for folder in ['web', 'data', 'games']:
+        shutil.copytree(ROOT / folder, output / folder, dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns('.DS_Store', '__pycache__'))
+    for slug in slugs:
+        directory = output / slug
+        directory.mkdir(exist_ok=True)
+        (directory / 'index.html').write_text(html)
+    return slugs
+
+if __name__ == '__main__':
+    print(f'Built dist/ with {len(build())} static game routes.')

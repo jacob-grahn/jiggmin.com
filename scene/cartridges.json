@@ -1,0 +1,117 @@
+[
+  {
+    "object": "CARTRIDGE_01 \u2022 Effing Meteors",
+    "gameId": "effing-meteors",
+    "storage": "table"
+  },
+  {
+    "object": "CARTRIDGE_02 \u2022 Platform Racing 3",
+    "gameId": "platform-racing-3",
+    "storage": "table"
+  },
+  {
+    "object": "CARTRIDGE_03 \u2022 the Great Red Herring Chase",
+    "gameId": "the-great-red-herring-chase",
+    "storage": "table"
+  },
+  {
+    "object": "CARTRIDGE_04 \u2022 Effing Hail",
+    "gameId": "effing-hail",
+    "storage": "table"
+  },
+  {
+    "object": "CARTRIDGE_05 \u2022 Neverending Light",
+    "gameId": "neverending-light",
+    "storage": "table"
+  },
+  {
+    "object": "CARTRIDGE_06 \u2022 Platform Racing 2",
+    "gameId": "platform-racing-2",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_07 \u2022 Musical Evenizer",
+    "gameId": "musical-evenizer",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_08 \u2022 Uber Space Shooter",
+    "gameId": "uber-space-shooter",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_09 \u2022 Platform Racing",
+    "gameId": "platform-racing",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_10 \u2022 Kongregate Racing",
+    "gameId": "kongregate-racing",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_11 \u2022 Orbit",
+    "gameId": "orbit",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_12 \u2022 Beat Master 3000",
+    "gameId": "beat-master-3000",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_13 \u2022 Click Upon Dots",
+    "gameId": "click-upon-dots",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_14 \u2022 Rolley-Ball",
+    "gameId": "rolley-ball",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_15 \u2022 the Game of Disorientation",
+    "gameId": "the-game-of-disorientation",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_16 \u2022 Uber Pool",
+    "gameId": "uber-pool",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_17 \u2022 Mines",
+    "gameId": "mines",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_18 \u2022 Cooties",
+    "gameId": "cooties",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_19 \u2022 Uber Breakout II",
+    "gameId": "uber-breakout-2",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_20 \u2022 Uber Breakout",
+    "gameId": "uber-breakout",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_21 \u2022 Kimblis the Blue",
+    "gameId": "kimblis-the-blue",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_22 \u2022 Red Earth II",
+    "gameId": "red-earth-2",
+    "storage": "rack"
+  },
+  {
+    "object": "CARTRIDGE_23 \u2022 Red Earth",
+    "gameId": "red-earth",
+    "storage": "rack"
+  }
+]

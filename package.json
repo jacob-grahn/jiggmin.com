@@ -1,0 +1,15 @@
+{
+  "name": "jiggmin-midnight-den",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "python3 scripts/serve.py",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "build": "python3 scripts/build_routes.py"
+  },
+  "dependencies": {
+    "@ruffle-rs/ruffle": "0.6.0",
+    "cannon-es": "0.20.0",
+    "three": "0.186.1"
+  }
+}

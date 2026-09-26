@@ -1,0 +1,1060 @@
+{
+  "sourceIndex": "https://jiggmin2.com/",
+  "fetchedAt": "2026-09-26T02:01:47.212354+00:00",
+  "selectionRule": "Game page links from the index that contain both a Ruffle script and an actual SWF object/embed. Includes warning-marked Ruffle entries; excludes header animations and separate non-Ruffle games.",
+  "games": [
+    {
+      "id": "effing-meteors",
+      "title": "Effing Meteors",
+      "sourcePage": "https://jiggmin2.com/games/effing-meteors",
+      "resolvedPage": "https://jiggmin2.com/games/effing-meteors/",
+      "sourceSwf": "https://jiggmin2.com/games/effing-meteors/effing-meteors.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/effing-meteors/effing-meteors.swf",
+      "file": "games/effing-meteors/effing-meteors.swf",
+      "bytes": 12341732,
+      "sha256": "84839d576b5b0fe1273b09bf8d0866037c82bb80effdabee7283130ceebcff71",
+      "embedWidth": 400,
+      "embedHeight": 600,
+      "sourceRuffleNotice": "This website uses Ruffle to show Adobe Flash content. Since this game is made in ActionScript 3 (not yet supported by Ruffle), it may not function properly. To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": true,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 14,
+        "uncompressedBytes": 13286866,
+        "stageWidth": 400.0,
+        "stageHeight": 600.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin",
+          "http://adobe.com/AS3/2006/builtin*http://www.adobe.com/2006/flex/mx/internal"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/effing-meteors/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/effing-meteors-200x100.jpg",
+        "bytes": 16180,
+        "sha256": "dfabc7be0c0f027cbc4c57af6e3f71ab2598740c852e68c8832d59c4f263a8ae"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "platform-racing-3",
+      "title": "Platform Racing 3",
+      "sourcePage": "https://jiggmin2.com/games/platform-racing-3",
+      "resolvedPage": "https://jiggmin2.com/games/platform-racing-3/",
+      "sourceSwf": "https://jiggmin2.com/games/platform-racing-3/pr3-loader.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/platform-racing-3/pr3-loader.swf",
+      "file": "games/platform-racing-3/pr3-loader.swf",
+      "bytes": 24596,
+      "sha256": "8e6a0397fe2f68693c11fac5f2c282f1304f2ccde6e43b169df267582d1ba838",
+      "embedWidth": 675,
+      "embedHeight": 480,
+      "sourceRuffleNotice": "This website uses Ruffle to show Adobe Flash content. Since this game is made in ActionScript 3 (not yet supported by Ruffle), it may not function properly. To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": true,
+      "entryPointKind": "loader",
+      "playbackTested": false,
+      "offlineCompleteness": "Main payload and loader fetched; online services and other runtime assets not mirrored.",
+      "swf": {
+        "signature": "CWS",
+        "version": 43,
+        "uncompressedBytes": 31107,
+        "stageWidth": 675.0,
+        "stageHeight": 480.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin",
+          "http://pr3hub.com/swf_info.txt?",
+          "https://pr3hub.com/swf_info.txt?"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/platform-racing-3/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/platform-racing-3-200x100.jpg",
+        "bytes": 8775,
+        "sha256": "89f04cc45d9d6e49c9a2ec19b285dd0f5239a8f736e42c9f368b4f2eb003e4ed"
+      },
+      "embedParameters": {},
+      "mainPayload": {
+        "source": "https://pr3hub.com/files/game/game_01_09_2026_b1.swf",
+        "file": "games/platform-racing-3/game_01_09_2026_b1.swf",
+        "bytes": 7104048,
+        "sha256": "b08393d4c0a8f4898a2a6a77903477c02a2a585924feddccf7a7ee3b24cb57b2",
+        "swf": {
+          "signature": "CWS",
+          "version": 44,
+          "uncompressedBytes": 9526029,
+          "stageWidth": 675.0,
+          "stageHeight": 480.0,
+          "frameRate": 30.0,
+          "embeddedUrlHints": [
+            "http://adobe.com/AS3/2006/builtin",
+            "http://api.goldtreeservers.net/pr3/",
+            "http://dev.sparkworkz.com/api/",
+            "http://itunes.apple.com/us/app/platform-racing-3/id437364752?mt=8",
+            "http://ns.adobe.com/photoshop/1.0/\"",
+            "http://ns.adobe.com/xap/1.0/",
+            "http://ns.adobe.com/xap/1.0/\"",
+            "http://ns.adobe.com/xap/1.0/mm/\"",
+            "http://ns.adobe.com/xap/1.0/sType/ResourceEvent#\"",
+            "http://purl.org/dc/elements/1.1/\"",
+            "http://qa.sparkworkz.com/api/",
+            "http://sparkworkz.com/platformracing3/?levelId=999</font></p><p",
+            "http://www.facebook.com/sharer.php?u=<http://twitter.com/home?status=Check",
+            "http://www.iec.ch",
+            "http://www.sparkworkz.com/api/\"SPARKWORKZ_LIVE_LOCATION_LOCALHOST!http://localhost/platformracing3/",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#\">",
+            "https://localhost:5001/",
+            "https://pr3hub.com/?levelId=2mailto:?subject=Check"
+          ]
+        },
+        "descriptorSource": "https://pr3hub.com/swf_info.txt",
+        "descriptorFile": "games/platform-racing-3/swf-info.txt"
+      }
+    },
+    {
+      "id": "the-great-red-herring-chase",
+      "title": "the Great Red Herring Chase",
+      "sourcePage": "https://jiggmin2.com/games/the-great-red-herring-chase",
+      "resolvedPage": "https://jiggmin2.com/games/the-great-red-herring-chase/",
+      "sourceSwf": "https://jiggmin2.com/games/the-great-red-herring-chase/the-great-red-herring-chase.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/the-great-red-herring-chase/the-great-red-herring-chase.swf",
+      "file": "games/the-great-red-herring-chase/the-great-red-herring-chase.swf",
+      "bytes": 976769,
+      "sha256": "e6678413e9755d7092ef9b2db81aad7f7ffe9c7d2add0cfa7e65968ebd99e67e",
+      "embedWidth": 600,
+      "embedHeight": 600,
+      "sourceRuffleNotice": "This website uses Ruffle to show Adobe Flash content. Since this game is made in ActionScript 3 (not yet supported by Ruffle), it may not function properly. To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": true,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 9,
+        "uncompressedBytes": 1044430,
+        "stageWidth": 600.0,
+        "stageHeight": 600.0,
+        "frameRate": 25.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin",
+          "http://aeiowu.com",
+          "http://jiggmin.com%No",
+          "https://jiggmin2.com"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/the-great-red-herring-chase/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/the-great-red-herring-chase-200x100.jpg",
+        "bytes": 5865,
+        "sha256": "df762dea381b503dc68c5cbd9a5e8e140fea45892539c5c094b9e8552d0fd68d"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "effing-hail",
+      "title": "Effing Hail",
+      "sourcePage": "https://jiggmin2.com/games/effing-hail",
+      "resolvedPage": "https://jiggmin2.com/games/effing-hail/",
+      "sourceSwf": "https://jiggmin2.com/games/effing-hail/effing-hail.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/effing-hail/effing-hail.swf",
+      "file": "games/effing-hail/effing-hail.swf",
+      "bytes": 1009195,
+      "sha256": "7528da8f6294c66bfa0795d5ddd9f95e67f56667dec305e0348ef8f2aeba1c46",
+      "embedWidth": 600,
+      "embedHeight": 700,
+      "sourceRuffleNotice": "This website uses Ruffle to show Adobe Flash content. Since this game is made in ActionScript 3 (not yet supported by Ruffle), it may not function properly. To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": true,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 9,
+        "uncompressedBytes": 1197616,
+        "stageWidth": 600.0,
+        "stageHeight": 700.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin",
+          "http://adobe.com/AS3/2006/builtin*http://www.adobe.com/2006/flex/mx/internal"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/effing-hail/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/effing-hail-200x100.jpg",
+        "bytes": 7313,
+        "sha256": "c8f89c89a8c389e6931a3d8aa4276e6ac6cfd9a6ab7622db2eb9518b56355d5c"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "neverending-light",
+      "title": "Neverending Light",
+      "sourcePage": "https://jiggmin2.com/games/neverending-light",
+      "resolvedPage": "https://jiggmin2.com/games/neverending-light/",
+      "sourceSwf": "https://jiggmin2.com/games/neverending-light/neverending-light.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/neverending-light/neverending-light.swf",
+      "file": "games/neverending-light/neverending-light.swf",
+      "bytes": 19894861,
+      "sha256": "72f78019610600d78abf22d7d4ace1ba78f6e0a280d16426da1c5942e759b748",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This website uses Ruffle to show Adobe Flash content. Since this game is made in ActionScript 3 (not yet supported by Ruffle), it may not function properly. To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": true,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "FWS",
+        "version": 9,
+        "uncompressedBytes": 19894861,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin",
+          "http://jiggmin.com#http://chrispington.newgrounds.com/",
+          "http://jiggmin.com/downloads",
+          "http://voice123.com/johnweitz",
+          "http://voice123.com/laniminella",
+          "http://voice123.com/michelesantopietro",
+          "http://www.ediblecastle.com/",
+          "https://jiggmin2.com",
+          "https://jiggmin2.com/games/neverending-light/download.php#http://www.imdb.com/name/nm0763873/Bhttps://jiggmin2.com/games/neverending-light/neverending-light.swf"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/neverending-light/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/neverending-light-200x100.jpg",
+        "bytes": 7120,
+        "sha256": "0cdf3f4f7aadf789296fdd5ca39a87ae2556fa9ccc056592eb6e24fcdfd0c56f"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "platform-racing-2",
+      "title": "Platform Racing 2",
+      "sourcePage": "https://jiggmin2.com/games/platform-racing-2",
+      "resolvedPage": "https://jiggmin2.com/games/platform-racing-2/",
+      "sourceSwf": "https://jiggmin2.com/games/platform-racing-2/platform-racing-2-loader-v15.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/platform-racing-2/platform-racing-2-loader-v15.swf",
+      "file": "games/platform-racing-2/platform-racing-2-loader-v15.swf",
+      "bytes": 8478,
+      "sha256": "2573f938e7ca51c4b9b1461adaae73491b79009d4366a3c623c285203028dbed",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This website uses Ruffle to show Adobe Flash content. Since this game is made in ActionScript 3 (not yet supported by Ruffle), it may not function properly. To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": true,
+      "entryPointKind": "loader",
+      "playbackTested": false,
+      "offlineCompleteness": "Main payload and loader fetched; online services and other runtime assets not mirrored.",
+      "swf": {
+        "signature": "CWS",
+        "version": 43,
+        "uncompressedBytes": 12245,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin",
+          "https://pr2hub.com/version.txt",
+          "https://www.kongregate.com/flash/API_AS3_Local.swf"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/platform-racing-2/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/platform-racing-2-200x100.jpg",
+        "bytes": 8200,
+        "sha256": "23fd56e03ae45d5132c6664829376f0c20501655a34335c591675bf4480ddd1b"
+      },
+      "embedParameters": {},
+      "mainPayload": {
+        "source": "https://pr2hub.com/files/platform-racing-2-v168_2_1.swf",
+        "file": "games/platform-racing-2/platform-racing-2-v168_2_1.swf",
+        "bytes": 10277296,
+        "sha256": "2f3d104176a124dcd5b580da98c7d365732363bdbfb7772f76ff3a6fc05b3ede",
+        "swf": {
+          "validation": "not a standard standalone SWF",
+          "reason": "Download is not a SWF",
+          "firstEightBytesHex": "360cf004b80946fa"
+        },
+        "descriptorSource": "https://pr2hub.com/version.txt",
+        "descriptorFile": "games/platform-racing-2/version.json"
+      }
+    },
+    {
+      "id": "musical-evenizer",
+      "title": "Musical Evenizer",
+      "sourcePage": "https://jiggmin2.com/games/musical-evenizer",
+      "resolvedPage": "https://jiggmin2.com/games/musical-evenizer/",
+      "sourceSwf": "https://jiggmin2.com/games/musical-evenizer/musical-evenizer.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/musical-evenizer/musical-evenizer.swf",
+      "file": "games/musical-evenizer/musical-evenizer.swf",
+      "bytes": 271196,
+      "sha256": "99f62056f9d4a160ccd90a52cb79ba3bb5d448e007ff5a578d4cc7ebdd672ba4",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This website uses Ruffle to show Adobe Flash content. Since this game is made in ActionScript 3 (not yet supported by Ruffle), it may not function properly. To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": true,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 9,
+        "uncompressedBytes": 400822,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 25.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin",
+          "http://adobe.com/AS3/2006/builtin*http://www.adobe.com/2006/flex/mx/internal",
+          "https://jiggmin2.com/games/musical-evenizer/files/songList.php"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/musical-evenizer/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/musical-evenizer-200x100.jpg",
+        "bytes": 2729,
+        "sha256": "cf146a049202507a845fa157810f86f824ae68faac2357de19e2a1a8162bb9a6"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "uber-space-shooter",
+      "title": "Uber Space Shooter",
+      "sourcePage": "https://jiggmin2.com/games/uber-space-shooter",
+      "resolvedPage": "https://jiggmin2.com/games/uber-space-shooter/",
+      "sourceSwf": "https://jiggmin2.com/games/uber-space-shooter/uber-space-shooter.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/uber-space-shooter/uber-space-shooter.swf",
+      "file": "games/uber-space-shooter/uber-space-shooter.swf",
+      "bytes": 11789605,
+      "sha256": "9c89842d870e652e475f17880a50d0e7eb936d6c937fe93def1d16290a671254",
+      "embedWidth": 500,
+      "embedHeight": 500,
+      "sourceRuffleNotice": "This website uses Ruffle to show Adobe Flash content. Since this game is made in ActionScript 3 (not yet supported by Ruffle), it may not function properly. To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": true,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 9,
+        "uncompressedBytes": 13129962,
+        "stageWidth": 500.0,
+        "stageHeight": 500.0,
+        "frameRate": 27.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin",
+          "http://www.adobe.com/2006/flex/mx/internal"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/uber-space-shooter/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/uber-space-shooter-200x100.jpg",
+        "bytes": 9186,
+        "sha256": "91085bfb8ef38ebc2cc57ffe858fcb89b0e447e78ca322019e155ffb39750c45"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "platform-racing",
+      "title": "Platform Racing",
+      "sourcePage": "https://jiggmin2.com/games/platform-racing",
+      "resolvedPage": "https://jiggmin2.com/games/platform-racing/",
+      "sourceSwf": "https://jiggmin2.com/games/platform-racing/platform-racing.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/platform-racing/platform-racing.swf",
+      "file": "games/platform-racing/platform-racing.swf",
+      "bytes": 4053115,
+      "sha256": "2a98e4ed197c86e4192cc5465a347293783aa187417ad2d2adeafeaf635fb37d",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 14,
+        "uncompressedBytes": 4799385,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com",
+          "http://jiggmin.com/",
+          "https://jiggmin2.com",
+          "https://jiggmin2.com/",
+          "https://twitter.com/chabotc"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/platform-racing/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/platform-racing-200x100.jpg",
+        "bytes": 4525,
+        "sha256": "cb4193f02bd398eb6cf342fb25689393bba973d4af133dfd0974ae9b837f5868"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "kongregate-racing",
+      "title": "Kongregate Racing",
+      "sourcePage": "https://jiggmin2.com/games/kongregate-racing",
+      "resolvedPage": "https://jiggmin2.com/games/kongregate-racing/",
+      "sourceSwf": "https://jiggmin2.com/games/kongregate-racing/kongregate-racing.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/kongregate-racing/kongregate-racing.swf",
+      "file": "games/kongregate-racing/kongregate-racing.swf",
+      "bytes": 2103515,
+      "sha256": "71b6a8f919feae82c8e88aede5cae6ff4a2f0ef4a4568d5b0ccb7aae1cb2b3dd",
+      "embedWidth": 565,
+      "embedHeight": 365,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 2527864,
+        "stageWidth": 565.0,
+        "stageHeight": 365.0,
+        "frameRate": 25.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com\"",
+          "http://jiggmin.com/",
+          "https://jiggmin2.com\"",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/kongregate-racing/-images/",
+          "https://twitter.com/chabotc\""
+        ]
+      },
+      "thumbnail": {
+        "file": "games/kongregate-racing/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/kongregate-racing-200x100.jpg",
+        "bytes": 7268,
+        "sha256": "c30977e6448140fd50200fc84b73ba4509677708b96c62797c20471ef7351852"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "orbit",
+      "title": "Orbit",
+      "sourcePage": "https://jiggmin2.com/games/orbit",
+      "resolvedPage": "https://jiggmin2.com/games/orbit/",
+      "sourceSwf": "https://jiggmin2.com/games/orbit/orbit.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/orbit/orbit.swf",
+      "file": "games/orbit/orbit.swf",
+      "bytes": 6686374,
+      "sha256": "24c8a0573d799ab32d041b8005fc35577a1956753385fbcec65a536241c03e47",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 6876050,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com",
+          "http://jiggmin.com/",
+          "http://jiggmin.com/\"",
+          "http://www.macromedia.com/go/getflash/</a></font></p><p",
+          "http://www.newgrounds.com/audio/view.php?id=339805&sub=68508\"",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/submit-scores.php",
+          "https://jiggmin2.com/games/view-scores.php?game=orbit"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/orbit/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/orbit-200x100.jpg",
+        "bytes": 2753,
+        "sha256": "170b1a39b8cb0a056744d05753e09edb33fc2601435a9db9ad5e5e6441da47f9"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "beat-master-3000",
+      "title": "Beat Master 3000",
+      "sourcePage": "https://jiggmin2.com/games/beat-master-3000",
+      "resolvedPage": "https://jiggmin2.com/games/beat-master-3000/",
+      "sourceSwf": "https://jiggmin2.com/games/beat-master-3000/beat-master-3000.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/beat-master-3000/beat-master-3000.swf",
+      "file": "games/beat-master-3000/beat-master-3000.swf",
+      "bytes": 1809269,
+      "sha256": "32193916620237d9469572d4f5ad8b7cc0ea209ba174ce26334568df8cf6fccb",
+      "embedWidth": 320,
+      "embedHeight": 500,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 2104922,
+        "stageWidth": 320.0,
+        "stageHeight": 500.0,
+        "frameRate": 50.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com",
+          "http://jiggmin.com/",
+          "http://www.macromedia.com/go/getflash/\"",
+          "http://www.macromedia.com/go/getflash/</a></font></p>",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/beat-master-3000/\"><b>Click"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/beat-master-3000/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/beat-master-3000-200x100.jpg",
+        "bytes": 9260,
+        "sha256": "195273a2b8980edd707ae718409ef76b1fe79b8706fff9d12632a0ddf9aa21a9"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "click-upon-dots",
+      "title": "Click Upon Dots",
+      "sourcePage": "https://jiggmin2.com/games/click-upon-dots",
+      "resolvedPage": "https://jiggmin2.com/games/click-upon-dots/",
+      "sourceSwf": "https://jiggmin2.com/games/click-upon-dots/click-upon-dots.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/click-upon-dots/click-upon-dots.swf",
+      "file": "games/click-upon-dots/click-upon-dots.swf",
+      "bytes": 1766333,
+      "sha256": "c8ba1ba89851b10ada4ada42f0c02a375ad5a7898caa5143070b4d28cf007a96",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 2040563,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com\"",
+          "http://jiggmin.com/",
+          "https://jiggmin2.com/",
+          "https://twitter.com/razorberry\"",
+          "https://www.newgrounds.com/audio/listen/68508\""
+        ]
+      },
+      "thumbnail": {
+        "file": "games/click-upon-dots/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/click-upon-dots-200x100.jpg",
+        "bytes": 7036,
+        "sha256": "5d8ec13fbbb0575a900479250a0895d87f7694396a050aa7c007099a21ccb0ba"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "rolley-ball",
+      "title": "Rolley-Ball",
+      "sourcePage": "https://jiggmin2.com/games/rolley-ball",
+      "resolvedPage": "https://jiggmin2.com/games/rolley-ball/",
+      "sourceSwf": "https://jiggmin2.com/games/rolley-ball/rolley-ball.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/rolley-ball/rolley-ball.swf",
+      "file": "games/rolley-ball/rolley-ball.swf",
+      "bytes": 4113769,
+      "sha256": "6653a716f7a18fd3b2ca95dd0a8708341bfd4a8a5cb7ded2b9066f4ae2de478e",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 4425162,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 25.0,
+        "embeddedUrlHints": [
+          "http://andydennis.co.uk/",
+          "http://jiggmin.com/",
+          "http://jiggmin.com/viewScores?table=rolley&dir=desc",
+          "http://newgrounds.com/audio/view.php?id=803382&sub=67693",
+          "http://www.andrew-dennis.com/",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/submit-scores.php",
+          "https://jiggmin2.com/games/view-scores.php?game=rolley"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/rolley-ball/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/rolley-ball-200x100.jpg",
+        "bytes": 8089,
+        "sha256": "8db2ef41f8c489773f0e06152018986f74deb1d61eeee8c353266b108504b6de"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "the-game-of-disorientation",
+      "title": "the Game of Disorientation",
+      "sourcePage": "https://jiggmin2.com/games/the-game-of-disorientation",
+      "resolvedPage": "https://jiggmin2.com/games/the-game-of-disorientation/",
+      "sourceSwf": "https://jiggmin2.com/games/the-game-of-disorientation/the-game-of-disorientation.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/the-game-of-disorientation/the-game-of-disorientation.swf",
+      "file": "games/the-game-of-disorientation/the-game-of-disorientation.swf",
+      "bytes": 9892035,
+      "sha256": "5ada494d8e107c24548f199f68f6b488df2b20c3ed09e8340e2892a544215106",
+      "embedWidth": 500,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 10273397,
+        "stageWidth": 500.0,
+        "stageHeight": 400.0,
+        "frameRate": 35.0,
+        "embeddedUrlHints": [
+          "http://armorgames.com",
+          "http://jiggmin.com",
+          "http://jiggmin.com/",
+          "http://ns.adobe.com/xap/1.0/\">",
+          "http://ns.adobe.com/xap/1.0/mm/\"",
+          "http://ns.adobe.com/xap/1.0/sType/ResourceRef#\">",
+          "http://purl.org/dc/elements/1.1/\">",
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#\">",
+          "https://jiggmin2.com",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/the-game-of-disorientation/files/scores.php"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/the-game-of-disorientation/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/the-game-of-disorientation-200x100.jpg",
+        "bytes": 6569,
+        "sha256": "82728fb89d53de58c1200a898acf68495b9cecec10a33bb1a6862a3a860dc018"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "uber-pool",
+      "title": "Uber Pool",
+      "sourcePage": "https://jiggmin2.com/games/uber-pool",
+      "resolvedPage": "https://jiggmin2.com/games/uber-pool/",
+      "sourceSwf": "https://jiggmin2.com/games/uber-pool/uber-pool.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/uber-pool/uber-pool.swf",
+      "file": "games/uber-pool/uber-pool.swf",
+      "bytes": 2430303,
+      "sha256": "d248ffb88e785413533a8f5435a4c5649734a1e9aaef9d662e49023af28e0bce",
+      "embedWidth": 650,
+      "embedHeight": 540,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 2626397,
+        "stageWidth": 650.0,
+        "stageHeight": 540.0,
+        "frameRate": 35.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com/",
+          "http://ns.adobe.com/xap/1.0/\">",
+          "http://ns.adobe.com/xap/1.0/mm/\"",
+          "http://ns.adobe.com/xap/1.0/sType/ResourceRef#\">",
+          "http://purl.org/dc/elements/1.1/\">",
+          "http://www.andrew-dennis.com/",
+          "http://www.iconian.com/",
+          "http://www.macromedia.com/go/getflash/",
+          "http://www.macromedia.com/go/getflash/</font></p><p",
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#\">",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/uber-pool/files/scores.php"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/uber-pool/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/uber-pool-200x100.jpg",
+        "bytes": 5790,
+        "sha256": "0043fdb1dea20d3e70fad0514a195c4e343e0305c48fe17d09edc43d546c20b8"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "mines",
+      "title": "Mines",
+      "sourcePage": "https://jiggmin2.com/games/mines",
+      "resolvedPage": "https://jiggmin2.com/games/mines/",
+      "sourceSwf": "https://jiggmin2.com/games/mines/mines.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/mines/mines.swf",
+      "file": "games/mines/mines.swf",
+      "bytes": 5317802,
+      "sha256": "c84d70d83907b6ba571e668d8d64e6afa9999304b3dcc1c7c57f9808e42b4fee",
+      "embedWidth": 550,
+      "embedHeight": 300,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 5797629,
+        "stageWidth": 550.0,
+        "stageHeight": 300.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com",
+          "http://jiggmin.com/",
+          "http://ns.adobe.com/xap/1.0/\">",
+          "http://ns.adobe.com/xap/1.0/mm/\"",
+          "http://ns.adobe.com/xap/1.0/sType/ResourceRef#\">",
+          "http://purl.org/dc/elements/1.1/\">",
+          "http://www.macromedia.com/go/getflash/",
+          "http://www.macromedia.com/go/getflash/</font></p><p",
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#\">",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/submit-scores.php",
+          "https://jiggmin2.com/games/view-scores.php?game=mines"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/mines/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/mines-200x100.jpg",
+        "bytes": 5708,
+        "sha256": "17396fe4a9e3cea44d0616d3c1aaa33dd172195b761ab187220a1319b82868fc"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "cooties",
+      "title": "Cooties",
+      "sourcePage": "https://jiggmin2.com/games/cooties",
+      "resolvedPage": "https://jiggmin2.com/games/cooties/",
+      "sourceSwf": "https://jiggmin2.com/games/cooties/cooties.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/cooties/cooties.swf",
+      "file": "games/cooties/cooties.swf",
+      "bytes": 4254411,
+      "sha256": "5bda0a571719bb7ed031ed1fa395aaf901ddb61cc8795aa0bdb676023cdbe02d",
+      "embedWidth": 650,
+      "embedHeight": 200,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 5137399,
+        "stageWidth": 650.0,
+        "stageHeight": 200.0,
+        "frameRate": 35.0,
+        "embeddedUrlHints": [
+          "http://armorgames.com/",
+          "http://edgen.com/",
+          "http://jiggmin.com/",
+          "http://www.armorgames.com",
+          "http://www.blackgoldfish.com/",
+          "http://www.macromedia.com/go/getflash/",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/cooties/files/scores.php"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/cooties/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/cooties-200x100.jpg",
+        "bytes": 14220,
+        "sha256": "7f34d17c8581f8e10d412187f654e23731468e49cac7279866d794ce3039156b"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "uber-breakout-2",
+      "title": "Uber Breakout II",
+      "sourcePage": "https://jiggmin2.com/games/uber-breakout-2",
+      "resolvedPage": "https://jiggmin2.com/games/uber-breakout-2/",
+      "sourceSwf": "https://jiggmin2.com/games/uber-breakout-2/uber-breakout-2.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/uber-breakout-2/uber-breakout-2.swf",
+      "file": "games/uber-breakout-2/uber-breakout-2.swf",
+      "bytes": 403718,
+      "sha256": "d45d656b1dea9a0bf7e0f9d069fc6e259d81f0264c68032bfbc49128ac37d1a4",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 510635,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 35.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com/",
+          "http://newgrounds.com/audio/view.php?id=489978&sub=19622",
+          "http://www.iconian.com/",
+          "http://www.macromedia.com/go/getflash/",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/submit-scores.php"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/uber-breakout-2/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/uber-breakout-2-200x100.jpg",
+        "bytes": 6603,
+        "sha256": "e2ec07aea02838e4ed9bcd5e6d7ebb3abb5c16e43a443fcd368e57bccd6cd447"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "uber-breakout",
+      "title": "Uber Breakout",
+      "sourcePage": "https://jiggmin2.com/games/uber-breakout",
+      "resolvedPage": "https://jiggmin2.com/games/uber-breakout/",
+      "sourceSwf": "https://jiggmin2.com/games/uber-breakout/uber-breakout.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/uber-breakout/uber-breakout.swf",
+      "file": "games/uber-breakout/uber-breakout.swf",
+      "bytes": 5208403,
+      "sha256": "f200569c9afe67956e893308eecb200dde549586324a257c80ebe9d33f586797",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 5464461,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://jiggmin.com/",
+          "http://jiggmin.com/highscores/view.php?group=Uber",
+          "http://ns.adobe.com/xap/1.0/\">",
+          "http://ns.adobe.com/xap/1.0/mm/\"",
+          "http://ns.adobe.com/xap/1.0/sType/ResourceRef#\">",
+          "http://purl.org/dc/elements/1.1/\">",
+          "http://www.iconian.com/",
+          "http://www.kizash.com/",
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#\">",
+          "http://www.xanga.com/xstormer1",
+          "https://jiggmin2.com/",
+          "https://jiggmin2.com/games/submit-scores.php",
+          "https://jiggmin2.com/games/view-scores.php?game=breakout",
+          "https://www.kizash.com/high_scores/games_unique_id.php",
+          "https://xstormer1.newgrounds.com/"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/uber-breakout/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/uber-breakout-200x100.jpg",
+        "bytes": 7806,
+        "sha256": "fb66d4e9ebf14951c6ee0d0a65f77a6ce283fed8af50b47ab31636c90dc5105a"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "kimblis-the-blue",
+      "title": "Kimblis the Blue",
+      "sourcePage": "https://jiggmin2.com/games/kimblis-the-blue",
+      "resolvedPage": "https://jiggmin2.com/games/kimblis-the-blue/",
+      "sourceSwf": "https://jiggmin2.com/games/kimblis-the-blue/kimblis-the-blue.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/kimblis-the-blue/kimblis-the-blue.swf",
+      "file": "games/kimblis-the-blue/kimblis-the-blue.swf",
+      "bytes": 1781276,
+      "sha256": "ec17d62b1c45a4e3ed7080a920c4779ae9700c1c20ae884c86f123d8a52e352f",
+      "embedWidth": 650,
+      "embedHeight": 550,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 2357943,
+        "stageWidth": 650.0,
+        "stageHeight": 550.0,
+        "frameRate": 18.0,
+        "embeddedUrlHints": [
+          "http://armorgames.com/",
+          "http://blackgoldfish.com/",
+          "http://edgen.com/",
+          "http://jiggmin.com/",
+          "http://macromedia.com/shockwave/download/download.cgi?P1_Prod_Version=ShockwaveFlash&promoid=BIOX",
+          "http://members.fortunecity.com/niftykoala/NewGrounds.htm",
+          "http://www.chrisbouchard.co.uk/",
+          "http://www.jaredhudson.com/",
+          "http://www.the-omunai.cjb.net/",
+          "https://jiggmin2.com/"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/kimblis-the-blue/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/kimblis-the-blue-200x100.jpg",
+        "bytes": 4871,
+        "sha256": "0bcd033f1ed41d227e100657cd98a06f182d2bdd1ae838090d8d20ca20c5fd91"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "red-earth-2",
+      "title": "Red Earth II",
+      "sourcePage": "https://jiggmin2.com/games/red-earth-2",
+      "resolvedPage": "https://jiggmin2.com/games/red-earth-2/",
+      "sourceSwf": "https://jiggmin2.com/games/red-earth-2/red-earth-2.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/red-earth-2/red-earth-2.swf",
+      "file": "games/red-earth-2/red-earth-2.swf",
+      "bytes": 1467747,
+      "sha256": "3f46fe7388f6cb545e79923d19ce723fd3de9f2a8e44355cb8815699ba0ca844",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 6,
+        "uncompressedBytes": 1564367,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 25.0,
+        "embeddedUrlHints": [
+          "http://armorgames.com/",
+          "http://gamesofgondor.com/",
+          "https://jiggmin2.com/"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/red-earth-2/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/red-earth-2-200x100.jpg",
+        "bytes": 7372,
+        "sha256": "189a2802c3103c094faba13649f4ff52929bd67e15db650da846c50e1ae765b8"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    },
+    {
+      "id": "red-earth",
+      "title": "Red Earth",
+      "sourcePage": "https://jiggmin2.com/games/red-earth",
+      "resolvedPage": "https://jiggmin2.com/games/red-earth/",
+      "sourceSwf": "https://jiggmin2.com/games/red-earth/red-earth.swf",
+      "resolvedSwf": "https://jiggmin2.com/games/red-earth/red-earth.swf",
+      "file": "games/red-earth/red-earth.swf",
+      "bytes": 1654951,
+      "sha256": "b7e3af5212dc403a8a88272983d9989e9a526bde508d6caca9bb240fbd545f30",
+      "embedWidth": 550,
+      "embedHeight": 400,
+      "sourceRuffleNotice": "This game was originally made in Adobe Flash. It is playable in the browser, powered by Ruffle . To check the ongoing status of game compatibility as Ruffle development progresses, click here .",
+      "sourceCompatibilityWarning": false,
+      "entryPointKind": "game",
+      "playbackTested": false,
+      "offlineCompleteness": "not verified",
+      "swf": {
+        "signature": "CWS",
+        "version": 7,
+        "uncompressedBytes": 1726908,
+        "stageWidth": 550.0,
+        "stageHeight": 400.0,
+        "frameRate": 20.0,
+        "embeddedUrlHints": [
+          "http://gamesofgondor.com/",
+          "https://jiggmin2.com/"
+        ]
+      },
+      "thumbnail": {
+        "file": "games/red-earth/thumbnail.jpg",
+        "source": "https://jiggmin2.com/style/gamepics/red-earth-200x100.jpg",
+        "bytes": 7682,
+        "sha256": "15edebcbe046b017ef8a32cdafe5bd76c7812598ae22b89cdbb1232d9838c606"
+      },
+      "embedParameters": {
+        "scale": "noscale"
+      }
+    }
+  ],
+  "excluded": [
+    {
+      "title": "Bubble Racing (WIP)",
+      "sourcePage": "https://bubbleracing.com/",
+      "reason": "Separate non-Ruffle web game; excluded from this fetch."
+    },
+    {
+      "title": "Volly-Bounce",
+      "sourcePage": "https://vb.jiggmin2.com/",
+      "reason": "Separate non-Ruffle web game; excluded from this fetch."
+    }
+  ]
+}
