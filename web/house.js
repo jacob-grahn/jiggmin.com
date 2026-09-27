@@ -1,3 +1,4 @@
+import {createHouseRenderer} from './house-renderer.js';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 export const HOUSE_MEDIA_QUERY = '(min-width: 1000px) and (min-aspect-ratio: 69/50) and (pointer: fine)';
@@ -20,33 +21,31 @@ async function json(url) {
   return response.json();
 }
 
-export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoomChange = () => {} } = {}) {
+export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoomChange = () => {}, getDen } = {}) {
   let open = false, destroyed = false, room = 'hallway', roomTicket = 0, playTicket = 0;
-  let data, manifest, contentRequest, discovered = new Set(), storage, persistence = true;
-  let player, playAbort, modalReturn, modalKind, bonusRequest;
+  let data, manifest, anchors, view, travelling = false, contentRequest, discovered = new Set(), storage, persistence = true;
+  let player, playAbort, modalReturn, modalKind, bonusRequest, journalOnly=false, revealing=false;
   try { storage = window.localStorage; } catch { persistence = false; }
   const media = window.matchMedia(HOUSE_MEDIA_QUERY);
   const root = el('section', 'house-overlay');
   root.hidden = true; root.inert = true; root.setAttribute('aria-label', 'Explore the house');
   const header = el('header', 'house-header');
-  const back = button('← Hallway', () => enter('hallway'), 'house-back');
+  const back = button('‹', () => room === 'hallway' ? returnToDen() : enter('hallway'), 'house-back');
+  back.setAttribute('aria-label', 'Return to hallway');
   const heading = el('div', 'house-heading');
   const kicker = el('p', 'house-kicker');
   const title = el('h1', '', 'The house'); title.tabIndex = -1;
   heading.append(kicker, title);
   const journal = button('Journal · 0', showJournal);
-  const leave = button('Return to den', exit);
-  header.append(back, heading, journal, leave);
+  header.append(back, heading);
   const viewport = el('div', 'house-viewport');
   const scene = el('div', 'house-scene');
-  const image = el('img', 'house-image'); image.alt = ''; image.draggable = false;
   const hotspots = el('div', 'house-hotspots');
   const loading = el('div', 'house-loading'); loading.setAttribute('role', 'status');
-  scene.append(image, hotspots, loading); viewport.append(scene);
+  scene.append(hotspots, loading); viewport.append(scene);
   const footer = el('div', 'house-footer');
   const description = el('p', 'house-description');
-  const next = button('Workshop →', () => enter(ROOMS[(ROOMS.indexOf(room) + 1) % ROOMS.length]));
-  footer.append(description, next);
+  footer.append(description);
   const live = el('p', 'house-sr'); live.setAttribute('role', 'status');
   const shade = el('div', 'house-modal-shade'); shade.hidden = true;
   const dialog = el('section', 'house-dialog'); dialog.setAttribute('role', 'dialog');
@@ -54,7 +53,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   dialog.tabIndex = -1;
   const modalHeader = el('div', 'house-dialog-header');
   const modalTitle = el('h2'); modalTitle.id = 'house-dialog-title';
-  const close = button('Close ×', closeModal);
+  const close = button('×', closeModal); close.setAttribute('aria-label','Dismiss paper');
   const modalBody = el('div', 'house-dialog-body');
   modalHeader.append(modalTitle, close); dialog.append(modalHeader, modalBody); shade.append(dialog);
   root.append(header, viewport, footer, live, shade); document.body.append(root);
@@ -63,9 +62,10 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     if (!open) return;
     stopPlayer();
     if (modalKind === 'game') closeModal();
-    if (!media.matches) { exit(); return; }
+    if (!media.matches && !journalOnly) { exit(); return; }
     const rect = viewport.getBoundingClientRect();
     scene.style.width = `${Math.min(rect.width, rect.height * 1.6)}px`;
+    view?.resize();
   }
   function updateJournal() { journal.textContent = `Journal · ${discovered.size}`; }
   function stopPlayer() {
@@ -73,18 +73,23 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     if (player) { try { player.ruffle().suspend(); } catch {} player.remove(); player = null; }
   }
   function closeModal() {
+    if (journalOnly) { journalOnly=false; exit(); return; }
     stopPlayer(); shade.hidden = true; modalBody.replaceChildren(); modalKind = null;
     header.inert = viewport.inert = footer.inert = false;
+    if (open && !travelling) view?.setActive(true);
     if (open && modalReturn?.isConnected && !modalReturn.closest('[hidden]')) modalReturn.focus();
   }
   function openModal(label, kind) {
     const wasOpen = !shade.hidden;
     stopPlayer();
     if (!wasOpen) modalReturn = document.activeElement;
-    modalKind = kind; modalTitle.textContent = label; close.textContent = kind === 'game' ? 'Eject ×' : 'Close ×';
+    modalKind = kind; modalTitle.textContent = label; close.textContent = '×'; close.setAttribute('aria-label',kind==='game'?'Eject cartridge':'Dismiss paper');
     modalBody.replaceChildren(); shade.hidden = false;
     header.inert = viewport.inert = footer.inert = true;
-    dialog.classList.toggle('house-dialog-game', kind === 'game'); close.focus();
+    view?.setInteractive(false);
+    dialog.classList.toggle('house-dialog-game', kind === 'game');
+    dialog.classList.toggle('house-paper', kind === 'notes');
+    dialog.classList.toggle('house-journal', kind === 'journal'); close.focus();
   }
   function noteCard(note, showTitle = true) {
     const card = el('article', 'house-note');
@@ -98,16 +103,16 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   function showNotes(notes) {
     const added = discoverNotes(discovered, notes);
     persistence = saveJournal(storage, discovered); updateJournal();
-    if (added) live.textContent = `${added === 1 ? 'A memory' : `${added} memories`} added to your journal.`;
-    openModal(notes.length === 1 ? notes[0].title : 'A few memories', 'notes');
-    modalBody.append(el('p', 'house-discovery', added ? 'Added to your journal' : 'Already in your journal'));
+    if (added) live.textContent = `${added === 1 ? 'A paper' : `${added} papers`} saved in your journal.`;
+    openModal(notes.length === 1 ? notes[0].title : 'A few scraps', 'notes');
+
     notes.forEach(note => modalBody.append(noteCard(note, notes.length !== 1)));
     if (!persistence) modalBody.append(el('p', 'house-save-notice', 'Your journal will stay with you for this visit. This browser could not save it for later.'));
   }
   function showJournal() {
     if (!data) return;
     openModal(`Journal · ${discovered.size}`, 'journal');
-    if (!discovered.size) modalBody.append(el('p', '', 'Look around the rooms. The memories you find will appear here.'));
+    if (!discovered.size) modalBody.append(el('p', '', 'Scraps found behind objects will be kept here.'));
     for (const roomInfo of data.rooms) {
       const found = data.notes.filter(note => note.room === roomInfo.id && discovered.has(note.id));
       if (!found.length) continue;
@@ -116,11 +121,25 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     }
     if (!persistence) modalBody.append(el('p', 'house-save-notice', 'Your journal is saved for this visit only.'));
   }
-  function activate(id) {
-    if (id === 'door-den') { exit(); return; }
-    if (DOORS[id]) { enter(DOORS[id]); return; }
+  async function activate(id) {
+    if (travelling || revealing) return;
+    if (id === 'door-den') { returnToDen(); return; }
+    if (DOORS[id]) { enter(DOORS[id], id); return; }
     const notes = data.notes.filter(note => note.room === room && note.hotspot === id);
-    if (notes.length) { showNotes(notes); return; }
+    if (notes.length) {
+      const unread=notes.filter(note=>!discovered.has(note.id));
+      if (!unread.length) return;
+      revealing=true;view?.setInteractive(false);
+      const ticket=roomTicket;
+      try {
+        const origin=await view?.revealScrap(id);
+        if (!open || ticket!==roomTicket) return;
+        dialog.style.setProperty('--paper-x',`${(origin?.x??50)-50}vw`);
+        dialog.style.setProperty('--paper-y',`${(origin?.y??50)-50}vh`);
+        showNotes(unread);
+      } finally { revealing=false; }
+      return;
+    }
     const locked = data.lockedDoors.find(door => door.id === id);
     if (locked) { openModal(locked.title, 'notes'); modalBody.append(el('p', '', locked.body)); }
   }
@@ -133,8 +152,8 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   }
   async function content() {
     if (data) return;
-    contentRequest ??= Promise.all([json('/data/house-notes.json'), json('/web/assets/house/hotspots.json')])
-      .then(([notes, objects]) => {
+    contentRequest ??= Promise.all([json('/data/house-notes.json'), json('/web/assets/house/hotspots.json'), json('/web/assets/house/anchors.json')])
+      .then(([notes, objects, positions]) => {
         const validData = validateHouseData(notes);
         for (const id of ROOMS) {
           if (!Array.isArray(objects?.[id])) throw new Error('The objects in this room could not load.');
@@ -146,52 +165,64 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
             }
           }
         }
-        data = validData; manifest = objects;
+        data = validData; manifest = objects; anchors = positions;
         discovered = readJournal(storage, data.notes.map(note => note.id)); updateJournal();
       }).catch(error => { contentRequest = null; throw error; });
     return contentRequest;
   }
-  async function enter(destination = 'hallway') {
-    if (destroyed) return;
+  async function enter(destination = 'hallway', doorId) {
+    if (destroyed || travelling) return;
     if (!media.matches) { if (open) exit(); else onExit(); return; }
     if (!ROOMS.includes(destination)) destination = 'hallway';
     closeModal();
-    const wasOpen = open;
+    const wasOpen = open, previous = room;
     open = true; root.hidden = false; root.inert = false;
     if (!wasOpen) onOpen();
     const ticket = ++roomTicket;
-    hotspots.replaceChildren(); image.hidden = !image.hasAttribute('src'); loading.hidden = false;
-    loading.classList.toggle('house-loading-transition', image.hasAttribute('src'));
-    loading.replaceChildren(el('p', '', 'Opening the door…')); journal.disabled = true;
-    room = destination;
-    title.textContent = destination[0].toUpperCase() + destination.slice(1);
-    kicker.textContent = ''; description.textContent = '';
-    back.hidden = destination === 'hallway'; next.disabled = true; resize();
+    travelling = true; back.disabled = true; hotspots.replaceChildren();
+    loading.hidden = wasOpen; loading.classList.toggle('house-loading-transition', wasOpen);
+    loading.replaceChildren(el('p', '', 'Opening the door…')); resize();
     try {
       await content();
       if (!open || ticket !== roomTicket) return;
-      const objects = manifest[destination];
-      const loaded = new Image(); loaded.src = `/web/assets/house/${destination}.webp`;
-      await loaded.decode();
+      view ??= createHouseRenderer(scene,{onActivate:activate,getDen,collected:new Set(data.notes.filter(note=>data.notes.filter(n=>n.hotspot===note.hotspot).every(n=>discovered.has(n.id))).map(note=>note.hotspot))});
+      await view.load(destination);
       if (!open || ticket !== roomTicket) return;
-      image.src = loaded.src; image.hidden = false;
+      loading.hidden = true;
+      await view.travel(destination, doorId ? anchors[previous][doorId] : null, doorId, destination === 'hallway' ? anchors.hallway[`door-${wasOpen ? previous : 'den'}`] : null);
+      if (!open || ticket !== roomTicket) return;
+      room = destination;
+      back.setAttribute('aria-label', room === 'hallway' ? 'Return to den' : 'Return to hallway');
       const info = data.rooms.find(info => info.id === destination);
-      image.alt = `${info.title}. ${info.description ?? ''}`;
-      title.textContent = info.title; kicker.textContent = info.kicker ?? ''; description.textContent = info.description ?? '';
-      for (const object of objects) {
+      title.textContent = info.title;
+      const targetButtons = new Map();
+      for (const object of manifest[destination]) {
         const label = hotspotLabel(object.id); if (!label) continue;
         const hit = button('', () => activate(object.id), 'house-hotspot');
         hit.setAttribute('aria-label', label); hit.append(el('span', 'house-hotspot-label', label));
         Object.assign(hit.style, {left:`${object.x*100}%`,top:`${object.y*100}%`,width:`${object.width*100}%`,height:`${object.height*100}%`});
-        hotspots.append(hit);
+        hotspots.append(hit); targetButtons.set(object.id,hit);
       }
-      next.textContent = `${data.rooms.find(info => info.id === ROOMS[(ROOMS.indexOf(room)+1)%ROOMS.length]).title} →`;
-      next.disabled = false; journal.disabled = false; loading.hidden = true;
+      const bindings = new Map();
+      for (const prop of view.props) {
+        let hit = prop.hotspot && targetButtons.get(prop.hotspot);
+        if (!hit) {
+          hit = button('', () => view.activateProp(prop), 'house-hotspot house-prop-target');
+          hit.setAttribute('aria-label', `${prop.mode === 'throw' ? 'Toss' : 'Nudge'} ${prop.title}`);
+          hotspots.append(hit);
+        }
+        hit.classList.add('house-prop-target');
+        bindings.set(prop, hit);
+      }
+      view.bindTargets(bindings);
       title.focus(); onRoomChange(destination);
     } catch {
       if (!open || ticket !== roomTicket) return;
-      loading.replaceChildren(el('p', '', 'The door is sticking. This room could not load.'), button('Try again', () => enter(destination)), button('Return to den', exit));
-      journal.disabled = !data; loading.querySelector('button')?.focus();
+      loading.hidden = false;
+      loading.replaceChildren(el('p', '', 'The door is sticking. This room could not load.'), button('Try again', () => enter(destination, doorId)), button('Return to den', exit));
+      loading.querySelector('button')?.focus();
+    } finally {
+      if (ticket === roomTicket) { travelling = false; back.disabled = false; view?.setActive(shade.hidden); }
     }
   }
   async function play(note) {
@@ -222,14 +253,23 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       modalBody.append(button('Try again', () => play(note)));
     }
   }
+  async function returnToDen() {
+    if (travelling) return;
+    travelling = true; back.disabled = true; hotspots.inert = true;
+    const ticket = roomTicket;
+    try { await view?.depart(anchors?.hallway['door-den'], 'door-den'); }
+    finally { hotspots.inert = false; if (ticket === roomTicket) exit(); }
+  }
   function exit() {
     if (!open) return;
+    journalOnly=false;root.classList.remove('house-journal-only');
     roomTicket++; closeModal(); open = false; root.hidden = true; root.inert = true;
-    hotspots.replaceChildren(); image.removeAttribute('src'); image.hidden = true; onExit();
+    hotspots.replaceChildren(); view?.cancel(); travelling = false; back.disabled = false; onExit();
   }
   function keydown(event) {
     if (!open) return;
-    if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); if (!shade.hidden) closeModal(); else exit(); return; }
+    if (event.key === 'Escape' && view?.cancelGrab()) { event.preventDefault(); event.stopPropagation(); return; }
+    if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); if (!shade.hidden) closeModal(); else if (!travelling && room !== 'hallway') enter('hallway'); else exit(); return; }
     if (shade.hidden || event.key !== 'Tab') return;
     const nodes = [...dialog.querySelectorAll(focusable)].filter(node => !node.closest('[hidden]'));
     const first = nodes[0], last = nodes.at(-1);
@@ -240,10 +280,11 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   window.addEventListener('resize', resize);
   shade.addEventListener('click', event => { if (event.target === shade) closeModal(); });
   return { enter, exit, async openJournal() {
-    if (!open) await enter('hallway');
-    if (open && data) showJournal();
+    await content();
+    if (!open) { journalOnly=true;open=true;root.hidden=false;root.inert=false;root.classList.add('house-journal-only');onOpen(); }
+    showJournal();
   }, get isOpen() { return open; }, destroy() {
     exit(); destroyed = true; roomTicket++; stopPlayer();
-    document.removeEventListener('keydown', keydown, true); window.removeEventListener('resize', resize); root.remove();
+    document.removeEventListener('keydown', keydown, true); window.removeEventListener('resize', resize); view?.dispose(); root.remove();
   } };
 }

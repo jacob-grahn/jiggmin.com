@@ -26,3 +26,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Rebuilt procedural house textures are embedded in the versioned GLBs
+/scene/house-textures/surface-finish/

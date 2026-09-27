@@ -1,0 +1,47 @@
+{
+  "hallway": {
+    "timber": 175,
+    "plaster": 17,
+    "metal": 40,
+    "Preserved artwork / light / glass": 105,
+    "weave": 86,
+    "rubber": 11,
+    "paper": 31,
+    "enamel": 6,
+    "leather": 9,
+    "cardboard": 3
+  },
+  "workshop": {
+    "plaster": 1,
+    "rubber": 57,
+    "timber": 57,
+    "metal": 36,
+    "enamel": 55,
+    "paper": 19,
+    "Preserved artwork / light / glass": 3,
+    "weave": 4,
+    "cardboard": 2
+  },
+  "attic": {
+    "rubber": 65,
+    "timber": 64,
+    "weave": 117,
+    "metal": 26,
+    "Preserved artwork / light / glass": 2,
+    "enamel": 16,
+    "plaster": 1,
+    "paper": 46,
+    "cardboard": 18
+  },
+  "basement": {
+    "plaster": 433,
+    "timber": 64,
+    "metal": 36,
+    "Preserved artwork / light / glass": 4,
+    "cardboard": 12,
+    "paper": 92,
+    "rubber": 33,
+    "enamel": 21,
+    "weave": 11
+  }
+}

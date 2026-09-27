@@ -19,9 +19,9 @@ Run `npm start` from this directory, then open <http://127.0.0.1:8000>. Serve ov
 
 ## Explore the house
 
-On desktop landscape screens, the edge arrows open a hallway, garage workshop, unfinished attic, and basement. Click objects to discover personal notes, then revisit them in the journal. Discoveries are saved in this browser. Two workshop cartridges reveal playable recovered experiments: Inkclipse and A Murder in Crowland.
+On desktop landscape screens, the right-edge arrow opens a hallway, garage workshop, unfinished attic, and basement. Tap or throw objects to reveal hidden paper scraps, then reread collected papers in the den’s journal. Discoveries are saved in this browser. Two workshop cartridges reveal playable recovered experiments: Inkclipse and A Murder in Crowland.
 
-The additional rooms load only when visited. Exploration pauses the den and stops its active game; Return to den restores the original room. Smaller screens retain the original game room. See [house exploration](docs/house-exploration.md) for loading, content, and authoring details.
+The additional Blender-exported models load together on first exploration and share one connected 3D house. Doors open as the camera travels through passages, basement stairs, and an attic ladder; a single arrow returns to the hallway. Exploration pauses the den and stops its active game; Return to den restores the original room. Smaller screens retain the original game room. See [house exploration](docs/house-exploration.md) for loading, content, and authoring details.
 
 ## Mouse controls
 

@@ -31,7 +31,7 @@ const currentMode=()=>currentGame()?.gameplay.mode||'controller';
 const isCartridge=root=>root.userData.role==='draggable_cartridge';
 let houseOpen=false;
 const denMain=document.querySelector('main');
-const houseEntry=createHouseEntry({host:denMain,
+const houseEntry=createHouseEntry({host:denMain,getDen:()=>({scene,camera}),
  onOpen(){
   if(drag)finishDrag({pointerId:drag.id},false,true);
   eject();mobileControls?.release();tip.hidden=true;

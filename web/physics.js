@@ -30,7 +30,7 @@ const vec = p => new CANNON.Vec3(p.x, p.y, p.z);
 function limit(v, max) {const n = v.length(); if(n > max) v.scale(max / n, v);}
 
 export class CartridgePhysics {
-  constructor(colliders, onImpact = () => {}) {
+  constructor(colliders, onImpact = () => {}, {bounds, floorY=-.02} = {}) {
     this.world = new CANNON.World({gravity: new CANNON.Vec3(0, -9.81, 0), allowSleep: true});
     this.world.broadphase = new CANNON.SAPBroadphase(this.world);
     this.world.solver.iterations = 18;
@@ -43,12 +43,12 @@ export class CartridgePhysics {
     this.addStatic(colliders);
     // Keep throws in the room with collisions, never by teleporting them home.
     // These outer boundaries sit beyond the visible furniture and inside the floor.
-    for(const [x,z,hx,hz] of [[-5.2,0,.5,5.7],[5.2,0,.5,5.7],[0,-5.2,5.7,.5],[0,5.2,5.7,.5]]) {
+    for(const [x,z,hx,hz] of (bounds ?? [[-5.2,0,.5,5.7],[5.2,0,.5,5.7],[0,-5.2,5.7,.5],[0,5.2,5.7,.5]])) {
       const wall = new CANNON.Body({mass:0,shape:new CANNON.Box(new CANNON.Vec3(hx,10,hz))});
       wall.position.set(x,9,z);wall.aabbNeedsUpdate=true;this.world.addBody(wall);
     }
     const floor = new CANNON.Body({mass:0,shape:new CANNON.Plane()});
-    floor.position.y=-.02;floor.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
+    floor.position.y=floorY;floor.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
     floor.aabbNeedsUpdate=true;this.world.addBody(floor);
     this.onImpact = onImpact;
   }
