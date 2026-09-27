@@ -1,5 +1,5 @@
 {
-  "reviewedAt": "2026-09-26",
+  "reviewedAt": "2026-09-27",
   "description": "Editable profiles. Broken means unavailable in the current archive, not necessarily an engine bug. See docs/gameplay-review.md.",
   "games": {
     "effing-meteors": {
@@ -39,7 +39,7 @@
       },
       "review": {
         "source": "instructions-and-local-review",
-        "notes": "Remains at checking your login. Intended arrows/Space controls; requires online services.",
+        "notes": "Remains at checking your login in local Ruffle. Decompiled MenuPage waits for the api.pr3hub.com isloggedin response and retries when it fails. Also requires server list and game socket services; no offline campaign was established. Intended arrows/Space controls.",
         "provisional": true
       }
     },
@@ -69,7 +69,7 @@
       },
       "review": {
         "source": "instructions-and-local-review",
-        "notes": "Instructions: arrows/WASD move, up jumps, down charges, Space uses item. Online availability pending. Local menu works, but attempting to connect reports Could not connect to the server.",
+        "notes": "Instructions: arrows/WASD move, up jumps, down charges, Space uses item. Online availability pending. Local menu works, but attempting to connect reports Could not connect to the server. SWF contains XMLSocket networking; the web player has no socket proxy configured. Requires a working game service plus a browser-compatible WebSocket bridge; a menu or domain patch alone cannot restore online racing.",
         "provisional": true
       }
     },
@@ -82,12 +82,12 @@
       },
       "review": {
         "source": "instructions-and-local-review",
-        "notes": "Online racing; controller assignment provisional until server availability is checked. Local menu works, but attempting to connect reports Could not connect to the server.",
+        "notes": "Online racing; controller assignment provisional until server availability is checked. Local menu works, but attempting to connect reports Could not connect to the server. SWF contains XMLSocket networking; the web player has no socket proxy configured. Requires a working game service plus a browser-compatible WebSocket bridge; a menu or domain patch alone cannot restore online racing.",
         "provisional": true
       }
     },
     "musical-evenizer": {
-      "mode": "broken",
+      "mode": "controller",
       "controller": {
         "stick": "arrows",
         "a": [
@@ -98,8 +98,8 @@
         ]
       },
       "review": {
-        "source": "instructions-and-local-review",
-        "notes": "Blank white player during local review. Embedded Z/X controls; song list is an external PHP endpoint.",
+        "source": "swf-compatibility-review",
+        "notes": "Site-check and local soundtrack repairs verified: loader, instructions, song selection, moving spectrum platforms and increasing score. Author-supplied source confirms left/right movement, Up double jump, Down faster falling, Z downward weights and X upward weights. All 24 songs archived, but only the first track was gameplay-tested. Online upload/high scores not verified.",
         "provisional": true
       }
     },
@@ -160,7 +160,7 @@
       },
       "review": {
         "source": "instructions-and-local-review",
-        "notes": "Pointer-only intended controls, but Connect reports Could not connect to the server in the local archive.",
+        "notes": "Pointer controls intended. Connect reports Could not connect to the server in local Ruffle. SWF uses XMLSocket; requires a working game service and browser-compatible WebSocket bridge.",
         "provisional": true
       }
     },
@@ -238,20 +238,18 @@
       }
     },
     "uber-breakout-2": {
-      "mode": "broken",
+      "mode": "controller",
       "controller": {
         "stick": "arrows",
         "a": [
-          "Space"
-        ],
-        "b": [
           "KeyP"
-        ]
+        ],
+        "b": []
       },
       "review": {
-        "source": "user",
-        "notes": "User-confirmed broken. Instructions: left/right paddles, P to resume.",
-        "provisional": false
+        "source": "swf-compatibility-review",
+        "notes": "Previously user-reported broken; September 27 retest with unchanged SWF reached single-player gameplay, increasing score and life loss. Starts paused: press P (A on the virtual controller) to resume. Left/right rotate paddles. Full completion and two-player mode not verified.",
+        "provisional": true
       }
     },
     "uber-breakout": {
@@ -335,7 +333,7 @@
       }
     },
     "the-great-red-herring-chase": {
-      "mode": "broken",
+      "mode": "touch",
       "controller": {
         "stick": "mouse",
         "a": [
@@ -344,8 +342,8 @@
         "b": []
       },
       "review": {
-        "source": "instructions-and-local-review",
-        "notes": "Black screen with sound icon persists. Embedded text describes typing commands and mentions a click mode.",
+        "source": "swf-compatibility-review",
+        "notes": "URL-check repair verified: title menu and first driving round. For pointer/touch play, open options (bottom menu choice), change difficulty twice from medium to click mode, then return and start. Typing mode remains available with a keyboard.",
         "provisional": true
       }
     },

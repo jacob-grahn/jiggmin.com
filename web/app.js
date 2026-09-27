@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {createHouseEntry} from './house-entry.js';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
-import {inSlot,playbackFile} from './interaction.js?v=taller-slot-1';
+import {inSlot,playbackFile} from './interaction.js?v=swf-compat-1';
 import {resolveRoute,writeGameUrl} from './routes.js';
 import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
 import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=raycast-bvh-1';
@@ -292,7 +292,7 @@ async function init(){
  const loader=new GLTFLoader();
  const json=async path=>{const r=await fetch(path);if(!r.ok)throw Error(`Could not load ${path}`);return r.json();};
  const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel,propLighting,profiles]=await Promise.all([
-  json('/data/games.json?v=pr2-html5-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=grounded-props-2'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=grounded-props-2'),json('/web/assets/colliders.json?v=grounded-props-2'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=grounded-props-2'),json('/data/gameplay.json?v=disorientation-arrows-1')
+  json('/data/games.json?v=swf-compat-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=grounded-props-2'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=grounded-props-2'),json('/web/assets/colliders.json?v=grounded-props-2'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=grounded-props-2'),json('/data/gameplay.json?v=swf-compat-1')
  ]);
  games=manifest.games;for(const game of games){game.gameplay=profiles.games[game.id];if(!game.gameplay)throw Error(`Missing gameplay profile: ${game.id}`);}meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;

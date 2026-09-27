@@ -140,7 +140,7 @@
       "sourceCompatibilityWarning": true,
       "entryPointKind": "game",
       "playbackTested": false,
-      "offlineCompleteness": "not verified",
+      "offlineCompleteness": "Core game packaged locally; limited gameplay verified. Full completion not verified.",
       "swf": {
         "signature": "CWS",
         "version": 9,
@@ -167,6 +167,12 @@
       "cartridgeLabel": {
         "file": "web/assets/labels/the-great-red-herring-chase-screenprint.webp",
         "style": "screenprint"
+      },
+      "playback": {
+        "file": "games/the-great-red-herring-chase/game.swf",
+        "bytes": 976652,
+        "sha256": "e112c490e2123ee18b2b63d9c260405e68d55ed9a17a2985d158bc0c01fc23b3",
+        "notes": "Patched Data.allowedURL to permit local and jiggmin.com playback; original artwork, buttons and game logic preserved."
       }
     },
     {
@@ -335,7 +341,7 @@
       "sourceCompatibilityWarning": true,
       "entryPointKind": "game",
       "playbackTested": false,
-      "offlineCompleteness": "not verified",
+      "offlineCompleteness": "Core game packaged locally; limited gameplay verified. Soundtrack archived; online upload and high scores not verified.",
       "swf": {
         "signature": "CWS",
         "version": 9,
@@ -361,6 +367,12 @@
       "cartridgeLabel": {
         "file": "web/assets/labels/musical-evenizer-screenprint.webp",
         "style": "screenprint"
+      },
+      "playback": {
+        "file": "games/musical-evenizer/game.swf",
+        "bytes": 270435,
+        "sha256": "c43e77c592166f190900c2d29c48ebc74b73ef41a933040cbf8d6358ed327c18",
+        "notes": "Patched obfuscated URL permission check and pointed the song list at the local archive. All 24 listed MP3s are packaged locally; online upload and high-score services remain external."
       }
     },
     {

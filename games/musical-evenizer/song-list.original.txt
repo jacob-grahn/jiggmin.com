@@ -1,0 +1,73 @@
+title1=Orbital Trance - Space Planet
+&url1=https://jiggmin2.com/games/musical-evenizer/songs/01_orbital-trance.mp3
+
+&title2=Code - Stefano Maccarelli
+&url2=https://jiggmin2.com/games/musical-evenizer/songs/02_code.mp3
+
+&title3=Paradise on E - API
+&url3=https://jiggmin2.com/games/musical-evenizer/songs/03_paradise-on-e_ng32772.mp3
+
+&title4=Crying Soul (FL Mix) - Pyroific
+&url4=https://jiggmin2.com/games/musical-evenizer/songs/04_crying-soul_ng102483.mp3
+
+&title5=My Vision - David Orr
+&url5=https://jiggmin2.com/games/musical-evenizer/songs/05_my-vision_ng44613.mp3
+
+&title6=Switchblade - Detective Jabsco
+&url6=https://jiggmin2.com/games/musical-evenizer/songs/06_switchblade_ng59342.mp3
+
+&title7=The Wires - Cheez-R-Us
+&url7=https://jiggmin2.com/games/musical-evenizer/songs/07_the-wires_ng74690.mp3
+
+&title8=Before Mydnite - F-777
+&url8=https://jiggmin2.com/games/musical-evenizer/songs/08_before-mydnite_ng108133.mp3
+
+&title9=Desert Rose - Metalcan
+&url9=https://jiggmin2.com/games/musical-evenizer/songs/09_desert-rose_ng34354.mp3
+
+&title10=Broked It - SWiTCH
+&url10=https://jiggmin2.com/games/musical-evenizer/songs/10_broked-it_ng51265.mp3
+
+&title11=Hello? - TMM43
+&url11=https://jiggmin2.com/games/musical-evenizer/songs/11_hello_ng83720.mp3
+
+&title12=Pyrokinesis - Sean Tucker
+&url12=https://jiggmin2.com/games/musical-evenizer/songs/12_pyrokinesis_ng98624.mp3
+
+&title13=Flowerz 'n' Herbs - Brunzolaitis
+&url13=https://jiggmin2.com/games/musical-evenizer/songs/13_flowerz-n-herbs_ng109884.mp3
+
+&title14=Dwindled Bible - Acti
+&url14=https://jiggmin2.com/games/musical-evenizer/songs/14_dwindled-bible.mp3
+
+&title15=Instrumental #4 - Reasoner
+&url15=https://jiggmin2.com/games/musical-evenizer/songs/15_instrumental-4_ng128701.mp3
+
+&title16=Prismatic - Lunanova
+&url16=https://jiggmin2.com/games/musical-evenizer/songs/16_prismatic.mp3
+
+&title17=We Are Loud - Dynamedion
+&url17=https://jiggmin2.com/games/musical-evenizer/songs/17_we-are-loud.mp3
+
+&title18=Toodaloo - mustangman
+&url18=https://jiggmin2.com/games/musical-evenizer/songs/22_toodaloo.mp3
+
+&title19=Night Shade - Goliathe
+&url19=https://jiggmin2.com/games/musical-evenizer/songs/23_night-shade.mp3
+
+&title20=Blizzard! - Majicke
+&url20=https://jiggmin2.com/games/musical-evenizer/songs/24_blizzard.mp3
+
+&title21=Thanks - Jiggmin
+&url21=https://jiggmin2.com/games/musical-evenizer/songs/18_thanks.mp3
+
+&title22=Disorientation - Jiggmin
+&url22=https://jiggmin2.com/games/musical-evenizer/songs/19_disorientation.mp3
+
+&title23=Meteors Theme - GameBalance
+&url23=https://jiggmin2.com/games/musical-evenizer/songs/20_ditawss_ng111925.mp3
+
+&title24=!-=ColDPaD=-! - FlashGigant
+&url24=https://jiggmin2.com/games/musical-evenizer/songs/21_coldpad_ng69128.mp3
+
+&uploadURL=https://jiggmin2.com/games/musical-evenizer/songs/upload.php&scoreURL=https://jiggmin2.com/games/musical-evenizer/songs/scores.php

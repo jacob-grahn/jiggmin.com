@@ -9,7 +9,8 @@ test('Every archived game has an explicit, supported gameplay profile',()=>{
  const games=JSON.parse(readFileSync('data/games.json')).games;
  assert.equal(Object.keys(profiles).length,games.length);
  for(const game of games){const p=profiles[game.id];assert.ok(p,game.id);assert.ok(['touch','controller','broken'].includes(p.mode));assert.ok(['arrows','wasd','mouse'].includes(p.controller.stick));assert.ok(['standard','arrows','twin-sticks'].includes(p.controller.layout||'standard'));for(const key of [...p.controller.a,...p.controller.b])assert.ok(key==='MouseLeft'||KEY_INFO[key],`${game.id}: ${key}`);}
- assert.equal(profiles.mines.mode,'touch');assert.equal(profiles['uber-breakout-2'].mode,'broken');
+ assert.equal(profiles.mines.mode,'touch');assert.equal(profiles['uber-breakout-2'].mode,'controller');
+ assert.deepEqual(profiles['uber-breakout-2'].controller,{stick:'arrows',a:['KeyP'],b:[]});
  assert.deepEqual(profiles.orbit.controller,{stick:'mouse',a:['ArrowLeft'],b:['ArrowRight']});
  assert.deepEqual(profiles['uber-breakout'].controller,{stick:'arrows',a:['KeyP'],b:[]});
 });
