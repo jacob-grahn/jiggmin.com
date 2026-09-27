@@ -31,6 +31,8 @@ Use Blender's Python environment to load `scripts/build_den.py`, then call `init
 
 ## Texture provenance
 
+The four house rooms use generated rainy garden and treetop views in `house-textures/windows/`. Their exact prompts are saved alongside the images. Rebuild them with `Blender -b --python scene/scripts/build_house_rooms.py -- hallway workshop attic basement`. The final lighting pass switches existing fixtures off, lights the rooms from their windows, and adds one low-output floor lamp in the attic. It also regenerates the browser hotspot coordinates from the room cameras.
+
 The distant rainy-garden view uses an AI-generated background texture, made with the built-in image generation tool. See `textures/rainy-garden-prompt.txt` for its prompt. Cartridge labels use the game thumbnails mirrored from jiggmin2.com; other assets are modeled geometry or original procedural graphics. All texture files are included and packed into the Blender file.
 
 ## Controller revision

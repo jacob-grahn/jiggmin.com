@@ -179,7 +179,7 @@ function updateTouchSurface(){
 function stop(){mobileControls?.release();loadId++;for(const [root,m] of motions)if(m.kind==='dock')cancelMotion(root);if(player){try{player.ruffle?.().suspend();}catch{}player.remove();player=null;}screen.hidden=true;$('player').replaceChildren();environment?.setPlaying(false);dirty=true;updateTouchSurface();}
 function eject({updateUrl=true}={}){
  if(drag)finishDrag({pointerId:drag.id},true);
- if(updateUrl)writeGameUrl(null);document.title='Jiggmin — Midnight Den';
+ if(updateUrl)writeGameUrl(null);document.title='Jiggmin - Midnight';
  if(!inserted)return;const old=inserted;inserted=null;stop();
  // Eject with a little upward motion, onto a clear foreground area of the table.
  physics.place(gameId(old),{position:{x:.6,y:1.1,z:2.04},quaternion:{x:0,y:0,z:0,w:1}});
@@ -229,7 +229,7 @@ function finishDrag(e,cancel=false,interrupted=false){
  const shouldDock=isCartridge(d.root)&&inSlot(x,y,meta.slot)&&nearDock&&(velocity.length()<3||centered);
  physics.release(velocity);
  if(shouldDock){insert(d.root);return;}
- if(d.wasInserted){writeGameUrl(null);document.title='Jiggmin — Midnight Den';}
+ if(d.wasInserted){writeGameUrl(null);document.title='Jiggmin - Midnight';}
  say(`${d.root.userData.title} — ${velocity.length()>1.4?'nice throw.':isCartridge(d.root)?'place it gently in the slot to play.':'the cord keeps it within reach.'}`);
 }
 for(const surface of [canvas,touchSurface])surface.addEventListener('pointerdown',e=>{

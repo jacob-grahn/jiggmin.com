@@ -54,11 +54,11 @@ def text(body,loc,size=.1,m='ink',rot=(math.pi/2,0,0)):
 
 def anchor(id,*objs): anchors[id]=list(objs)
 def area(n,loc,power,col,size,target):
- d=bpy.data.lights.new(n,'AREA');d.energy=power;d.color=col;d.shape='DISK';d.size=size;o=bpy.data.objects.new(n,d);bpy.context.collection.objects.link(o);o.location=loc;o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler()
+ d=bpy.data.lights.new(n,'AREA');d.energy=power;d.color=col;d.shape='DISK';d.size=size;o=bpy.data.objects.new(n,d);bpy.context.collection.objects.link(o);o.location=loc;o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler();o.visible_camera=False
 
 def init(room):
  global S,anchors;anchors={};bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
- S=bpy.context.scene;S.name='House — '+room;S.render.engine='CYCLES';S.cycles.samples=8;S.cycles.device='CPU';S.cycles.max_bounces=5;S.cycles.diffuse_bounces=3;S.cycles.glossy_bounces=3;S.cycles.use_denoising=True
+ S=bpy.context.scene;S.name='House — '+room;S.render.engine='CYCLES';S.cycles.samples=32;S.cycles.device='CPU';S.cycles.max_bounces=5;S.cycles.diffuse_bounces=3;S.cycles.glossy_bounces=3;S.cycles.use_denoising=True
  S.render.resolution_x=1280;S.render.resolution_y=800;S.render.resolution_percentage=100;S.render.image_settings.file_format='PNG'
  S.world=bpy.data.worlds.new('Night');S.world.use_nodes=True;S.world.node_tree.nodes['Background'].inputs[0].default_value=(.075,.12,.19,1);S.world.node_tree.nodes['Background'].inputs[1].default_value=.18
  S.view_settings.view_transform='AgX';S.view_settings.exposure=-.6
@@ -81,7 +81,7 @@ def lamp(x,y,z=2.6):
  cyl('Brass shade',(x,y,z),.25,.12);sphere('Opal lamp',(x,y,z-.1),(.12,.12,.08),'glow');pipe('Lamp stem',[(x,y,z+.05),(x,y,z+.65)],.018,'brass');area('Warm pool',(x,y,z-.15),120,(1,.72,.44),.7,(x,y-.3,0))
 
 def window(x,y,z=2.4,w=1.6,h=1.7):
- box('Night glass',(x,y,z),(w,.03,h),'night');
+ outside_view('Garden beyond window',(x,y-.025,z),w,h,'rainy-treetops' if S.name.endswith('attic') else 'rainy-garden')
  for dx in [-w/2,w/2]:box('Window jamb',(x+dx,y-.08,z),(.12,.17,h+.2))
  for dz in [-h/2,h/2]:box('Window rail',(x,y-.08,z+dz),(w+.2,.17,.12))
  box('Window cross',(x,y-.1,z),(.055,.07,h));box('Window transom',(x,y-.1,z),(w,.07,.055));box('Deep sill',(x,y-.22,z-h/2),(w+.35,.45,.10))
@@ -678,6 +678,74 @@ def tighten_attic_view():
    offset=(0,3.2,0) if ob.data.body=='?' else (-1.75,1.05,0)
    ob.matrix_world=Matrix.Translation(offset)@ob.matrix_world
 
+def outside_view(name,loc,w,h,texture='rainy-garden'):
+ # A UV-mapped exterior, with preserved photographic color and depth.
+ path='scene/house-textures/windows/'+texture+'.png'
+ ob=print_plane(name,path,loc,w,h)
+ key='Exterior '+texture
+ if key not in M:
+  m=bpy.data.materials.new(key);m.use_nodes=True;M[key]=m
+  nodes=m.node_tree.nodes;nodes.clear();links=m.node_tree.links
+  tx=nodes.new('ShaderNodeTexImage');tx.image=bpy.data.images.load(str(R/path),check_existing=True)
+  emission=nodes.new('ShaderNodeEmission');emission.inputs['Strength'].default_value=.8
+  output=nodes.new('ShaderNodeOutputMaterial');links.new(tx.outputs['Color'],emission.inputs['Color']);links.new(emission.outputs[0],output.inputs['Surface'])
+ ob.data.materials.clear();ob.data.materials.append(M[key]);bpy.context.view_layer.update();return ob
+
+def window_lighting(room):
+ # All existing fixtures are switched off. Light originates at the windows.
+ from mathutils import Matrix
+ for ob in list(bpy.data.objects):
+  if ob.type=='LIGHT':bpy.data.objects.remove(ob,do_unlink=True)
+ p=M['glow'].node_tree.nodes.get('Principled BSDF')
+ p.inputs['Emission Strength'].default_value=0;p.inputs['Base Color'].default_value=(.48,.45,.37,1)
+ S.world.node_tree.nodes['Background'].inputs[1].default_value=.035
+ S.view_settings.exposure=-.85
+ def side_window(loc,w,h,angle):
+  before=set(bpy.data.objects);window(0,0,loc[2],w,h);bpy.context.view_layer.update()
+  tr=Matrix.Translation((loc[0],loc[1],0))@Matrix.Rotation(angle,4,'Z')
+  for ob in [o for o in bpy.data.objects if o not in before]:
+   if ob.type=='LIGHT':bpy.data.objects.remove(ob,do_unlink=True)
+   else:ob.matrix_world=tr@ob.matrix_world
+ if room=='hallway':
+  for ob in list(bpy.data.objects):
+   if ob.name.startswith(('Long rain rivulet','Uneven rain runnel')):bpy.data.objects.remove(ob,do_unlink=True)
+  rain=M['Rain water glints'].node_tree.nodes.get('Principled BSDF');rain.inputs['Emission Strength'].default_value=0;rain.inputs['Base Color'].default_value=(.07,.11,.14,1)
+  for name in ['Wet window glass','Dark outside the rainy window']:
+   ob=bpy.data.objects.get(name)
+   if ob:bpy.data.objects.remove(ob,do_unlink=True)
+  ob=outside_view('Rainy garden through hallway',(0,.085,1.85),1.81,1.40)
+  ob.matrix_world=Matrix.Translation((1.30,-3.70,0))@Matrix.Rotation(-math.pi/2,4,'Z')@ob.matrix_world
+  side_window((1.265,2.55,1.92),1.7,1.35,-math.pi/2)
+  area('Front window moonlight',(1.12,-3.7,1.9),230,(.56,.72,1),1.5,(-1,-1.5,.8))
+  area('Far window moonlight',(1.10,2.55,1.92),185,(.56,.72,1),1.5,(-1,3,.8))
+ elif room=='workshop':
+  S.camera.location=(0,-2.25,2.22);S.camera.rotation_euler=(Vector((0,.8,1.60))-S.camera.location).to_track_quat('-Z','Y').to_euler();S.camera.data.lens=23
+  window(-.60,1.39,2.65,1.32,.62)
+  side_window((-2.78,.2,2.05),1.65,1.45,math.pi/2)
+  area('Bench window moonlight',(-.6,1.18,2.65),160,(.60,.76,1),1.2,(0,.2,1))
+  area('Side window moonlight',(-2.55,.2,2.05),210,(.56,.72,1),1.5,(0,.5,.95))
+ elif room=='attic':
+  # Enlarge the gable window without moving any discoveries.
+  for ob in list(bpy.data.objects):
+   if ob.name.startswith(('Garden beyond window','Window jamb','Window rail','Window cross','Window transom','Deep sill')):bpy.data.objects.remove(ob,do_unlink=True)
+  window(0,4.27,2.02,1.36,1.05)
+  area('Gable moonlight',(0,4.04,2.02),290,(.58,.74,1),1.2,(-.5,1,.25))
+  # Small floor lamp on the existing plywood, beneath the low rafters.
+  cyl('Small floor lamp foot',(.47,1.45,.29),.14,.035,'ink')
+  pipe('Small floor lamp stem',[(.47,1.45,.30),(.47,1.45,.99)],.012,'metal')
+  bpy.ops.mesh.primitive_cone_add(vertices=48,radius1=.18,radius2=.10,depth=.22,location=(.47,1.45,1.02))
+  bpy.context.object.name='Small linen floor lamp shade';bpy.context.object.data.materials.append(M['cream'])
+  area('Small floor lamp',(.47,1.45,.90),3,(1,.78,.53),.28,(-.1,2,.25))
+ elif room=='basement':
+  window(2.2,3.19,3.0,1.8,.62)
+  side_window((-4.84,-1.1,2.85),2.0,.75,math.pi/2)
+  area('Cellar left window',(-2.2,3.0,2.95),230,(.59,.75,1),1.7,(-2,0,.5))
+  area('Cellar right window',(2.2,2.96,3),180,(.59,.75,1),1.7,(2,0,.6))
+  area('Cellar side window',(-4.6,-1.1,2.85),190,(.59,.75,1),1.8,(0,-1,.4))
+ # window() creates a default light; retain only the authored lighting above.
+ for ob in list(bpy.data.objects):
+  if ob.type=='LIGHT' and ob.name.startswith('Night window'):bpy.data.objects.remove(ob,do_unlink=True)
+
 def project(room):
  bpy.context.view_layer.update();hot=[]
  for id,objs in anchors.items():
@@ -729,6 +797,7 @@ for room in args:
    center=sum((ob.matrix_world@Vector(c) for c in ob.bound_box),Vector())/8
    if abs(center.x)>.60:ob.location.x+=-.30 if center.x>0 else .30
    if ob.name.startswith(('Coat hook rail','Brass coat hook','Hanging ordinary jacket','Jacket loose sleeve','Jacket folded collar')):ob.location.y+=2.70
+ window_lighting(room)
  if anchors_only:project(room)
  elif preview:
   S.render.resolution_percentage=40;S.cycles.samples=4;S.render.filepath=str(R/'scene/renders/house'/(room+'-preview.png'));bpy.ops.render.render(write_still=True)
