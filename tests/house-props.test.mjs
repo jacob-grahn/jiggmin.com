@@ -33,6 +33,15 @@ for(const room of ['hallway','workshop','attic','basement'])test(`${room}: small
   const lamp=props.find(p=>p.title.startsWith('Task lamp'));
   assert.ok(lamp.root.children.some(o=>/Task_lamp_shade/.test(o.name)));
  }
+ if(room==='attic'){
+  const tricycle=props.find(p=>p.hotspot==='tricycle');
+  assert.ok(tricycle,'tricycle retains its note interaction');
+  const parts=tricycle.root.children;
+  for(const name of ['tire','front_fork','rear_axle','black_saddle','swept_handlebar','rubber_pedal']){
+   assert.ok(parts.some(o=>o.name.includes(`Tricycle_${name}`)),`${name} is detached from the tricycle`);
+  }
+  assert.ok(!props.some(p=>p!==tricycle&&p.root.children.some(o=>o.name.startsWith('Tricycle_'))),'tricycle must remain one assembly');
+ }
 
 });
 test('wall art detaches, travels with its frame, and can cancel a grab',async()=>{

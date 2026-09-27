@@ -11,22 +11,19 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen}){
   button.append(arrow);nav.append(button);return button;
  });
  host.append(nav);
- const journal=document.createElement('button');journal.type='button';journal.className='den-journal';journal.textContent='Journal';journal.setAttribute('aria-label','Read collected papers');
- (host.querySelector('#room')??host).append(journal);
  let instance,loading,stylesheet,active=false,ready=false,origin,entryTicket=0;
- const update=()=>{nav.hidden=!media.matches||active||!ready;journal.hidden=active||!ready;};
+ const update=()=>{nav.hidden=!media.matches||active||!ready;};
  function styles(){
   return stylesheet??=new Promise((resolve,reject)=>{
    const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css';
    link.onload=resolve;link.onerror=()=>{link.remove();stylesheet=null;reject(new Error('The house styles could not load. Try the arrow again.'));};document.head.append(link);
   });
  }
- async function open(event){
-  const journalRequest=event.currentTarget===journal;
-  if((!media.matches&&!journalRequest)||loading||active)return;origin=event.currentTarget;const ticket=++entryTicket;
+ async function open(originElement,journalRequest=false){
+  if((!media.matches&&!journalRequest)||loading||active)return;origin=originElement;const ticket=++entryTicket;
   buttons.forEach(button=>{button.disabled=true;button.setAttribute('aria-busy','true');});
   loading=(async()=>{
-   if(!instance){const [module]=await Promise.all([import('./house.js'),styles()]);instance=await module.createHouse({getDen,
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=hall-landing-back-1'),styles()]);instance=await module.createHouse({getDen,
     onOpen(){active=true;update();onOpen?.();},
     onExit(){active=false;update();onExit?.();if(origin?.isConnected&&!origin.hidden)origin.focus();},
    });}
@@ -35,9 +32,8 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen}){
   try{await loading;}catch(error){instance?.exit();onError?.(error.message||'The house could not open. Try again.');}
   finally{loading=null;buttons.forEach(button=>{button.disabled=false;button.removeAttribute('aria-busy');});update();}
  }
- for(const button of buttons)button.addEventListener('click',open);
- journal.addEventListener('click',open);
+ for(const button of buttons)button.addEventListener('click',event=>open(event.currentTarget));
  media.addEventListener('change',()=>{if(!media.matches){entryTicket++;instance?.exit();}update();});
  update();
- return {setReady(){ready=true;update();},exit(){entryTicket++;instance?.exit();}};
+ return {setReady(){ready=true;update();},openJournal(){if(ready)return open(null,true);},exit(){entryTicket++;instance?.exit();}};
 }

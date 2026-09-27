@@ -1,5 +1,5 @@
 """Export authored house geometry, cameras, and world-space interaction anchors.
-Run with Blender -b --python scene/scripts/export_house_models.py.
+Run with Blender -b --python scene/scripts/export_house_models.py -- [room ...].
 """
 import bpy, sys, json
 from pathlib import Path
@@ -8,11 +8,16 @@ ROOT=Path(__file__).resolve().parents[2]
 source=(ROOT/'scene/scripts/build_house_rooms.py').read_text().split('\nargs=sys.argv')[0]
 ns={'__file__':str(ROOT/'scene/scripts/build_house_rooms.py')}
 exec(compile(source,'build_house_rooms.py','exec'),ns)
-manifest={}
-finish_report={}
+rooms=sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else ['hallway','workshop','attic','basement']
+if not rooms or any(room not in ['hallway','workshop','attic','basement'] for room in rooms):raise ValueError('Specify valid room names')
+def existing_report(name):
+ path=ROOT/'web/assets/house'/name
+ return json.loads(path.read_text()) if path.exists() else {}
+manifest=existing_report('anchors.json')
+finish_report=existing_report('surface-finish.json')
 sys.path.insert(0,str(ROOT/'scene/scripts'))
 from detail_house_models import finish_house
-for room in ['hallway','workshop','attic','basement']:
+for room in rooms:
  # Recreate the same authored scene and keep the semantic anchors before export.
  sys.argv=['export','--','anchors',room]
  exec(compile('\nargs=sys.argv'+(ROOT/'scene/scripts/build_house_rooms.py').read_text().split('\nargs=sys.argv')[1],'build_house_rooms.py','exec'),ns)

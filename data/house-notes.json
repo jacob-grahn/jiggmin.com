@@ -215,11 +215,6 @@
   ],
   "lockedDoors": [
     {
-      "id": "locked-door-1",
-      "title": "Not open yet",
-      "body": "This door isn't available yet."
-    },
-    {
       "id": "locked-door-2",
       "title": "Not open yet",
       "body": "This door isn't available yet."

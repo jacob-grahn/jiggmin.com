@@ -1,8 +1,8 @@
 {
   "hallway": {
-    "timber": 175,
-    "plaster": 17,
-    "metal": 40,
+    "timber": 164,
+    "plaster": 15,
+    "metal": 35,
     "Preserved artwork / light / glass": 105,
     "weave": 86,
     "rubber": 11,
@@ -23,12 +23,12 @@
     "cardboard": 2
   },
   "attic": {
-    "rubber": 65,
+    "rubber": 72,
     "timber": 64,
     "weave": 117,
-    "metal": 26,
+    "metal": 86,
     "Preserved artwork / light / glass": 2,
-    "enamel": 16,
+    "enamel": 24,
     "plaster": 1,
     "paper": 46,
     "cardboard": 18

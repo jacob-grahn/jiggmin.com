@@ -117,7 +117,7 @@ def hallway():
   if ob.type=='LIGHT':bpy.data.objects.remove(ob,do_unlink=True)
  mat('Corridor paint',(.075,.135,.145),.92,noise=.20)
  mat('Quiet ceiling',(.24,.28,.26),.94,noise=.12)
- S.camera.location=(0,-6.6,1.7);S.camera.rotation_euler=(Vector((0,5.8,1.63))-S.camera.location).to_track_quat('-Z','Y').to_euler();S.camera.data.lens=24
+ S.camera.location=(0,-7.4,1.7);S.camera.rotation_euler=(Vector((0,5.8,1.63))-S.camera.location).to_track_quat('-Z','Y').to_euler();S.camera.data.lens=22
  # Actual openings are built into the wall; casing seats across the reveal.
  half=1.30;outer=1.39;ceiling=3.10
  for ix in range(11):
@@ -127,7 +127,7 @@ def hallway():
   if y1<=y0:return
   box('Integrated corridor wall',(side*outer,(y0+y1)/2,(z0+z1)/2),(.18,y1-y0,z1-z0),'Corridor paint',.002)
   if z0==0:box('Oak skirting between openings',(side*1.275,(y0+y1)/2,.12),(.07,y1-y0,.24),'wood',.006)
- for side,cuts in [(-1,[(-3,.59,0,2.48),(0,.59,0,2.48),(3.2,.59,0,2.48)]),(1,[(-3.70,.96,1.12,2.58),(-1.8,.59,0,2.48)])]:
+ for side,cuts in [(-1,[(-5.9,.59,0,2.48),(3.2,.59,0,2.48)]),(1,[(-3.70,.96,1.12,2.58),(-1.8,.59,0,2.48)])]:
   start=-7.5
   for y,r,bottom,top in cuts:
    wall_part(side,start,y-r);wall_part(side,y-r,y+r,top,ceiling)
@@ -159,10 +159,9 @@ def hallway():
    pipe('Closed door chain',[(-.30,-.088,1.23),(0,-.16,1.15),(.30,-.088,1.23)],.012,'metal');box('Small future lock',(0,-.165,1.14),(.095,.055,.12),'brass')
   anchor(id,leaf)
   mount([ob for ob in bpy.data.objects if ob not in before],loc,angle)
- integrated_door('door-den',(-1.36,-3,0),math.pi/2)
- integrated_door('door-workshop',(-1.36,0,0),math.pi/2)
- integrated_door('locked-door-1',(-1.36,3.2,0),math.pi/2,True)
- integrated_door('door-basement',(1.36,-1.8,0),-math.pi/2)
+ integrated_door('door-den',(-1.36,-5.9,0),math.pi/2)
+ integrated_door('door-workshop',(1.36,-1.8,0),-math.pi/2)
+ integrated_door('door-basement',(-1.36,3.2,0),math.pi/2)
  integrated_door('locked-door-2',(0,5.92,0),0,True)
  # Recessed rainy-night window on the right, with actual drops and runnels.
  before=set(bpy.data.objects)
@@ -333,18 +332,47 @@ def attic():
  area('Plywood work light',(.6,-1.2,1.45),24,(1,.75,.48),.70,(0,-1.5,.23))
  # The red tricycle and opened black bag remain among the joists.
  before=set(bpy.data.objects)
- # Red tricycle, three real wheels, tubular frame, forks and handlebars.
- tric=[]
- for xx,yy,rr in [(-2.8,-.9,.38),(-3.6,.05,.25),(-2.75,.50,.25)]:
-  wheel=cyl('Tricycle rubber wheel',(xx,yy,rr+.24),rr,.115,'rubber',(math.pi/2,0,0));tric.append(wheel);cyl('Cream wheel hub',(xx,yy-.063,rr+.24),rr*.68,.025,'cream',(math.pi/2,0,0));cyl('Steel axle',(xx,yy-.083,rr+.24),.05,.04,'metal',(math.pi/2,0,0))
- pipe('Tricycle frame',[(-3.55,.05,.55),(-3.14,-.06,.94),(-2.8,-.9,.65),(-2.85,-.92,1.35)],.046,'red')
- pipe('Rear tricycle axle',[(-3.6,.05,.50),(-2.75,.50,.50)],.035,'metal');pipe('Tricycle saddle post',[(-3.15,-.05,.75),(-3.15,-.05,1.12)],.032,'red');sphere('Tricycle black saddle',(-3.15,-.05,1.12),(.23,.17,.05),'rubber')
- pipe('Tricycle handlebar',[(-3.12,-.95,1.35),(-2.85,-.95,1.35),(-2.60,-.95,1.35)],.025,'metal');pipe('Tricycle fork',[(-2.85,-.92,1.24),(-2.8,-.90,.62)],.028,'red');pipe('Pedal crank',[(-3,-.99,.63),(-2.8,-.99,.63),(-2.62,-.99,.56)],.019,'metal')
- for xx in [-3.12,-2.6]:cyl('Handlebar grip',(xx,-.95,1.35),.033,.19,'rubber',(0,math.pi/2,0))
+ # Model in a consistent local frame: forward is +X, every axle runs along Y.
+ # One large driven front wheel and two small rear wheels share a ground plane.
+ def wheel(x,y,r):
+  bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=12,major_radius=r-.038,minor_radius=.038,location=(x,y,r),rotation=(math.pi/2,0,0))
+  tire=bpy.context.object;tire.name='Tricycle tire';tire.data.materials.append(M['rubber'])
+  for face in tire.data.polygons:face.use_smooth=True
+  cyl('Tricycle cream rim',(x,y,r),r-.065,.052,'cream',(math.pi/2,0,0))
+  for side in [-1,1]:
+   yy=y+side*.03
+   cyl('Tricycle red hub',(x,yy,r),.055,.025,'red',(math.pi/2,0,0))
+   for i in range(10):
+    a=i*math.tau/10
+    pipe('Tricycle wheel spoke',[(x+.055*math.cos(a),yy+side*.015,r+.055*math.sin(a)),(x+(r-.08)*math.cos(a),yy+side*.015,r+(r-.08)*math.sin(a))],.008,'metal')
+  return tire
+ wheel(.55,0,.33)
+ for y in [-.39,.39]:wheel(-.48,y,.22)
+ pipe('Tricycle rear axle',[(-.48,-.45,.22),(-.48,.45,.22)],.028,'metal')
+ box('Tricycle rear standing step',(-.48,0,.29),(.26,.64,.045),'red',.018)
+ for y in [-.23,-.12,0,.12,.23]:box('Tricycle step tread',(-.48,y,.315),(.18,.012,.004),'rubber',.002)
+ # Swept low frame connects the rear axle to the steering head.
+ pipe('Tricycle curved frame',[(-.48,0,.25),(-.31,0,.30),(-.14,0,.39),(.03,0,.48),(.20,0,.62),(.36,0,.79)],.039,'red')
+ pipe('Tricycle saddle post',[(-.22,0,.35),(-.22,0,.67)],.025,'metal')
+ sphere('Tricycle black saddle',(-.20,0,.69),(.18,.135,.045),'rubber')
+ pipe('Tricycle head tube',[(.40,0,.66),(.32,0,.90)],.043,'red')
+ # Two fork legs straddle the front wheel and meet its actual hub.
+ for y in [-.077,.077]:
+  pipe('Tricycle front fork',[(.35,0,.83),(.39,y,.74),(.48,y,.54),(.55,y,.33)],.023,'red')
+ pipe('Tricycle steering stem',[(.32,0,.87),(.28,0,1.01)],.023,'metal')
+ pipe('Tricycle swept handlebar',[(.18,-.28,1.00),(.26,-.17,1.03),(.28,0,1.03),(.26,.17,1.03),(.18,.28,1.00)],.019,'metal')
+ for side in [-1,1]:
+  pipe('Tricycle handlebar grip',[(.20,side*.23,1.01),(.15,side*.36,.98)],.029,'rubber')
+  # Opposed cranks and broad rubber pedals, directly driven by the front axle.
+  pipe('Tricycle pedal crank',[(.55,side*.06,.33),(.55,side*.14,.33),(.55+side*.12,side*.14,.33+side*.065)],.013,'metal')
+  box('Tricycle rubber pedal',(.55+side*.12,side*.19,.33+side*.065),(.095,.12,.04),'rubber',.009)
+ tric=[ob for ob in bpy.data.objects if ob not in before]
  anchor('tricycle',*tric)
-
  bpy.context.view_layer.update()
- for ob in [ob for ob in bpy.data.objects if ob not in before]:ob.matrix_world=Matrix.Translation((1.15,1.15,0))@ob.matrix_world
+ # Park ahead of the stored print so its frame and all three wheels can be read.
+ pose=Matrix.Translation((-1.8,.45,.24))@Matrix.Rotation(-.50,4,'Z')
+ for ob in tric:ob.matrix_world=pose@ob.matrix_world
+
  mat('Black bag plastic',(.013,.016,.018),.30,noise=.18)
  verts=[];faces=[];n=32
  for ring in range(4):
@@ -667,7 +695,7 @@ def tighten_attic_view():
   (('The one leftover plywood sheet','Plywood old screw','Worn questions notebook','Questions notebook pages','Loose graphite pencil','Folded private story letter','Plain red letter seal'),(0,3.2,0)),
   (('Unframed Derron character draft','Drawn character head','Character pencil','Paper draft support carton'),(-1.75,1.05,0)),
   (('Rough farm model carton','Cardboard farm dream model','Model potato row','Rough model farm robot','Tiny robot solar panel','Model robot wheel'),(-1,2.2,0)),
-  (('Cooties unframed stored print','Plain carton supporting stored cartridge art'),(-.30,1.1,0)),
+  (('Cooties unframed stored print','Plain carton supporting stored cartridge art'),(-.30,2.3,0)),
  ]
  bpy.context.view_layer.update()
  for ob in bpy.data.objects:
@@ -759,9 +787,6 @@ def project(room):
   # Keep the broad three-wheel target clear of the nearby character sketch.
   by_id={r['id']:r for r in hot};tric=by_id['tricycle'];draft=by_id['derron']
   tric['width']=round(min(tric['width'],draft['x']-.004-tric['x']),5)
- if room=='hallway':
-  by_id={r['id']:r for r in hot};plate=by_id['plate'];door_rect=by_id['door-workshop'];right=door_rect['x']+door_rect['width'];left=max(door_rect['x'],plate['x']+plate['width']+.003)
-  door_rect['x']=round(left,5);door_rect['width']=round(right-left,5)
  allhot[room]=hot
  existing={}
  if (OUT/'hotspots.json').exists():existing=json.loads((OUT/'hotspots.json').read_text())

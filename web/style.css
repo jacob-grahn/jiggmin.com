@@ -76,6 +76,3 @@ body{display:block;overflow:hidden}main{position:relative;width:100%;height:100s
 .house-entrance span{font:36px Georgia,serif;line-height:1}.house-entrance small{font:9px ui-monospace,monospace;letter-spacing:.04em}
 @media(max-width:999px),(max-aspect-ratio:1379/1000),(pointer:coarse){.house-entrance{display:none}}
 @media(prefers-reduced-motion:reduce){.house-entrance button{transition:none}}
-.den-journal{position:absolute;z-index:7;right:8%;bottom:5%;width:92px;height:62px;padding:0 0 0 6px;transform:rotate(-9deg) skewY(4deg);border:1px solid #736040;border-left:7px solid #2b261b;border-radius:3px 6px 6px 3px;background:linear-gradient(110deg,#493c29,#655037);box-shadow:2px 5px 0 #a69875,4px 9px 12px #0008;color:#d5bf87;font:small-caps 14px Georgia,serif;letter-spacing:.07em}
-.den-journal:hover{background:#776044;color:#f1dfb1}
-.den-journal[hidden]{display:none}

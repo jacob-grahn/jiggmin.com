@@ -11,7 +11,7 @@ The four room labels are simple. Their short descriptions set a quiet, welcoming
 | Hallway | `plate` | The kindergarten plate recollection |
 | Hallway | `contests` | Community-run contests and creative possibility |
 | Hallway | `door-workshop`, `door-attic`, `door-basement`, `door-den` | Door interactions/navigation; no discovery note copy |
-| Hallway | `locked-door-1`, `locked-door-2` | Two gentle unavailable messages in `lockedDoors` |
+| Hallway | `locked-door-2` | One gentle unavailable message in `lockedDoors` |
 | Workshop | `tablet` | Drawing tablet |
 | Workshop | `working-hours` | Working in the zone, then keeping a regular schedule |
 | Workshop | `greg` | Greg and the 30-games-in-30-days attempt |

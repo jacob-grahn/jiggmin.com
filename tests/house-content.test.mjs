@@ -8,7 +8,7 @@ const art = JSON.parse(readFileSync('web/assets/house/hotspots.json','utf8'));
 const bonus = JSON.parse(readFileSync('data/bonus-games.json','utf8'));
 const roomIds = ['hallway','workshop','attic','basement'];
 const expectedHotspots = {
-  hallway:['plate','contests','door-workshop','door-attic','door-basement','door-den','locked-door-1','locked-door-2'],
+  hallway:['plate','contests','door-workshop','door-attic','door-basement','door-den','locked-door-2'],
   workshop:['tablet','working-hours','greg','crowland','inkclipse','zigzag','destroyers'],
   attic:['tricycle','longtide','questions','derron','farm','secret'],
   basement:['community','neverending','voices','d-note'],
@@ -64,13 +64,13 @@ test('house notes resolve to one room and an authored hotspot',()=>{
  }
 });
 
-test('all illustrated hotspot IDs and both future doors have matching copy',()=>{
+test('all illustrated hotspot IDs and the remaining future door have matching copy',()=>{
  for(const [room,ids] of Object.entries(expectedHotspots)){
   const actual=new Set(art[room].map(object=>object.id));
   for(const id of ids)assert.ok(actual.has(id),`missing illustrated hotspot ${room}/${id}`);
  }
  const locked=new Set(house.lockedDoors.map(door=>door.id));
- assert.deepEqual([...locked].sort(),['locked-door-1','locked-door-2']);
+ assert.deepEqual([...locked].sort(),['locked-door-2']);
  for(const door of house.lockedDoors){
   assert.ok(art.hallway.some(object=>object.id===door.id),`missing art for ${door.id}`);
   assert.match(door.body,/(?:not|isn't) available yet/i,`${door.id} should state plainly that it is unavailable`);

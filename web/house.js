@@ -1,4 +1,4 @@
-import {createHouseRenderer} from './house-renderer.js';
+import {createHouseRenderer} from './house-renderer.js?v=hall-landing-back-1';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 export const HOUSE_MEDIA_QUERY = '(min-width: 1000px) and (min-aspect-ratio: 69/50) and (pointer: fine)';
@@ -152,7 +152,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   }
   async function content() {
     if (data) return;
-    contentRequest ??= Promise.all([json('/data/house-notes.json'), json('/web/assets/house/hotspots.json'), json('/web/assets/house/anchors.json')])
+    contentRequest ??= Promise.all([json('/data/house-notes.json?v=hall-landing-back-1'), json('/web/assets/house/hotspots.json?v=hall-landing-back-1'), json('/web/assets/house/anchors.json?v=hall-landing-back-1')])
       .then(([notes, objects, positions]) => {
         const validData = validateHouseData(notes);
         for (const id of ROOMS) {
@@ -204,6 +204,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
         hotspots.append(hit); targetButtons.set(object.id,hit);
       }
       const bindings = new Map();
+      for (const [id,target] of view.fixedTargets) { const hit=targetButtons.get(id); if(hit)bindings.set(target,hit); }
       for (const prop of view.props) {
         let hit = prop.hotspot && targetButtons.get(prop.hotspot);
         if (!hit) {

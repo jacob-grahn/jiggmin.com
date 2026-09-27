@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import {createHouseEntry} from './house-entry.js';
+import {createHouseEntry} from './house-entry.js?v=hall-landing-back-1';
+import {createDenJournal} from './den-journal.js';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
 import {inSlot,playbackFile} from './interaction.js?v=swf-compat-1';
 import {resolveRoute,writeGameUrl} from './routes.js';
@@ -234,7 +235,7 @@ function finishDrag(e,cancel=false,interrupted=false){
 }
 for(const surface of [canvas,touchSurface])surface.addEventListener('pointerdown',e=>{
  if(e.button!==0||drag||!physics)return;const hit=pick(e);
- if(!hit){const prop=pickProp(e);if(prop){e.preventDefault();environment.reactions.kick(prop.object,prop.point,reducedMotion.matches);say(`${prop.object.userData.title} — ${reducedMotion.matches?'hello there.':'a little nudge.'}`);dirty=true;}return;}
+ if(!hit){const prop=pickProp(e);if(prop){e.preventDefault();if(prop.object.userData.prop==='journal'){houseEntry.openJournal();return;}environment.reactions.kick(prop.object,prop.point,reducedMotion.matches);say(`${prop.object.userData.title} — ${reducedMotion.matches?'hello there.':'a little nudge.'}`);dirty=true;}return;}
  e.preventDefault();
  const {root,point}=hit,wasInserted=root===inserted;
  unlockAudio();stored.delete(root);cancelMotion(root);recovery.touch(root,performance.now()/1000);
@@ -297,6 +298,7 @@ async function init(){
  games=manifest.games;for(const game of games){game.gameplay=profiles.games[game.id];if(!game.gameplay)throw Error(`Missing gameplay profile: ${game.id}`);}meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;
  environment=prepareRoom(roomModel,camera,lighting,propLighting);scene.add(environment.group);
+ const journal=createDenJournal();scene.add(journal.group);environment.props.push(...journal.meshes);environment.occluders.push(...journal.meshes);
  physics=new CartridgePhysics(colliders);
  upperShelf=createUpperShelf();scene.add(upperShelf.group);upperShelf.group.visible=false;
  upperBodies=physics.addStatic(upperShelf.colliders);for(const b of upperBodies)b.collisionFilterMask=0;
