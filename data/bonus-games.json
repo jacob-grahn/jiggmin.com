@@ -1,0 +1,66 @@
+{
+  "games": [
+    {
+      "id": "inkclipse",
+      "title": "Inkclipse",
+      "file": "games/bonus/inkclipse/game.swf",
+      "thumbnail": "games/bonus/inkclipse/thumbnail.png",
+      "bytes": 1525698,
+      "sha256": "e62ae5c669a02e67972398a513461f0aeec6c46e9aefee29f4fc4e5c1cefa4d3",
+      "sourceArchive": "Inkclipse.zip",
+      "sourceMember": "Inkclipse/Inkclipse.swf",
+      "embedWidth": 600.0,
+      "embedHeight": 200.0,
+      "swf": {
+        "signature": "CWS",
+        "version": 9,
+        "uncompressedBytes": 1624159,
+        "stageWidth": 600.0,
+        "stageHeight": 200.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin"
+        ]
+      },
+      "playbackTested": true,
+      "original": {
+        "file": "games/bonus/inkclipse/original.swf",
+        "bytes": 1525896,
+        "sha256": "7e4af89337908850aec5c8c15f91249ddaba415f32f131d9687dc0b24f13b416"
+      },
+      "compatibilityPatch": "Data.allowedURL returns true. The two menu buttons gain separate transparent Up states for Ruffle; original HitTest records and shared artwork are preserved. Original SWF retained. Rebuild with scripts/prepare_bonus_games.py.",
+      "playbackNotes": "Title screen renders with original menu appearance. Mouse mode starts with a rotating globe and ink targets; full completion not verified."
+    },
+    {
+      "id": "a-murder-in-crowland",
+      "title": "A Murder in Crowland",
+      "file": "games/bonus/a-murder-in-crowland/game.swf",
+      "thumbnail": "games/bonus/a-murder-in-crowland/thumbnail.png",
+      "bytes": 692871,
+      "sha256": "220c2743bfaad8d26776f57cd13f692c7a1c42770b62b99d717774aa8d13554d",
+      "sourceArchive": "A Murder in Crowland.zip",
+      "sourceMember": "A Murder in Crowland/Crows.swf",
+      "embedWidth": 700.0,
+      "embedHeight": 400.0,
+      "swf": {
+        "signature": "CWS",
+        "version": 9,
+        "uncompressedBytes": 805421,
+        "stageWidth": 700.0,
+        "stageHeight": 400.0,
+        "frameRate": 30.0,
+        "embeddedUrlHints": [
+          "http://adobe.com/AS3/2006/builtin"
+        ]
+      },
+      "playbackTested": true,
+      "original": {
+        "file": "games/bonus/a-murder-in-crowland/original.swf",
+        "bytes": 693007,
+        "sha256": "f3589e9960a6c90b9385ca258800f85892f3b2fcc26adb003e95d13c752c30ce"
+      },
+      "compatibilityPatch": "Only Data.allowedURL method body replaced with return true. Original SWF retained. Rebuild with scripts/prepare_bonus_games.py.",
+      "playbackNotes": "Title, start, crow animation and shooting/ammo decrement verified in browser with vendored Ruffle. Full completion, reload and shield not verified."
+    }
+  ]
+}

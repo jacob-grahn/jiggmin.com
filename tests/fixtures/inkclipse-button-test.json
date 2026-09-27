@@ -1,0 +1,91 @@
+{
+  "source": "games/bonus/inkclipse/original.swf",
+  "variant": "games/bonus/inkclipse/game.swf",
+  "stage": {
+    "width": 600,
+    "height": 200
+  },
+  "changes": {
+    "description": "Add separate transparent Up-state record to both menu buttons; preserve original HitTest record byte-for-byte. No shape edits.",
+    "records": [
+      {
+        "character": 42,
+        "hitShape": 41,
+        "upStateAlphaMultiplier": 0,
+        "hitStatePreserved": true,
+        "originalColorTransform": "04"
+      },
+      {
+        "character": 43,
+        "hitShape": 41,
+        "upStateAlphaMultiplier": 0,
+        "hitStatePreserved": true,
+        "originalColorTransform": "04"
+      }
+    ],
+    "shape41Uses": [
+      {
+        "button": 42,
+        "states": 8
+      },
+      {
+        "button": 43,
+        "states": 8
+      }
+    ]
+  },
+  "buttons": [
+    {
+      "character": 42,
+      "name": "mouseButton",
+      "matrix": [
+        0.70263671875,
+        0,
+        0,
+        1.4102630615234375,
+        -133.05,
+        -2.0
+      ],
+      "stageBounds": {
+        "x": 166.95,
+        "y": 98.0,
+        "width": 77.9932332932949,
+        "height": 55.0003239561338
+      },
+      "stageCenter": {
+        "x": 205.94661664664744,
+        "y": 125.5001619780669
+      },
+      "display1200x400Center": {
+        "x": 411.8932332932949,
+        "y": 251.0003239561338
+      }
+    },
+    {
+      "character": 43,
+      "name": "keyboardButton",
+      "matrix": [
+        0.68292236328125,
+        0,
+        0,
+        1.1702117919921875,
+        -34.9,
+        -2.0
+      ],
+      "stageBounds": {
+        "x": 265.1,
+        "y": 98.0,
+        "width": 111.999267578125,
+        "height": 54.99995422363281
+      },
+      "stageCenter": {
+        "x": 321.0996337890625,
+        "y": 125.4999771118164
+      },
+      "display1200x400Center": {
+        "x": 642.199267578125,
+        "y": 250.9999542236328
+      }
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import {accelerateRaycasts} from './raycast-acceleration.js';
 import * as THREE from 'three';
 import {createPropReactions} from './prop-reactions.js?v=stronger-wiggle-2';
 import {mergeGeometries} from './vendor/three/BufferGeometryUtils.js';
@@ -39,6 +40,7 @@ export function prepareRoom(gltf, camera, lighting, propLighting=lighting) {
     mat.vertexShader=material.vertexShader.replace('uniform mat4 bakeProjection;','uniform mat4 bakeProjection;uniform mat4 bakeModelMatrix;').replace('bakePosition=bakeProjection*world;','bakePosition=bakeProjection*bakeModelMatrix*vec4(position,1.0);');
     prop.material=mat;
   }
+  accelerateRaycasts([shell,...props]);
   const reactions=createPropReactions(props);
   // Only the moving objects cast onto this duplicate receiver. The static lighting
   // and contact shadows are already baked, so they must not be applied twice.

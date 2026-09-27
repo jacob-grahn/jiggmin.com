@@ -9,6 +9,8 @@
 /scene/mockups/
 /scene/textures/
 /scene/renders/
+# Original personal reference photo; the cropped authoring texture is versioned
+/docs/references/kindergarten-plate.jpg
 *.blend
 *.blend[0-9]*
 *.blend@

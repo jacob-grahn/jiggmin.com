@@ -6,7 +6,7 @@ test('All statically imported browser modules exist, including vendor dependenci
  const seen=new Set();
  function visit(path){if(seen.has(path))return;seen.add(path);assert.ok(existsSync(path),path);
  const source=readFileSync(path,'utf8');
- for(const match of source.matchAll(/(?:import|export)\s+(?:[^;'"()]+?\s+from\s+)?['"]([^'"]+)['"]/g)){
+ for(const match of source.matchAll(/^\s*(?:import|export)\s+(?:[^;'"()]+?\s+from\s+)?['"]([^'"]+)['"]/gm)){
   const spec=match[1].split('?')[0];
   if(spec==='three')visit(resolve('web/vendor/three/three.module.js'));
   else if(spec.startsWith('.'))visit(resolve(dirname(path),spec));

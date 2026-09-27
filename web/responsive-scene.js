@@ -60,6 +60,7 @@ export function cartridgeVisible(root,camera,occluders){
  root.updateWorldMatrix(true,true);
  const bounds=new THREE.Box3().setFromObject(root),center=bounds.getCenter(new THREE.Vector3()),size=bounds.getSize(new THREE.Vector3());
  const origin=camera.getWorldPosition(new THREE.Vector3()),ray=new THREE.Raycaster();
+ ray.firstHitOnly=true;
  for(const [x,y,z] of [[0,0,0],[-.4,-.4,.4],[.4,-.4,.4],[-.4,.4,.4],[.4,.4,.4],[0,.4,-.4]]){
   const point=center.clone().add(new THREE.Vector3(x*size.x,y*size.y,z*size.z)),ndc=point.clone().project(camera);
   if(ndc.z<-1||ndc.z>1||Math.abs(ndc.x)>.98||Math.abs(ndc.y)>.98)continue;

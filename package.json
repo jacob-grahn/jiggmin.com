@@ -5,11 +5,13 @@
   "scripts": {
     "start": "python3 scripts/serve.py",
     "test": "npm run build && node --test tests/*.test.mjs",
-    "build": "python3 scripts/build_routes.py"
+    "build": "python3 scripts/build_routes.py",
+    "perf:visibility": "node scripts/benchmark-visibility.mjs"
   },
   "dependencies": {
     "@ruffle-rs/ruffle": "0.6.0",
     "cannon-es": "0.20.0",
-    "three": "0.186.1"
+    "three": "0.186.1",
+    "three-mesh-bvh": "0.9.15"
   }
 }

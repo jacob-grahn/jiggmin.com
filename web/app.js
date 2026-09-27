@@ -1,13 +1,14 @@
 import * as THREE from 'three';
+import {createHouseEntry} from './house-entry.js';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
 import {inSlot,playbackFile} from './interaction.js?v=taller-slot-1';
 import {resolveRoute,writeGameUrl} from './routes.js';
 import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
-import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=grounded-props-2';
+import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=raycast-bvh-1';
 import {createControllerCord} from './controller-cord.js?v=2';
 import {remodelCartridge} from './cartridge-model.js?v=screenprint-3';
-import {SHELF_SLOTS,shuffled,RestTimer,ease} from './library-behavior.js?v=visibility-1';
-import {UPPER_SLOTS,framing,captureSceneAnchors,composeCamera,projectWorld,createUpperShelf,cartridgeVisible} from './responsive-scene.js?v=controller-zoom-2';
+import {SHELF_SLOTS,shuffled,RecoveryQueue,ease} from './library-behavior.js?v=queued-recovery-1';
+import {UPPER_SLOTS,framing,captureSceneAnchors,composeCamera,projectWorld,createUpperShelf,cartridgeVisible} from './responsive-scene.js?v=raycast-bvh-1';
 import {createControllerDock} from './controller-dock.js';
 import {detailController} from './controller-detail.js';
 import {addSurfacePatina} from './surface-patina.js';
@@ -16,10 +17,10 @@ const $=id=>document.getElementById(id),room=$('room'),canvas=$('cartridges'),st
 const say=text=>status.textContent=text;
 let renderer,camera,scene,environment,physics,cord,roots=[],games,meta,drag=null,inserted=null,player=null,loadId=0,lastTime=0,dirty=true;
 const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),intersection=new THREE.Vector3();
-const motions=new Map(),restTimer=new RestTimer();
+const motions=new Map(),recovery=new RecoveryQueue();
 let anchors,baseCameraHeight,cameraDrop=0,audioContext,controller,upperShelf,upperBodies=[],upperMode=false,shelfSlots=SHELF_SLOTS,mobileControls;
-let focusY=.41,visibilityTick=0,controllerDock=null;
-const stored=new Map(),visibility=new Map();
+let focusY=.41,controllerDock=null;
+const stored=new Map();
 const touchLayout=matchMedia('(max-width:900px), (pointer:coarse)');
 const touchSurface=document.createElement('div');touchSurface.id='touch-screen';room.append(touchSurface);
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
@@ -28,8 +29,19 @@ const gameId=root=>root.userData.game_id||'controller';
 const currentGame=()=>games?.find(g=>g.id===inserted?.userData.game_id);
 const currentMode=()=>currentGame()?.gameplay.mode||'controller';
 const isCartridge=root=>root.userData.role==='draggable_cartridge';
+let houseOpen=false;
+const denMain=document.querySelector('main');
+const houseEntry=createHouseEntry({host:denMain,
+ onOpen(){
+  if(drag)finishDrag({pointerId:drag.id},false,true);
+  eject();mobileControls?.release();tip.hidden=true;
+  houseOpen=true;denMain.inert=true;denMain.setAttribute('aria-hidden','true');lastTime=0;
+ },
+ onExit(){houseOpen=false;denMain.inert=false;denMain.removeAttribute('aria-hidden');lastTime=0;dirty=true;recovery.defer(performance.now()/1000);},
+ onError:showError,
+});
 function coords(e){const r=room.getBoundingClientRect();return [(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height];}
-function setRay(e){const [x,y]=coords(e);pointer.set(x*2-1,1-y*2);ray.setFromCamera(pointer,camera);}
+function setRay(e){ray.firstHitOnly=true;const [x,y]=coords(e);pointer.set(x*2-1,1-y*2);ray.setFromCamera(pointer,camera);}
 function pick(e){
  setRay(e);const hit=ray.intersectObjects(roots.filter(r=>r.visible&&!(r===controller&&controllerDock?.active)),true)[0];if(!hit)return null;
  // Furniture blocks selection as well as rendering: no grabbing through the TV.
@@ -43,7 +55,7 @@ function pickProp(e){
  if(blockers[0]?.distance<hit.distance-.008)return null;
  return hit;
 }
-function syncObjects(){for(const root of roots){if(root===controller&&controllerDock?.active)continue;const pose=physics.pose(gameId(root));if(root.position.distanceToSquared(pose.position)>1e-10||Math.abs(root.quaternion.x-pose.quaternion.x)+Math.abs(root.quaternion.y-pose.quaternion.y)+Math.abs(root.quaternion.z-pose.quaternion.z)+Math.abs(root.quaternion.w-pose.quaternion.w)>1e-7)dirty=true;root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);}}
+function syncObjects(){for(const root of roots){if(root===controller&&controllerDock?.active)continue;const pose=physics.pose(gameId(root));if(root.position.distanceToSquared(pose.position)>1e-10||Math.abs(root.quaternion.x-pose.quaternion.x)+Math.abs(root.quaternion.y-pose.quaternion.y)+Math.abs(root.quaternion.z-pose.quaternion.z)+Math.abs(root.quaternion.w-pose.quaternion.w)>1e-7){dirty=true;recovery.moved(root,performance.now()/1000);}root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);}}
 function showError(message){say(message);$('error').textContent=message;$('error').hidden=false;}
 function unlockAudio(){try{audioContext ||= new AudioContext();audioContext.resume().catch(()=>{});}catch{}}
 function clickIn(){
@@ -58,7 +70,7 @@ function cancelMotion(root){
  motions.delete(root);physics.place(gameId(root),physics.pose(gameId(root)));motion.resolve(false);
 }
 function animate(root,poses,durations,kind,slotIndex=null){
- cancelMotion(root);restTimer.clear(gameId(root));
+ cancelMotion(root);recovery.moved(root,performance.now()/1000);
  return new Promise(resolve=>{const start=physics.pose(gameId(root));physics.pin(gameId(root),start);motions.set(root,{poses:[start,...poses],durations,elapsed:0,segment:0,kind,slotIndex,resolve});});
 }
 function updateMotions(dt){
@@ -89,26 +101,24 @@ function shelfSlotFree(root,index){
  return !roots.some(other=>other!==root&&other!==inserted&&box.intersectsBox(new THREE.Box3().setFromObject(other)));
 }
 function emptyShelfSlot(root){return shelfSlots.findIndex((_,i)=>shelfSlotFree(root,i));}
-function recoverCartridges(dt){
- if(inserted)return;
- visibilityTick+=dt;const check=visibilityTick>=.2;if(check)visibilityTick=0;
- const occluders=[...environment.occluders,...(upperMode?[upperShelf.group]:[])];
- for(const root of roots){
-  if(!isCartridge(root))continue;
-  const id=gameId(root),item=physics.items.get(id),body=item.body;
-  const resting=body.sleepState===2||(body.velocity.length()<.07&&body.angularVelocity.length()<.15);
+function recoverCartridges(){
+ const now=performance.now()/1000;
+ if(inserted){recovery.defer(now);return;}
+ const root=recovery.next(roots,now,root=>{
+  if(!isCartridge(root)||drag?.root===root||motions.has(root))return false;
   if(stored.has(root)){
    const home=shelfSlots[stored.get(root)].position;
-   if(root.position.distanceTo(new THREE.Vector3().copy(home))<.10)continue;
+   if(root.position.distanceToSquared(home)<.01)return false;
    stored.delete(root);
   }
-  if(check&&resting){
-   const index=shelfSlots.findIndex(p=>root.position.distanceTo(new THREE.Vector3().copy(p.position))<.06&&Math.abs(root.quaternion.dot(new THREE.Quaternion().copy(p.quaternion)))>.98);
-   if(index>=0){stored.set(root,index);restTimer.clear(id);continue;}
-  }
-  if(check)visibility.set(root,cartridgeVisible(root,camera,occluders));
-  if(!restTimer.update(id,dt,{resting,visible:visibility.get(root)!==false,excluded:root===inserted||drag?.root===root||motions.has(root)}))continue;
-  const index=emptyShelfSlot(root);if(index<0)continue;
+  const body=physics.items.get(gameId(root)).body;
+  return body.sleepState===2||(body.velocity.length()<.07&&body.angularVelocity.length()<.15);
+ });
+ if(!root)return;
+ const occluders=[...environment.occluders,...(upperMode?[upperShelf.group]:[])];
+ if(cartridgeVisible(root,camera,occluders))return;
+ const id=gameId(root);
+  const index=emptyShelfSlot(root);if(index<0)return;
   const destination=shelfSlots[index],start=physics.pose(id),q=destination.quaternion;
   say(`${root.userData.title} is returning to the bookshelf.`);
   // Travel in front of furniture before sliding into a free shelf space.
@@ -116,7 +126,6 @@ function recoverCartridges(dt){
   animate(root,[{position:{x:start.position.x,y:travelY,z:2.9},quaternion:start.quaternion},
    {position:{x:destination.position.x,y:travelY,z:.85},quaternion:q},
    {position:{x:destination.position.x,y:destination.position.y,z:.85},quaternion:q},destination],[.9,1,.8,.55],'return',index);
- }
 }
 function setShelfLayout(upper){
  if(upper===upperMode)return;
@@ -124,8 +133,8 @@ function setShelfLayout(upper){
  for(const [root,m] of [...motions])if(m.kind==='return')cancelMotion(root);
  upperMode=upper;shelfSlots=upper?UPPER_SLOTS:SHELF_SLOTS;
  upperShelf.group.visible=upper;for(const body of upperBodies)body.collisionFilterMask=upper?-1:0;
- for(const [root,index] of stored){const pose=shelfSlots[index];physics.place(gameId(root),pose,true);root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);}
- restTimer.elapsed.clear();visibility.clear();dirty=true;
+ for(const [root,index] of stored){const pose=shelfSlots[index];physics.place(gameId(root),pose,true);root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);recovery.moved(root,performance.now()/1000);}
+ recovery.defer(performance.now()/1000);dirty=true;
 }
 function updateProjection(){
  composeCamera(camera,{aspect:room.clientWidth/room.clientHeight,zoom:camera.zoom,focusY,height:baseCameraHeight-cameraDrop},anchors.focus);
@@ -180,10 +189,10 @@ function eject({updateUrl=true}={}){
 async function insert(root,{updateUrl=true}={}){
  if(!root||!isCartridge(root))return;if(updateUrl)writeGameUrl(gameId(root));if(inserted===root)return;
  if(inserted)eject({updateUrl:false});else stop();
- stored.delete(root);inserted=root;$('error').hidden=true;
+ recovery.touch(root,performance.now()/1000);stored.delete(root);inserted=root;$('error').hidden=true;
  // Stop automatic returns during play; interrupted carts settle naturally.
  for(const [cart,motion] of [...motions])if(motion.kind==='return')cancelMotion(cart);
- restTimer.elapsed.clear();visibility.clear();visibilityTick=0;
+ recovery.defer(performance.now()/1000);
  const game=games.find(g=>g.id===gameId(root)),ticket=++loadId;
  screen.classList.toggle('broken',game.gameplay.mode==='broken');mobileControls.configure(game.gameplay.controller);updateTouchSurface();
  const hover={position:{x:-.13,y:1.3,z:1.17},quaternion:dockPose.quaternion};
@@ -228,7 +237,7 @@ for(const surface of [canvas,touchSurface])surface.addEventListener('pointerdown
  if(!hit){const prop=pickProp(e);if(prop){e.preventDefault();environment.reactions.kick(prop.object,prop.point,reducedMotion.matches);say(`${prop.object.userData.title} — ${reducedMotion.matches?'hello there.':'a little nudge.'}`);dirty=true;}return;}
  e.preventDefault();
  const {root,point}=hit,wasInserted=root===inserted;
- unlockAudio();stored.delete(root);cancelMotion(root);restTimer.clear(gameId(root));
+ unlockAudio();stored.delete(root);cancelMotion(root);recovery.touch(root,performance.now()/1000);
  if(wasInserted){inserted=null;stop();}
  physics.grab(gameId(root),point);
  const normal=camera.getWorldDirection(new THREE.Vector3());
@@ -265,6 +274,7 @@ window.addEventListener('blur',()=>{if(drag)finishDrag({pointerId:drag.id},false
 document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden&&drag)finishDrag({pointerId:drag.id},false,true);});
 
 function applyRoute(){
+ houseEntry.exit();
  if(!physics)return;if(drag)finishDrag({pointerId:drag.id},true);
  const route=resolveRoute(location.pathname,games);
  if(route.kind==='game'){insert(roots.find(r=>gameId(r)===route.game.id),{updateUrl:false});return;}
@@ -340,9 +350,9 @@ async function init(){
 
  renderer.setAnimationLoop(time=>{
   const dt=lastTime?Math.min((time-lastTime)/1000,.08):0;lastTime=time;
-  if(!document.hidden){mobileControls.update(dt);physics.step(dt);updateMotions(dt);syncObjects();recoverCartridges(dt);updateZoom(dt);dirty=controllerDock.update(dt)||dirty;const flicker=environment.updateIdle(time/1000);dirty=environment.reactions.update(dt,reducedMotion.matches)||dirty;if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
+  if(!document.hidden&&!houseOpen){mobileControls.update(dt);physics.step(dt);updateMotions(dt);syncObjects();recoverCartridges(dt);updateZoom(dt);dirty=controllerDock.update(dt)||dirty;const flicker=environment.updateIdle(time/1000);dirty=environment.reactions.update(dt,reducedMotion.matches)||dirty;if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
  });
  if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
- applyRoute();
+ applyRoute();houseEntry.setReady();
 }
 init().catch(error=>{console.error(error);showError(`The den couldn’t open. ${error.message}. Refresh to retry.`);});

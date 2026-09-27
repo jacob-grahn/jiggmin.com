@@ -15,3 +15,20 @@ export class RestTimer {
 }
 export const ease=t=>t*t*(3-2*t);
 export function zoomPoint([x,y],zoom){return [(x-.5)*zoom+.5,(y-.5)*zoom+.5];}
+
+// Round-robin recovery checks, with no catch-up burst after a pause.
+export class RecoveryQueue {
+ constructor(){this.lastMoved=new Map();this.cursor=0;this.nextCheck=0;}
+ touch(id,now){this.lastMoved.set(id,now);}
+ moved(id,now){if(this.lastMoved.has(id))this.lastMoved.set(id,now);}
+ defer(now){this.nextCheck=now+1;}
+ next(ids,now,eligible=()=>true){
+  if(now<this.nextCheck)return null;
+  this.defer(now);
+  for(let n=0;n<ids.length;n++){
+   const index=this.cursor%ids.length,id=ids[index];this.cursor=(index+1)%ids.length;
+   if(this.lastMoved.has(id)&&now-this.lastMoved.get(id)>=5&&eligible(id))return id;
+  }
+  return null;
+ }
+}

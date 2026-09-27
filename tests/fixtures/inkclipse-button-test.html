@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inkclipse hit-area diagnostic</title>
+<style>
+body{margin:0;padding:24px;background:#151b20;color:#e0dccd;font:15px/1.5 system-ui,sans-serif}
+main{max-width:1200px;margin:auto;width:100%}h1{font-size:24px}button{padding:10px 16px;margin:0 10px 8px 0;background:#303d43;color:inherit;border:1px solid #73837d;border-radius:4px;cursor:pointer}
+#stage{position:relative;width:100%;aspect-ratio:3;background:#000}ruffle-player{display:block;width:100%;height:100%}
+#status{min-height:1.5em}#coordinates{white-space:pre-wrap;font:13px/1.6 monospace;color:#bfccbe}
+</style>
+<main>
+  <h1>Inkclipse menu hit-area diagnostic</h1>
+  <p>The repaired playback adds a separate transparent Up state to the two invisible menu buttons. Each new state uses an alpha multiplier of zero; each original HitTest record stays unchanged. Shared shape artwork stays unchanged. This page uses the live playback copy; the original archive remains untouched.</p>
+  <button id="diagnostic">Start repaired playback</button><button id="eject">Eject</button>
+  <p id="status" role="status">Start the player, then click the actual mouse or keyboard menu area.</p>
+  <div id="stage"></div>
+  <pre id="coordinates"></pre>
+</main>
+<script src="/web/vendor/ruffle/ruffle.js"></script>
+<script type="module">
+const stage=document.querySelector('#stage'),status=document.querySelector('#status'),coordinates=document.querySelector('#coordinates');
+let player,ticket=0;
+function stop(){ticket++;if(player){try{player.ruffle().suspend();}catch{}player.remove();player=null;}stage.replaceChildren();}
+async function start(){
+  stop();const request=ticket;
+  status.textContent='Loading repaired playback…';
+  try{
+    if(!window.RufflePlayer?.newest)throw new Error('Ruffle did not load.');
+    const active=window.RufflePlayer.newest().createPlayer();player=active;stage.append(active);
+    await active.ruffle().load({url:'/games/bonus/inkclipse/game.swf?variant=transparent-up',autoplay:'on',allowScriptAccess:false,allowNetworking:'internal',scale:'showAll',logLevel:'info'});
+    if(request!==ticket)return;
+    status.textContent='Repaired playback loaded. Click a menu hit area; watch for the globe moving downward and ink appearing. Restart the player before testing the other mode.';
+  }catch(error){if(request!==ticket)return;stop();status.textContent=error.message;}
+}
+document.querySelector('#diagnostic').onclick=start;
+document.querySelector('#eject').onclick=()=>{stop();status.textContent='Ejected.';};
+const centers=[['Mouse mode',205.94661664664744,125.5001619780669],['Keyboard mode',321.0996337890625,125.4999771118164]];
+function geometry(){const r=stage.getBoundingClientRect();coordinates.textContent='Stage: 600 × 200; display: '+Math.round(r.width)+' × '+Math.round(r.height)+'\n'+centers.map(([name,x,y])=>name+': stage center ('+x.toFixed(1)+', '+y.toFixed(1)+'); browser viewport center ('+(r.left+x*r.width/600).toFixed(1)+', '+(r.top+y*r.height/200).toFixed(1)+')').join('\n');}
+new ResizeObserver(geometry).observe(stage);window.addEventListener('scroll',geometry);geometry();
+window.addEventListener('pagehide',stop);
+</script>
+</html>

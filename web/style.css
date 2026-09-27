@@ -67,3 +67,12 @@ body{display:block;overflow:hidden}main{position:relative;width:100%;height:100s
 #mobile-controller.physical-handoff.raised{opacity:var(--handoff-opacity,0)}
 
 #player iframe{display:block;width:100%;height:100%;border:0;background:#000}
+
+/* An invitation at the edge of the den; the house itself loads on request. */
+.house-entrance[hidden]{display:none}
+.house-entrance button{position:fixed;top:48%;z-index:7;display:grid;justify-items:center;gap:0;width:56px;padding:8px 4px;border:1px solid #aaaf9b25;border-radius:30px;background:#0b141b70;color:#d6d5ba;box-shadow:0 5px 25px #0003;opacity:.66;transition:opacity .2s,background .2s}
+.house-entrance button:hover,.house-entrance button:focus-visible{opacity:1;background:#18232be8}
+.house-entrance-left{left:18px}.house-entrance-right{right:18px}
+.house-entrance span{font:36px Georgia,serif;line-height:1}.house-entrance small{font:9px ui-monospace,monospace;letter-spacing:.04em}
+@media(max-width:999px),(max-aspect-ratio:1379/1000),(pointer:coarse){.house-entrance{display:none}}
+@media(prefers-reduced-motion:reduce){.house-entrance button{transition:none}}

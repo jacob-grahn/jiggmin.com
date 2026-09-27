@@ -1,0 +1,48 @@
+{
+  "format": "PNG",
+  "colorType": "RGB",
+  "dimensions": {
+    "width": 640,
+    "height": 640,
+    "units": "pixels"
+  },
+  "alpha": false,
+  "background": "paper cream",
+  "palette": {
+    "paperCream": "#F0E6CB",
+    "inkNavy": "#1D3540",
+    "mutedRed": "#B95B49",
+    "teal": "#3F8581",
+    "orange": "#D77C36"
+  },
+  "renderer": "Sharp, bundled workspace dependency",
+  "prints": [
+    {
+      "id": "fish-boots",
+      "title": "Fish in Blue Boots",
+      "source": "fish-boots.svg",
+      "texture": "fish-boots.png",
+      "description": "A suspended orange fish above a checkerboard, wearing little teal-blue boots.",
+      "sha256": "c842bd9d6032b86d106f5e4f16017f53cf7e4a70147ffddf7244129ad418b041",
+      "bytes": 35082
+    },
+    {
+      "id": "orbit-teapot",
+      "title": "Tea Orbit",
+      "source": "orbit-teapot.svg",
+      "texture": "orbit-teapot.png",
+      "description": "A floating teal teapot circled by orbit lines, a tiny ringed planet, and small stars.",
+      "sha256": "7e7bb0f0deb6aad22eff3cbd038c6875763c85fad47aa6fcb614e235103c1052",
+      "bytes": 55469
+    },
+    {
+      "id": "antenna-pear",
+      "title": "Pear on a Ladder",
+      "source": "antenna-pear.svg",
+      "texture": "antenna-pear.png",
+      "description": "A green pear with a small antenna above a pink ladder, framed by simple abstract shapes.",
+      "sha256": "ccaa487275eeed738ad1bc63b41b6117b51bec016be7e7647db11bc4b0054354",
+      "bytes": 39406
+    }
+  ]
+}

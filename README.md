@@ -17,6 +17,12 @@ The game archive is included in Git so a fresh clone can play games and build th
 
 Run `npm start` from this directory, then open <http://127.0.0.1:8000>. Serve over HTTP; opening `index.html` as a file does not support the required module, WebAssembly, and game requests. Runtime files are vendored, so no npm installation or CDN connection is required to play standalone games. A static host must serve `.wasm` as `application/wasm`.
 
+## Explore the house
+
+On desktop landscape screens, the edge arrows open a hallway, garage workshop, unfinished attic, and basement. Click objects to discover personal notes, then revisit them in the journal. Discoveries are saved in this browser. Two workshop cartridges reveal playable recovered experiments: Inkclipse and A Murder in Crowland.
+
+The additional rooms load only when visited. Exploration pauses the den and stops its active game; Return to den restores the original room. Smaller screens retain the original game room. See [house exploration](docs/house-exploration.md) for loading, content, and authoring details.
+
 ## Mouse controls
 
 - Hold the left mouse button on a cartridge or controller to grip it. Move slowly to place it; flick and release to throw. Scroll while holding to adjust depth.

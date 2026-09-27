@@ -1,0 +1,228 @@
+{
+  "rooms": [
+    {
+      "id": "hallway",
+      "title": "Hallway",
+      "kicker": "A few things kept.",
+      "description": "A quiet place between rooms. The open doors lead to work in progress, ideas still taking shape, and things left behind."
+    },
+    {
+      "id": "workshop",
+      "title": "Workshop",
+      "kicker": "Games in progress.",
+      "description": "A comfortable, cluttered corner for tools, experiments, and the games that never quite made it out the door."
+    },
+    {
+      "id": "attic",
+      "title": "Attic",
+      "kicker": "Ideas with room to grow.",
+      "description": "Exposed joists, insulation, low roof braces, and one leftover sheet of plywood. A few big ideas are tucked away up here."
+    },
+    {
+      "id": "basement",
+      "title": "Basement",
+      "kicker": "Some things ended early.",
+      "description": "A place for old projects, lost history, and the people who made the work feel like a community."
+    }
+  ],
+  "notes": [
+    {
+      "id": "plate",
+      "room": "hallway",
+      "hotspot": "plate",
+      "title": "The plate",
+      "body": "I painted this in kindergarten. My parents saved it for years and gave it to me recently. I would have gotten rid of it. My kids like it, I think.",
+      "kind": "note"
+    },
+    {
+      "id": "contests",
+      "room": "hallway",
+      "hotspot": "contests",
+      "title": "Contests that grew",
+      "body": "Community members invented and ran entire contests on their own. Coming across one felt like discovering that molecules had suddenly formed into life all by themselves.",
+      "kind": "note"
+    },
+    {
+      "id": "tablet",
+      "room": "workshop",
+      "hotspot": "tablet",
+      "title": "The drawing tablet",
+      "body": "I used a drawing tablet instead of a mouse. Not the fancy kind with a screen—those were very expensive back then. I could type code while still holding the stylus.",
+      "kind": "note"
+    },
+    {
+      "id": "working-hours",
+      "room": "workshop",
+      "hotspot": "working-hours",
+      "title": "Working hours",
+      "body": "When I was in the zone, I'd work endlessly, staying up a few hours later each night until I worked my way back around to a temporarily normal schedule. Outside the zone, I'd struggle to do one thing a day.\n\nThat only worked because I lived alone and was self-employed. Now I keep a regular schedule. Probably for the best. The insomnia and sleep paralysis are long gone.",
+      "kind": "note"
+    },
+    {
+      "id": "greg",
+      "room": "workshop",
+      "hotspot": "greg",
+      "title": "Working with Greg",
+      "body": "Greg is great, a true artist. His passion was contagious and encouraged me to strive for my best as well.\n\nGreg and I set out to make 30 games in 30 days. I think we made about six. A few never saw the light of day. I probably still have them somewhere. Maybe.",
+      "kind": "note"
+    },
+    {
+      "id": "crowland",
+      "room": "workshop",
+      "hotspot": "crowland",
+      "title": "A Murder in Crowland",
+      "body": "I think maybe Greg just doesn't like crows.",
+      "kind": "cartridge",
+      "gameId": "a-murder-in-crowland"
+    },
+    {
+      "id": "inkclipse",
+      "room": "workshop",
+      "hotspot": "inkclipse",
+      "title": "Inkclipse",
+      "body": "I remember dropping ink on a spinning orb to reveal a map. I think that's how it went, anyway.",
+      "kind": "cartridge",
+      "gameId": "inkclipse"
+    },
+    {
+      "id": "zigzag",
+      "room": "workshop",
+      "hotspot": "zigzag",
+      "title": "Zig Zag Zack",
+      "body": "A puzzle game. I think the direction you left a screen determined the orientation of the next screen. Something like that.",
+      "kind": "note"
+    },
+    {
+      "id": "destroyers",
+      "room": "workshop",
+      "hotspot": "destroyers",
+      "title": "Destroyers of Planets",
+      "body": "I made a short demo of a game set in Longtide called Destroyers of Planets. You could walk around a spaceship and switch between four characters. I may still have it somewhere.\n\nIf you've played Platform Racing 2, you already know some of the characters' names: I used them for the servers.",
+      "kind": "note"
+    },
+    {
+      "id": "old-crew",
+      "room": "workshop",
+      "hotspot": "destroyers",
+      "title": "The old crew",
+      "body": "If I remember right, the demo's characters were Derron, Fitz, Carina, and Grayan. Fitz has since become an entirely different character with a different name. Carina is Kerena now. Grayan is still Grayan.",
+      "kind": "note"
+    },
+    {
+      "id": "longtide",
+      "room": "attic",
+      "hotspot": "longtide",
+      "title": "Longtide",
+      "body": "I've been imagining this universe since my teens. When I'm bored, I fill the time with stories, characters, and games that could happen here. The games tend to grow faster than my ability to make them. I'd like to find one small piece that would be fun all by itself.",
+      "kind": "note"
+    },
+    {
+      "id": "to-the-edges",
+      "room": "attic",
+      "hotspot": "longtide",
+      "title": "To the edges",
+      "body": "By all accounts, Longtide has always existed. There's no evidence of a big bang. People have explored the universe to its very edges and found empty planets. No aliens, no supernatural phenomena, no parallel universes, no time travel or mysterious space anomalies. No answers to life's hard questions.\n\nWhat motivates people when there's no ‘more’?",
+      "kind": "note"
+    },
+    {
+      "id": "questions",
+      "room": "attic",
+      "hotspot": "questions",
+      "title": "Questions",
+      "body": "Would society go through cycles? How would they know? If someone lived forever in a forever universe, would they go through cycles? How would they know?\n\nWhat would religion look like? Could people make their own heaven and hell? Maybe someone knows more than they're letting on.",
+      "kind": "note"
+    },
+    {
+      "id": "earlier-longtide",
+      "room": "attic",
+      "hotspot": "questions",
+      "title": "An earlier Longtide",
+      "body": "Originally, it was about trusting people like us to be the good guys, when the scary aliens were actually the good guys. I've replaced so many characters and ideas since then that the original story is unrecognizable. There aren't even aliens anymore.",
+      "kind": "note"
+    },
+    {
+      "id": "derron",
+      "room": "attic",
+      "hotspot": "derron",
+      "title": "Derron",
+      "body": "He's fairly serious. He's looking for his parents. He's invincible, for reasons almost no one understands.\n\nHe likes chili, I think.",
+      "kind": "note"
+    },
+    {
+      "id": "farm",
+      "room": "attic",
+      "hotspot": "farm",
+      "title": "The farm",
+      "body": "I'd like to live on a farm where solar-powered robots do most of the hard labor. I've been watching the solar-powered-farm-robot scene with much interest.",
+      "kind": "note"
+    },
+    {
+      "id": "potato-robot",
+      "room": "attic",
+      "hotspot": "farm",
+      "title": "The first farm robot",
+      "body": "It would grow potatoes, of course. It worked for the guy in The Martian.",
+      "kind": "note"
+    },
+    {
+      "id": "tricycle",
+      "room": "attic",
+      "hotspot": "tricycle",
+      "title": "The tricycle",
+      "body": "In the last two homes I've lived in, I found a mysterious black trash bag in the attic.\n\nAn attic is already a strange place. It's my house, but this part is dark and unfamiliar. I'm pretty sure some birds went up there and died. Then there's this bag someone left behind. A body? Drugs? Rat-infested sausages?\n\nBoth times, I brought it down and opened it slowly, touching it as little as possible. Both times, there was a tricycle inside.\n\nThe first time, that was a relief. The second time, it was not.\n\nDo people often store tricycles in their attics in black plastic bags?",
+      "kind": "note"
+    },
+    {
+      "id": "secret",
+      "room": "attic",
+      "hotspot": "secret",
+      "title": "Something I'm keeping to myself",
+      "body": "There's a plot twist in Longtide I'd really like to get out into the world. I can't tell you about it because, well.",
+      "kind": "note"
+    },
+    {
+      "id": "community",
+      "room": "basement",
+      "hotspot": "community",
+      "title": "A place to be creative",
+      "body": "The community around my games was a place where people could be creative. A lot of game communities aren't that.\n\nI eventually left making games for a living and got a normal job. I shut down the servers, and a lot of history was lost. That's probably what I regret most. At the time, I was pretty bummed and trying to figure out how to move on.",
+      "kind": "note"
+    },
+    {
+      "id": "neverending",
+      "room": "basement",
+      "hotspot": "neverending",
+      "title": "Neverending Light — parts 2 and 3",
+      "body": "Neverending Light was supposed to be three games. In the second, you would play as the girl and get a gun. In the third, you would switch between her and the guy: a gun and cave-sprite-possessed powers.\n\nI gave up on making parts 2 and 3.",
+      "kind": "note"
+    },
+    {
+      "id": "voices",
+      "room": "basement",
+      "hotspot": "voices",
+      "title": "What does a cave sprite sound like?",
+      "body": "The actress doing the cave sprite voices asked me what they should sound like. I told her I didn't know.\n\nShe spent the next ten minutes producing more voices than I knew could come out of one person. She was amazing.",
+      "kind": "note"
+    },
+    {
+      "id": "d-note",
+      "room": "basement",
+      "hotspot": "d-note",
+      "title": "D is for Derron",
+      "body": "D wasn't really connected to Derron, but that's where the name came from. Just indirect evidence of what I was thinking about.",
+      "kind": "note"
+    }
+  ],
+  "lockedDoors": [
+    {
+      "id": "locked-door-1",
+      "title": "Not open yet",
+      "body": "This door isn't available yet."
+    },
+    {
+      "id": "locked-door-2",
+      "title": "Not open yet",
+      "body": "This door isn't available yet."
+    }
+  ]
+}
