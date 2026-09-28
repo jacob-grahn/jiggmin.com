@@ -7,7 +7,7 @@ import {createMoonlitWindows} from '../web/house-window-sky.js';
 test('Every non-den window becomes a shared sky opening, while glass and other surfaces remain intact',()=>{
  const sky=new THREE.Texture();
  for(const [room,count] of Object.entries({hallway:2,basement:3,workshop:2,attic:1})){
-  const bytes=readFileSync(`web/assets/house/${room}.glb`),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
+  const bytes=readFileSync(`scene/exports/house/${room}.glb`),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
   const root=new THREE.Group();
   for(const node of doc.nodes.filter(n=>n.mesh!==undefined)){
    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(),new THREE.MeshStandardMaterial());mesh.name=node.name.replaceAll(' ','_');root.add(mesh);

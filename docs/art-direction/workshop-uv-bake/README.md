@@ -16,7 +16,7 @@ node scene/scripts/prepare_workshop_bake.mjs
 /Applications/Blender.app/Contents/MacOS/Blender -b --python scene/scripts/bake_workshop.py
 ```
 
-The original `workshop.glb` remains intact. `before.png` and `after.png` use the same
+The original `scene/exports/house/workshop.glb` remains intact. `before.png` and `after.png` use the same
 resting camera at 1440 × 900.
 
 Validation: `npm test` passes all 129 tests, including atlas coverage, retained

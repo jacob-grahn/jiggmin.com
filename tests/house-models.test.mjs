@@ -5,7 +5,7 @@ const anchors=JSON.parse(readFileSync('web/assets/house/anchors.json'));
 const hotspots=JSON.parse(readFileSync('web/assets/house/hotspots.json'));
 for(const room of ['hallway','workshop','attic','basement']){
  test(`${room} has browser geometry, an authored camera, and world-space interaction anchors`,()=>{
-  const bytes=readFileSync(`web/assets/house/${room}.glb`);
+  const bytes=readFileSync(`scene/exports/house/${room}.glb`);
   assert.equal(bytes.readUInt32LE(0),0x46546c67);
   assert.equal(bytes.readUInt32LE(8),bytes.length);
   assert.ok(bytes.length<15*1024*1024,'room exceeds lazy-load budget');
@@ -33,7 +33,7 @@ for(const room of ['hallway','workshop','attic','basement']){
 }
 
 test('basement walls use three painted slabs instead of individual bricks',()=>{
- const bytes=readFileSync('web/assets/house/basement.glb');
+ const bytes=readFileSync('scene/exports/house/basement.glb');
  const model=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
  assert.ok(!model.nodes.some(n=>/Old concrete block|Side masonry|Masonry backing/.test((n.name??'').replaceAll('_',' '))));
  const walls=model.nodes.filter(n=>n.extras?.painted_wall);

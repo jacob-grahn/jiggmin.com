@@ -2,7 +2,7 @@
 
 Generated with the built-in image_gen tool. The eight non-den windows sample one equirectangular panorama by world-space sightline. This keeps scenery angularly consistent and avoids fitting a complete landscape into every small window. Existing frames, rain geometry, clipping, and room ownership remain.
 
-Asset: web/assets/house/windows/moonlit-sky.png
+Asset: web/assets/house/windows/moonlit-sky.webp (lossless source; the build produces quality-80 WebP)
 
 Final generation prompt:
 

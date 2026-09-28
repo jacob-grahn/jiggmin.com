@@ -12,7 +12,7 @@ import {createHiddenScraps} from './house-scraps.js';
 import {createMoonlitWindows,MOONLIT_SKY_URL} from './house-window-sky.js';
 import {resizeHouseCamera} from './house-camera.js';
 import * as THREE from 'three';
-import {GLTFLoader} from './vendor/three/GLTFLoader.js';
+import {GLTFLoader} from './model-loader.js';
 
 export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new Set()}={}) {
  const renderer=new THREE.WebGLRenderer({antialias:true});

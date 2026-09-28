@@ -3,15 +3,24 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "python3 scripts/serve.py",
+    "start": "npm run build && python3 scripts/serve.py",
+    "start:source": "python3 scripts/serve.py --source",
     "test": "npm run build && node --test tests/*.test.mjs",
     "build": "python3 scripts/build_routes.py",
-    "perf:visibility": "node scripts/benchmark-visibility.mjs"
+    "perf:visibility": "node scripts/benchmark-visibility.mjs",
+    "assets:compare": "node scripts/compress-assets.mjs"
   },
   "dependencies": {
     "@ruffle-rs/ruffle": "0.6.0",
     "cannon-es": "0.20.0",
     "three": "0.186.1",
     "three-mesh-bvh": "0.9.15"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
+    "draco3dgltf": "^1.5.7",
+    "sharp": "^0.35.5"
   }
 }

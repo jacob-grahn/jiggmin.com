@@ -895,8 +895,10 @@ def save(room):
  bpy.ops.wm.save_as_mainfile(filepath=str(R/'scene'/('house-'+room+'.blend')))
  (R/'scene/renders/house').mkdir(parents=True,exist_ok=True)
  S.render.filepath=str(R/'scene/renders/house'/(room+'.png'));bpy.ops.render.render(write_still=True)
+ # Reference renders belong with authoring exports, outside the deployed site.
+ exports=R/'scene/exports/house';exports.mkdir(parents=True,exist_ok=True)
  # Blender has native WebP support; save the final color-managed render.
- S.render.image_settings.file_format='WEBP';S.render.image_settings.quality=88;bpy.data.images['Render Result'].save_render(str(OUT/(room+'.webp')),scene=S)
+ S.render.image_settings.file_format='WEBP';S.render.image_settings.quality=88;bpy.data.images['Render Result'].save_render(str(exports/(room+'.webp')),scene=S)
  existing={}
  if (OUT/'hotspots.json').exists():existing=json.loads((OUT/'hotspots.json').read_text())
  existing.update(allhot);(OUT/'hotspots.json').write_text(json.dumps(existing,indent=2)+'\n')

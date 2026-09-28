@@ -17,7 +17,7 @@ node scene/scripts/prepare_attic_bake.mjs
 /Applications/Blender.app/Contents/MacOS/Blender -b --python scene/scripts/bake_attic.py
 ```
 
-The original `attic.glb` remains intact. `before.png` and `after.png` use the same
+The original `scene/exports/house/attic.glb` remains intact. `before.png` and `after.png` use the same
 resting camera at 1440 × 900.
 
 Validation: `npm test` passes all 129 tests, including atlas coverage, retained

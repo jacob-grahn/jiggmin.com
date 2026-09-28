@@ -6,7 +6,7 @@ import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
 import {createHouseProps} from '../web/house-props.js';
 if(!globalThis.ProgressEvent)globalThis.ProgressEvent=class {constructor(type,values){Object.assign(this,{type},values);}};
 async function roomProps(room){
- const bytes=readFileSync(`web/assets/house/${room}.glb`),length=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+length));
+ const bytes=readFileSync(`scene/exports/house/${room}.glb`),length=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+length));
  doc.buffers[0].uri=`data:application/octet-stream;base64,${bytes.subarray(28+length).toString('base64')}`;
  // Physics/grouping tests need geometry; textures are exercised in the browser.
  doc.materials=[];for(const mesh of doc.meshes)for(const p of mesh.primitives)delete p.material;
@@ -95,7 +95,7 @@ test('hallway cartons are independent props with tape textured onto each box',as
   for(const other of cartons.filter(other=>other!==p))assert.equal(physics.items.get(other.id).body.type,4);
   physics.cancel();
  }
- const bytes=readFileSync('web/assets/house/hallway.glb'),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
+ const bytes=readFileSync('scene/exports/house/hallway.glb'),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
  assert.ok(!doc.nodes.some(n=>/Carton_packing_tape|Carton_top_seam/.test(n.name??'')));
  const taped=doc.materials.filter(m=>m.name.includes('taped cardboard'));
  assert.equal(taped.length,3);
@@ -112,7 +112,7 @@ test('workshop has intact computer and woodworking props with a flat printed key
  }
  const keyboard=props.find(p=>p.title==='Keyboard');assert.ok(keyboard);assert.equal(keyboard.mode,'throw');assert.ok(keyboard.size.y<.04);
  assert.ok(!props.some(p=>/Keycap|Inkclipse spinning orb|Zigzag puzzle piece|Four crew ship|Unfinished small component/.test(p.title)));
- const bytes=readFileSync('web/assets/house/workshop.glb'),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
+ const bytes=readFileSync('scene/exports/house/workshop.glb'),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
  const printed=doc.materials.find(m=>m.name==='Print keyboard-top');assert.ok(printed?.pbrMetallicRoughness.baseColorTexture);
  const camera=doc.nodes.find(n=>n.camera!==undefined);assert.ok(camera.translation[2]>2.9,'camera should stand farther back from bench');
 });

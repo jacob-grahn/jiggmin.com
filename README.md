@@ -4,18 +4,20 @@ A static HTML game room with real 3D geometry, throwable physics cartridges and 
 
 ## Project layout and Git
 
-- `index.html`, `web/`: site source, optimized browser assets, and vendored runtimes.
+- `index.html`, `web/`: site source, original browser asset exports, and vendored runtimes.
 - `data/`: versioned game catalog, checksums, source URLs, and archive notes.
 - `scripts/`, `tests/`: download/build/preview tools and verification.
 - `scene/`: Blender authoring scripts and documentation. Local `.blend` files, `textures/`, `renders/`, and `mockups/` are ignored by Git.
 - `games/`: versioned archived SWFs, thumbnails, and loader payloads.
+- `scene/exports/house/`: unbaked models, reference renders, and reports used by the authoring pipeline; not deployed.
+- `npm run assets:compare`: generate adjustable compression experiments; see [room compression](docs/asset-compression.md) for the preview and quality controls.
 - `dist/`: generated static deployment output; ignored by Git.
 
 The game archive is included in Git so a fresh clone can play games and build the complete site. The checked-in catalog lists the expected files and their hashes. Source artwork remains local and ignored; retain a separate backup of it. The fetch scripts can attempt downloads from the original mirror, but availability may change. No Blender source files are needed to run the exported website. Run `npm ci` to install dependencies for tests.
 
 ## Run locally
 
-Run `npm start` from this directory, then open <http://127.0.0.1:8000>. Serve over HTTP; opening `index.html` as a file does not support the required module, WebAssembly, and game requests. Runtime files are vendored, so no npm installation or CDN connection is required to play standalone games. A static host must serve `.wasm` as `application/wasm`.
+Run `npm ci` (including development dependencies), then `npm start` from this directory, then open <http://127.0.0.1:8000>. Serve over HTTP; opening `index.html` as a file does not support the required module, WebAssembly, and game requests. Runtime files are vendored, so the built site needs no npm installation or CDN connection. `npm start` builds and serves the compressed `dist/` output; use `npm run start:source` for original exports and test fixtures. A static host must serve `.wasm` as `application/wasm`.
 
 ## Explore the house
 
@@ -106,6 +108,6 @@ Cloudflare Workers Builds uses `npm run build` as the build command and `npx wra
 
 Open `/effing-meteors`, `/uber-breakout`, or any other ID from `data/games.json` to automatically insert that cartridge and load its game when the scene is ready. Inserting another cartridge updates the URL; completing a drag out of the console returns it to `/`. Back/Forward restores the corresponding game or empty console. Cancelling a drag keeps the same URL. Query strings and hashes are preserved. Browser autoplay policy may still require a click to enable sound.
 
-`npm run build` assembles the deployable site in `dist/`, including the main and bonus static `<slug>/index.html` entry pages, web assets, game catalog, and local game files. Run it after changing `index.html` or adding a game. `npm start` serves both `/slug` and `/slug/` directly. Ordinary static directory hosts may redirect `/slug` to `/slug/`; both work. Deploy the contents of `dist/` at the domain root. No server-side game runtime is needed. Unknown routes return the static host's 404; if the host rewrites them to `index.html`, the app shows a game-not-found message.
+`npm run build` assembles the deployable site in `dist/`, including the main and bonus static `<slug>/index.html` entry pages, web assets, game catalog, and local game files. It automatically applies the approved Balanced compression to all runtime GLBs, standalone WebP cartridge labels, and configured room images, without modifying the source exports. Run it after changing code, exporting room assets, or adding a game. See [the compression pipeline](docs/asset-compression.md) for settings and size reports. `npm start` serves both `/slug` and `/slug/` directly. Ordinary static directory hosts may redirect `/slug` to `/slug/`; both work. Deploy the contents of `dist/` at the domain root. No server-side game runtime is needed. Unknown routes return the static host's 404; if the host rewrites them to `index.html`, the app shows a game-not-found message.
 
 Bubble Racing (`/bubble-racing`) is a touch-mode HTML5 cartridge loaded in an iframe from https://bubbleracing.com/. It requires an internet connection and uses the live game, not the local Ruffle archive. Its cartridge is created from the shared runtime mold; its icon is stored under `web/assets/bubble-racing/`. Eject removes the iframe and stops the embedded game.

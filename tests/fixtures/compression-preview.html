@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Room compression comparison</title>
+<style>
+body{margin:0;background:#090e12;color:#eee;font:14px system-ui}header{height:64px;padding:0 20px;display:flex;align-items:center;gap:18px;box-sizing:border-box}select{font:inherit;padding:6px}iframe{display:block;border:0;width:100%;height:calc(100vh - 64px)}small{color:#bbb}#status{margin-left:auto}
+</style>
+<header><strong>Room compression</strong><label>Quality <select id="preset"><option value="original">Original</option><option value="high">High · image quality 90</option><option value="balanced">Balanced · image quality 80</option><option value="smaller">Smaller · image quality 65</option><option value="custom">Custom</option></select></label><small>Switching restarts the scene. Explore every room at desktop width.</small><span id="status"></span></header>
+<iframe title="Explore the house with the selected compression settings"></iframe>
+<script type="module">
+const select=document.querySelector('select'),frame=document.querySelector('iframe'),status=document.querySelector('#status');
+let revision=0;
+async function load(){
+  const ticket=++revision,preset=select.value;status.textContent='Loading…';
+  try{
+    let report;
+    if(preset!=='original'){
+      const response=await fetch(`/scene/compression/${preset}/report.json`);
+      if(!response.ok)throw Error('Generate this preset first with npm run assets:compare.');
+      report=await response.json();
+    }
+    const response=await fetch('/index.html');if(!response.ok)throw Error('Site HTML unavailable');
+    const doc=new DOMParser().parseFromString(await response.text(),'text/html');
+    const importmap=doc.querySelector('script[type="importmap"]'),map=JSON.parse(importmap.textContent);
+    map.imports['/web/routes.js']='/tests/fixtures/compression-routes.js';
+    if(report){
+      doc.querySelector('script[type="module"]').remove();
+      // The backdrop is an HTML image, so it does not use Three's LoadingManager.
+      doc.querySelector('.backdrop').src=report.urls['/web/assets/den.webp'];
+      const boot=doc.createElement('script');boot.type='module';
+      boot.textContent=`import {DefaultLoadingManager} from 'three';
+        const urls=${JSON.stringify(report.urls)};
+        DefaultLoadingManager.setURLModifier(url=>urls[new URL(url,document.baseURI).pathname]??url);
+        await import('/web/app.js?v=basement-stairs-1');`;
+      doc.body.append(boot);
+    }
+    importmap.textContent=JSON.stringify(map);
+    if(ticket!==revision)return;
+    frame.srcdoc='<!doctype html>'+doc.documentElement.outerHTML;
+    status.textContent=report?`${(report.bytes/1e6).toFixed(2)} MB · ${(100*(1-report.bytes/report.originalBytes)).toFixed(0)}% smaller`:'Original assets';
+  }catch(error){if(ticket===revision)status.textContent=error.message;}
+}
+select.addEventListener('change',load);load();
+</script></html>

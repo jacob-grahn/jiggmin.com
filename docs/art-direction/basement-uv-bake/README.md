@@ -20,7 +20,7 @@ node scene/scripts/prepare_basement_bake.mjs
 
 The hallway and basement share preparation, UV packing, baking, denoising, and
 export code, with separate room lighting configurations and assets. The original
-basement.glb remains unchanged. The before and after screenshots use the same
+`scene/exports/house/basement.glb` remains unchanged. The before and after screenshots use the same
 resting camera and 1440 × 900 viewport.
 
 Validation: all 121 tests pass, including atlas coverage, movable-prop exclusion,

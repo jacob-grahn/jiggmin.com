@@ -5,13 +5,14 @@ import bpy, sys, json
 from pathlib import Path
 from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[2]
+EXPORTS=ROOT/'scene/exports/house';EXPORTS.mkdir(parents=True,exist_ok=True)
 source=(ROOT/'scene/scripts/build_house_rooms.py').read_text().split('\nargs=sys.argv')[0]
 ns={'__file__':str(ROOT/'scene/scripts/build_house_rooms.py')}
 exec(compile(source,'build_house_rooms.py','exec'),ns)
 rooms=sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else ['hallway','workshop','attic','basement']
 if not rooms or any(room not in ['hallway','workshop','attic','basement'] for room in rooms):raise ValueError('Specify valid room names')
 def existing_report(name):
- path=ROOT/'web/assets/house'/name
+ path=(EXPORTS if name=='surface-finish.json' else ROOT/'web/assets/house')/name
  return json.loads(path.read_text()) if path.exists() else {}
 manifest=existing_report('anchors.json')
 finish_report=existing_report('surface-finish.json')
@@ -48,9 +49,9 @@ for room in rooms:
    bpy.ops.object.select_all(action='DESELECT');o.select_set(True);bpy.context.view_layer.objects.active=o
    bpy.ops.object.convert(target='MESH')
  finish_report[room]=finish_house(room)
- bpy.ops.export_scene.gltf(filepath=str(ROOT/f'web/assets/house/{room}.glb'),export_format='GLB',export_cameras=True,export_lights=True,export_extras=True,export_apply=True,export_image_format='JPEG',export_jpeg_quality=85)
+ bpy.ops.export_scene.gltf(filepath=str(EXPORTS/f'{room}.glb'),export_format='GLB',export_cameras=True,export_lights=True,export_extras=True,export_apply=True,export_image_format='JPEG',export_jpeg_quality=85)
  manifest[room]=anchors
  print('EXPORTED',room,flush=True)
 (ROOT/'web/assets/house/anchors.json').write_text(json.dumps(manifest,indent=2)+'\n')
 
-(ROOT/'web/assets/house/surface-finish.json').write_text(json.dumps(finish_report,indent=2)+'\n')
+(EXPORTS/'surface-finish.json').write_text(json.dumps(finish_report,indent=2)+'\n')

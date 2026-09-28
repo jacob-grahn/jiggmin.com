@@ -92,7 +92,7 @@ test('bonus cartridges match verified metadata and packaged asset hashes',()=>{
 
 test('every room image exists, fits the payload budget, and matches hotspot proportions',()=>{
  for(const room of roomIds){
-  const path=`web/assets/house/${room}.webp`,buffer=readFileSync(path);
+  const path=`scene/exports/house/${room}.webp`,buffer=readFileSync(path);
   assert.ok(statSync(path).size<=1024*1024,`${path} exceeds 1 MB`);
   const {width,height}=webpSize(buffer);
   assert.ok(width>0&&height>0&&width<=4096&&height<=4096,`${path} has invalid dimensions ${width}x${height}`);

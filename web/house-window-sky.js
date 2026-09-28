@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export const MOONLIT_SKY_URL='/web/assets/house/windows/moonlit-sky.png';
+export const MOONLIT_SKY_URL='/web/assets/house/windows/moonlit-sky.webp';
 
 // Window planes act as openings onto one infinitely distant environment.
 // Sample by the actual world-space sightline, not by the plane's local UVs:

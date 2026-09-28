@@ -28,7 +28,7 @@ const spineTitles={
  'kimblis-the-blue':'Kimblis'
 };
 export async function remodelCartridge(root,game){
- const loadImage=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src='/'+src;});
+ const loadImage=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=THREE.DefaultLoadingManager.resolveURL('/'+src);});
  const image=await loadImage(game.thumbnail.file);
  const label=game.cartridgeLabel?await loadImage(game.cartridgeLabel.file).catch(()=>null):null;
  // Remove the old plain shell, grips and labels as one replaceable model.

@@ -6,7 +6,7 @@ import {groupHouseProps} from '../../web/house-props.js';
 if(!globalThis.ProgressEvent)globalThis.ProgressEvent=class{constructor(type,values){Object.assign(this,{type},values);}};
 export async function prepareRoomBake(room){
 if(!['hallway','basement','attic','workshop'].includes(room))throw Error('Unsupported bake room');
-const bytes=readFileSync(`web/assets/house/${room}.glb`),length=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+length));
+const bytes=readFileSync(`scene/exports/house/${room}.glb`),length=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+length));
 const stripped=structuredClone(doc);stripped.buffers[0].uri=`data:application/octet-stream;base64,${bytes.subarray(28+length).toString('base64')}`;
 stripped.materials=[];for(const mesh of stripped.meshes)for(const p of mesh.primitives)delete p.material;
 delete stripped.textures;delete stripped.images;

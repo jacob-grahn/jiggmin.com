@@ -35,12 +35,12 @@ node scene/scripts/prepare_hallway_bake.mjs
 
 The preparation step uses the real browser prop grouping to classify fixed
 geometry and writes a temporary input GLB. Blender leaves the original scene
-assets intact and writes `hallway-baked.glb` and `hallway-bake.json`.
+assets intact and writes `hallway-baked.glb` and `scene/exports/house/hallway-bake.json`.
 Intermediate HDR and PNG textures are saved under ignored `scene/renders/`.
 
 `before.png` and `after.png` are browser captures at the hallway's resting camera
 with the same 1440 × 900 viewport. `before-cream-lighting.png` preserves the
-first bake before the cream ceiling and stronger blue/orange lighting revision. The original `hallway.glb` is retained for
+first bake before the cream ceiling and stronger blue/orange lighting revision. The original `scene/exports/house/hallway.glb` is retained for
 comparison and an easy rollback.
 
 Validation: all 117 automated tests pass, including atlas coverage, exclusion of

@@ -101,7 +101,7 @@ materials={}
 for name,color in {'plaster':(.09,.14,.15,1),'wood':(.10,.055,.025,1),'rail':(.20,.18,.13,1),'dark':(.018,.022,.025,1),'cream':(.75,.68,.53,1),'ochre':(.54,.27,.04,1),'blue':(.035,.15,.27,1),'rust':(.38,.075,.035,1)}.items():
  m=bpy.data.materials.new(name);m.diffuse_color=color;materials[name]=m
 for name,r in rooms.items():
- path=ROOT/('web/assets/room.glb' if name=='den' else f'web/assets/house/{name}.glb')
+ path=ROOT/('web/assets/room.glb' if name=='den' else f'scene/exports/house/{name}.glb')
  before=set(bpy.data.objects);bpy.ops.import_scene.gltf(filepath=str(path));objects=set(bpy.data.objects)-before
  root=bpy.data.objects.new('House / '+name,None);bpy.context.collection.objects.link(root)
  for o in objects:

@@ -4,7 +4,7 @@ import {cartridgeRoom} from './cartridge-storage.js';
 import * as THREE from 'three';
 import {createHouseEntry} from './house-entry.js?v=basement-stairs-1';
 import {createDenJournal} from './den-journal.js';
-import {GLTFLoader} from './vendor/three/GLTFLoader.js';
+import {GLTFLoader} from './model-loader.js';
 import {inSlot,slotTarget,playbackFile} from './interaction.js?v=aligned-slot-1';
 import {resolveRoute,writeGameUrl} from './routes.js';
 import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
