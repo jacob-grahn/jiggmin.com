@@ -1,11 +1,14 @@
+import {createBonusCartridge} from './bonus-cartridge-model.js';
+import {createBasementCartridges} from './cartridge-storage.js';
 import {illustrateHouse} from './house-illustration.js?v=3';
 import {repairDenProjection} from './den-projection.js';
 import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
 import {createRoomResources} from './house-resources.js';
 import {createHouseProps} from './house-props.js';
-import {createHousePropInput} from './house-prop-input.js?v=hall-landing-back-1';
-import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=hall-landing-back-1';
+import {createHousePropInput} from './house-prop-input.js?v=bitey-1';
+import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=bitey-1';
 import {createHiddenScraps} from './house-scraps.js';
+import {createWindowParallax} from './house-window-parallax.js';
 import * as THREE from 'three';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
 
@@ -18,7 +21,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  const ambient=new THREE.HemisphereLight(0xadc8de,0x58412b,.45);ambient.layers.enableAll();world.add(ambient);
  const fill=new THREE.DirectionalLight(0xb8cee0,.35);fill.position.set(-3,5,5);fill.layers.enableAll();world.add(fill);
  const loader=new GLTFLoader(),rooms=new Map(),reduced=matchMedia('(prefers-reduced-motion: reduce)');
- let layout,connections,loading,current,camera,revision=0,frame,finish,propFrame,propTime=0,active=false,targets=new Map(),denClone;
+ let layout,connections,loading,current,camera,revision=0,revealRevision=0,frame,finish,propFrame,propTime=0,active=false,targets=new Map(),denClone;
  const input=createHousePropInput(host,{getRoom:()=>current,getCamera:()=>camera,onActivate,wake,reduced});
  function wake(){if(!active||propFrame||document.hidden)return;propTime=performance.now();propFrame=requestAnimationFrame(updateProps);}
  function updateProps(now){
@@ -38,7 +41,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    Object.assign(button.style,{left:`${left*100}%`,top:`${top*100}%`,width:`${(right-left)*100}%`,height:`${(bottom-top)*100}%`});
   }
  }
- function render(){if(camera){renderIsolatedRooms(renderer,world,camera,[...rooms.keys()]);updateTargets();}}
+ function render(){if(camera){for(const room of rooms.values())room.windowParallax?.update(camera);renderIsolatedRooms(renderer,world,camera,[...rooms.keys()]);updateTargets();}}
  function resize(){input.cancel();const {width,height}=host.getBoundingClientRect();renderer.setSize(width,height,false);if(camera){camera.aspect=width/height;camera.updateProjectionMatrix();render();}}
  function setupDoors(model){
   const doors=new Map(),leaves=[];model.updateMatrixWorld(true);
@@ -59,6 +62,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   return doors;
  }
  function addRoom(id,gltf){
+  if(id==='basement')for(const cartridge of createBasementCartridges(getDen?.()?.basementCartridges??[]))gltf.scene.add(cartridge);
   const resources=createRoomResources();resources.capture(gltf.scene);
   const spec=layout.rooms[id],matrix=roomMatrix(spec);gltf.scene.applyMatrix4(matrix);world.add(gltf.scene);gltf.scene.updateMatrixWorld(true);
   const ceiling=[];
@@ -81,8 +85,9 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   const scraps=createHiddenScraps(props.props,view,world,collected);
   const roots=[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot),...Array.from(scraps.values(),s=>s.mesh)];
   illustrateHouse(roots);
+  const windowParallax=id==='hallway'?createWindowParallax(gltf.scene,view):null;
   roots.forEach(root=>resources.capture(root));assignRoomLighting(roots,id);
-  const room={id,resources,roots,scene:world,model:gltf.scene,view,doors,props,scraps,pickRoots:[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot)]};rooms.set(id,room);
+  const room={id,resources,roots,windowParallax,scene:world,model:gltf.scene,view,doors,props,scraps,pickRoots:[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot)]};rooms.set(id,room);
  }
  function refreshDen(){
   const source=getDen?.();if(!source?.scene||!source.camera)return;
@@ -126,7 +131,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  }
  async function load(){
   if(!loading)loading=(async()=>{
-   const response=await fetch('/web/assets/house/layout.json?v=hall-landing-back-1');if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
+   const response=await fetch('/web/assets/house/layout.json?v=bitey-1');if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
    connections=buildConnections(layout);
    // The replacement ceiling belongs to the hallway, including its lighting.
    assignRoomLighting(connections.group.children.filter(o=>o.name.startsWith('Hall ceiling')||o.name.startsWith('Hall landing')||o.name==='Den shared wall extension'),'hallway');
@@ -138,7 +143,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  async function ensureRoom(id,ticket){
   if(rooms.has(id))return;
   if(id==='den'){refreshDen();return;}
-  const gltf=await loader.loadAsync(`/web/assets/house/${id}.glb${id==='attic'?'?v=tricycle-2':id==='hallway'?'?v=hall-landing-back-1':''}`);
+  const gltf=await loader.loadAsync(`/web/assets/house/${id}.glb${id==='attic'?'?v=tricycle-2':id==='hallway'?'?v=bitey-1':id==='workshop'?'?v=desk-in-progress-1':''}`);
   if(ticket!==revision){const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();return;}
   addRoom(id,gltf);
  }
@@ -191,6 +196,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   }
  }
  async function travel(id){
+  revealRevision++;
   setActive(false);targets.clear();const ticket=revision;await load();
   if(ticket!==revision)return;
   await Promise.all([...new Set(['hallway',id])].map(room=>ensureRoom(room,ticket)));
@@ -204,17 +210,36 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   for(const room of [...rooms.keys()])if(room!==id)unloadRoom(room);
   render();
  }
- async function revealScrap(id){
-  const scrap=current?.scraps?.get(id);if(!scrap)return null;
-  const ticket=revision,start=scrap.mesh.position.clone(),end=scrap.prop.root.position.clone();
-  end.addScaledVector(camera.position.clone().sub(end).normalize(),.4);end.y+=.25;
-  const began=performance.now();
+ async function revealScrap(id,bonusId){
+  const room=current,scrap=room?.scraps?.get(id);if(!scrap)return null;
+  const ticket=revision,revealTicket=++revealRevision,start=scrap.mesh.position.clone(),end=scrap.prop.root.position.clone();
+  const valid=()=>ticket===revision&&revealTicket===revealRevision&&current===room;
+  let cartridge;
+  if(bonusId){
+   cartridge=await createBonusCartridge(bonusId);
+   const resources=createRoomResources();resources.capture(cartridge);
+   if(!valid()){resources.dispose();return null;}
+   cartridge.position.copy(start);cartridge.quaternion.copy(camera.quaternion);
+   world.add(cartridge);room.roots.push(cartridge);room.resources.capture(cartridge);
+   assignRoomLighting([cartridge],room.id);illustrateHouse([cartridge]);room.resources.capture(cartridge);
+  }
+  end.addScaledVector(camera.position.clone().sub(end).normalize(),bonusId ? .75 : .4);end.y+=bonusId ? .45 : .25;
+  const right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+  const paperEnd=end.clone().addScaledVector(right,bonusId?-.24:0);
+  const cartridgeEnd=end.clone().addScaledVector(right,.17);
+  const began=performance.now(),duration=bonusId?950:260;
   await new Promise(resolve=>{
-   const step=now=>{if(ticket!==revision){resolve();return;}const t=reduced.matches?1:Math.min(1,(now-began)/260);scrap.mesh.position.lerpVectors(start,end,t*t*(3-2*t));render();if(t<1)requestAnimationFrame(step);else resolve();};requestAnimationFrame(step);
+   const step=now=>{
+    if(!valid()){resolve();return;}
+    const t=reduced.matches?1:Math.min(1,(now-began)/duration),blend=t*t*(3-2*t);
+    scrap.mesh.position.lerpVectors(start,paperEnd,blend);
+    if(cartridge)cartridge.position.lerpVectors(start,cartridgeEnd,blend);
+    render();if(t<1)requestAnimationFrame(step);else resolve();
+   };requestAnimationFrame(step);
   });
-  if(ticket!==revision){scrap.mesh.position.copy(start);return null;}
-  const point=end.project(camera);collected.add(id);scrap.mesh.visible=false;render();
-  return {x:(point.x+1)*50,y:(1-point.y)*50};
+  if(!valid()){scrap.mesh.position.copy(start);if(cartridge)cartridge.visible=false;return null;}
+  const point=end.project(camera);collected.add(id);scrap.mesh.visible=false;if(cartridge)cartridge.visible=false;render();
+  return {x:(point.x+1)*50,y:(1-point.y)*50,cartridgeLabel:cartridge?.userData.labelImage};
  }
  return {load,travel,depart:()=>travel('den'),resize,cancel,setActive,setInteractive:value=>input.setEnabled(value),revealScrap,cancelGrab:()=>input.cancel(),
   get props(){return current?.props?.props??[];},

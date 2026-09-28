@@ -33,18 +33,18 @@ export function createHousePropInput(host,{getRoom,getCamera,onActivate,wake,red
   pick(event); // Update the ray, including when the pointer leaves the object.
   if(!ray.ray.intersectPlane(g.plane,point))return;
   const now=performance.now(),dt=Math.max(.008,(now-g.time)/1000);
-  const speed=point.clone().sub(g.last).divideScalar(dt);if(speed.length()>8)speed.setLength(8);
-  g.velocity.lerp(speed,.45);g.last.copy(point);g.time=now;
+  const speed=point.clone().sub(g.last).divideScalar(dt);
+  g.velocity.lerp(speed,.45);if(g.velocity.length()>8)g.velocity.setLength(8);g.last.copy(point);g.time=now;
   getRoom().props.physics.move(point);host.style.cursor='grabbing';wake();event.preventDefault();
  }
- function end(event,cancelled=false){
+ function end(event,cancelled=false,interrupted=false){
   const g=gesture;if(!g||event.pointerId!==g.id)return;
   gesture=null;suppressClick=true;
   if(host.hasPointerCapture(g.id))host.releasePointerCapture(g.id);
   const room=getRoom();
   if(cancelled)room.props.cancel();
-  else if(g.dragged){room.props.physics.release(performance.now()-g.time>120?new THREE.Vector3():g.velocity);if(g.prop.hotspot)onActivate(g.prop.hotspot);}
-  else {room.props.kick(g.prop,reduced.matches);if(g.prop.hotspot)onActivate(g.prop.hotspot);}
+  else if(g.dragged){room.props.physics.release(performance.now()-g.time>120?new THREE.Vector3():g.velocity);if(!interrupted&&g.prop.hotspot)onActivate(g.prop.hotspot);}
+  else if(!interrupted){room.props.kick(g.prop,reduced.matches);if(g.prop.hotspot)onActivate(g.prop.hotspot);}
   host.style.cursor='';wake();
  }
  function click(event){if(suppressClick&&event.detail!==0){event.preventDefault();event.stopImmediatePropagation();suppressClick=false;}}
@@ -53,10 +53,10 @@ export function createHousePropInput(host,{getRoom,getCamera,onActivate,wake,red
   event.preventDefault();gesture.plane.constant+=THREE.MathUtils.clamp(event.deltaY*.002,-.15,.15);move({clientX:event.clientX,clientY:event.clientY,pointerId:gesture.id,preventDefault(){}});
  }
  function cancel(){const held=Boolean(gesture);if(gesture)end({pointerId:gesture.id},true);return held;}
- function lost(event){if(gesture?.id===event.pointerId)end(event,true);}
- function blur(){cancel();}
- function visibility(){if(document.hidden)cancel();else wake();}
- const cancelEvent=e=>end(e,true);
+ function lost(event){if(gesture?.id===event.pointerId)end(event,false,true);}
+ function blur(){if(gesture)end({pointerId:gesture.id},false,true);}
+ function visibility(){if(document.hidden)blur();else wake();}
+ const cancelEvent=e=>end(e,false,true);
  host.addEventListener('pointerdown',down,true);host.addEventListener('pointermove',move);
  host.addEventListener('pointerup',end);host.addEventListener('pointercancel',cancelEvent);host.addEventListener('lostpointercapture',lost);
  host.addEventListener('click',click,true);host.addEventListener('wheel',wheel,{passive:false});

@@ -43,6 +43,14 @@
       "kind": "note"
     },
     {
+      "id": "bitey",
+      "room": "hallway",
+      "hotspot": "bitey",
+      "title": "Bitey — Adam Phillips",
+      "body": "Adam Phillips and his Brackenwood series inspired me to be brave enough to go out and do my own thing.",
+      "kind": "note"
+    },
+    {
       "id": "tablet",
       "room": "workshop",
       "hotspot": "tablet",

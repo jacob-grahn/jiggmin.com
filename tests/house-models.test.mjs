@@ -31,3 +31,17 @@ for(const room of ['hallway','workshop','attic','basement']){
   }
  });
 }
+
+test('basement walls use three painted slabs instead of individual bricks',()=>{
+ const bytes=readFileSync('web/assets/house/basement.glb');
+ const model=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
+ assert.ok(!model.nodes.some(n=>/Old concrete block|Side masonry|Masonry backing/.test((n.name??'').replaceAll('_',' '))));
+ const walls=model.nodes.filter(n=>n.extras?.painted_wall);
+ assert.equal(walls.length,3);
+ for(const wall of walls){
+  const primitives=model.meshes[wall.mesh].primitives;
+  assert.ok(primitives.reduce((sum,p)=>sum+model.accessors[p.attributes.POSITION].count,0)<1000);
+  for(const p of primitives)assert.ok(model.materials[p.material].pbrMetallicRoughness.baseColorTexture);
+ }
+ for(const name of ['Moon garden basement picture','Fish boots basement picture'])assert.ok(model.nodes.some(n=>n.name?.replaceAll('_',' ').startsWith(name)));
+});

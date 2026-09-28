@@ -7,7 +7,8 @@ OUTPUT = ROOT / 'dist'
 
 def game_slugs():
     games = json.loads((ROOT / 'data/games.json').read_text())['games']
-    slugs = {game['id'] for game in games}
+    bonus = json.loads((ROOT / 'data/bonus-games.json').read_text())['games']
+    slugs = {game['id'] for game in games + bonus}
     for slug in slugs:
         if not slug or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789-' for c in slug):
             raise ValueError(f'Invalid route slug: {slug}')

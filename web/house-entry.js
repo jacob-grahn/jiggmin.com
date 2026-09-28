@@ -1,7 +1,7 @@
 // This small entrance is the only house module loaded with the den.
 // Room code, notes, artwork, and bonus games are fetched after exploration begins.
 const QUERY='(min-width: 1000px) and (min-aspect-ratio: 69/50) and (pointer: fine)';
-export function createHouseEntry({host,onOpen,onExit,onError,getDen}){
+export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBonus}){
  const media=matchMedia(QUERY),nav=document.createElement('nav');
  nav.className='house-entrance';nav.setAttribute('aria-label','Explore the house');
  const buttons=['right'].map(side=>{
@@ -15,7 +15,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen}){
  const update=()=>{nav.hidden=!media.matches||active||!ready;};
  function styles(){
   return stylesheet??=new Promise((resolve,reject)=>{
-   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=house-ink-4';
+   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=bonus-cartridges-1';
    link.onload=resolve;link.onerror=()=>{link.remove();stylesheet=null;reject(new Error('The house styles could not load. Try the arrow again.'));};document.head.append(link);
   });
  }
@@ -23,7 +23,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen}){
   if((!media.matches&&!journalRequest)||loading||active)return;origin=originElement;const ticket=++entryTicket;
   buttons.forEach(button=>{button.disabled=true;button.setAttribute('aria-busy','true');});
   loading=(async()=>{
-   if(!instance){const [module]=await Promise.all([import('./house.js?v=house-ink-4'),styles()]);instance=await module.createHouse({getDen,
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=bonus-cartridges-1'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
     onOpen(){active=true;update();onOpen?.();},
     onExit(){active=false;update();onExit?.();if(origin?.isConnected&&!origin.hidden)origin.focus();},
    });}

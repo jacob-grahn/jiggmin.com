@@ -60,3 +60,23 @@ test('Controller cord is slack nearby, catches a hard throw, and survives a grip
  p.reset('controller');assert.ok(Math.abs(p.pose('controller').position.x+1.3)<1e-8);
  assert.equal(pad.mass,.58,'reset must preserve controller mass');
 });
+
+for(const dragging of [false,true])test(`${dragging?'Dragged':'Thrown'} objects detach pinned decor and transfer momentum`,()=>{
+ const p=new CartridgePhysics([]);p.world.gravity.setZero();
+ const a=p.add('a',pose(-1,1,0)),b=p.add('b',pose(0,1,0)),c=p.add('c',pose(0,1,3));
+ p.pin('b',pose(0,1,0),{releaseOnContact:true});p.pin('c',pose(0,1,3),{releaseOnContact:true});
+ step(p,.2);assert.equal(b.type,4);assert.equal(c.type,4);
+ if(dragging){p.grab('a',a.position);p.move({x:1,y:a.position.y,z:0});}
+ else {p.grab('a',a.position);p.release({x:6,y:0,z:0});}
+ step(p,.4);
+ assert.equal(b.type,1,'contact should detach decor');assert.ok(b.position.x>.1,'contact should move decor');
+ assert.equal(b.mass,.32);assert.equal(c.type,4,'untouched decor stays pinned');
+});
+test('Cancelling a decor grab restores its collision-release policy without changing console pins',()=>{
+ const p=new CartridgePhysics([]);p.add('decor',pose(0,1,0));p.pin('decor',pose(0,1,0),{releaseOnContact:true});
+ p.grab('decor',{x:0,y:1,z:0});p.cancel();
+ assert.equal(p.items.get('decor').releaseOnContact,true);assert.equal(p.items.get('decor').body.collisionFilterMask,-1);
+ p.add('console',pose(2,1,0));p.pin('console',pose(2,1,0));
+ p.grab('console',{x:2,y:1,z:0});p.cancel();
+ assert.equal(p.items.get('console').releaseOnContact,false);assert.equal(p.items.get('console').body.collisionFilterMask,0);
+});

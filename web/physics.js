@@ -45,7 +45,7 @@ export class CartridgePhysics {
     // These outer boundaries sit beyond the visible furniture and inside the floor.
     for(const [x,z,hx,hz] of (bounds ?? [[-5.2,0,.5,5.7],[5.2,0,.5,5.7],[0,-5.2,5.7,.5],[0,5.2,5.7,.5]])) {
       const wall = new CANNON.Body({mass:0,shape:new CANNON.Box(new CANNON.Vec3(hx,10,hz))});
-      wall.position.set(x,9,z);wall.aabbNeedsUpdate=true;this.world.addBody(wall);
+      wall.position.set(x,floorY+9,z);wall.aabbNeedsUpdate=true;this.world.addBody(wall);
     }
     const floor = new CANNON.Body({mass:0,shape:new CANNON.Plane()});
     floor.position.y=floorY;floor.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2);
@@ -67,6 +67,8 @@ export class CartridgePhysics {
     this.world.addBody(body);
     this.place(id, pose, true);
     body.addEventListener('collide', event => {
+      const item=this.items.get(id);
+      if(item.releaseOnContact && event.body.type===CANNON.Body.DYNAMIC && this.items.has(event.body.gameId)) this.unpin(id);
       const speed = Math.abs(event.contact.getImpactVelocityAlongNormal());
       if(speed > .45) this.onImpact(speed, body.position);
     });
@@ -94,6 +96,7 @@ export class CartridgePhysics {
   place(id, pose, sleep = false) {
     const {body:b,mass,center} = this.items.get(id);
     this.items.get(id).supported=false;
+    this.items.get(id).releaseOnContact=false;
     b.type = CANNON.Body.DYNAMIC; b.mass = mass; b.collisionFilterMask = -1; b.updateMassProperties();
     b.quaternion.set(pose.quaternion.x, pose.quaternion.y, pose.quaternion.z, pose.quaternion.w);
     b.position.copy(vec(pose.position).vadd(b.quaternion.vmult(center)));
@@ -122,16 +125,23 @@ export class CartridgePhysics {
     for(const [id,value] of result)this.items.get(id).supported=value;
   }
   reset(id) {this.place(id, this.items.get(id).home, true);}
-  pin(id, pose) {
+  pin(id, pose, {releaseOnContact=false}={}) {
     this.place(id, pose, true);
     const b = this.items.get(id).body;
-    b.type = CANNON.Body.KINEMATIC; b.mass = 0; b.collisionFilterMask = 0; b.updateMassProperties();
+    b.type = CANNON.Body.KINEMATIC; b.mass = 0; b.collisionFilterMask = releaseOnContact ? -1 : 0; b.updateMassProperties();
+    this.items.get(id).releaseOnContact=releaseOnContact;
+  }
+  unpin(id) {
+    const item=this.items.get(id), body=item.body;
+    item.releaseOnContact=false;
+    body.type=CANNON.Body.DYNAMIC; body.mass=item.mass; body.collisionFilterMask=-1; body.updateMassProperties(); body.wakeUp();
   }
   grab(id, point) {
     if(this.held) this.release();
     const before = this.pose(id), body = this.items.get(id).body;
     const wasPinned = body.type === CANNON.Body.KINEMATIC;
-    body.type = CANNON.Body.DYNAMIC; body.mass = this.items.get(id).mass; body.collisionFilterMask = -1; body.updateMassProperties(); body.wakeUp();
+    const releaseOnContact=this.items.get(id).releaseOnContact;
+    this.unpin(id);
     const anchor = new CANNON.Body({mass: 0, type: CANNON.Body.KINEMATIC, collisionFilterMask: 0});
     anchor.position.copy(vec(point));
     this.world.addBody(anchor);
@@ -139,7 +149,7 @@ export class CartridgePhysics {
     const constraint = new CANNON.PointToPointConstraint(body, pivot, anchor, new CANNON.Vec3(), 80);
     for(const eq of constraint.equations) eq.setSpookParams(8e4, 4, FIXED_STEP);
     this.world.addConstraint(constraint);
-    this.held = {id, body, anchor, constraint, target: vec(point), pivot, before, wasPinned};
+    this.held = {id, body, anchor, constraint, target: vec(point), pivot, before, wasPinned, releaseOnContact};
   }
   move(point) {if(this.held) this.held.target.copy(vec(point));}
   release(velocity) {
@@ -152,7 +162,7 @@ export class CartridgePhysics {
   }
   cancel() {
     const h = this.release(); if(!h) return;
-    if(h.wasPinned) this.pin(h.id, h.before); else this.place(h.id, h.before, true);
+    if(h.wasPinned) this.pin(h.id, h.before, {releaseOnContact:h.releaseOnContact}); else this.place(h.id, h.before, true);
   }
   step(dt) {
     this.accumulator += Math.min(Math.max(dt,0), .08);

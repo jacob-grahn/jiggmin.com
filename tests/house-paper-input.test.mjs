@@ -7,7 +7,7 @@ class Surface extends EventTarget {
  getBoundingClientRect(){return {left:0,top:0,width:100,height:100};}
  setPointerCapture(){this.captured=true;}hasPointerCapture(){return this.captured;}releasePointerCapture(){this.captured=false;}
 }
-for(const gesture of ['tap','throw','cancel'])test(`${gesture}: paper discovery follows completed object interaction`,()=>{
+for(const gesture of ['tap','throw','cancel','lostpointercapture','blur','hidden','escape'])test(`${gesture}: paper discovery follows completed object interaction`,()=>{
  globalThis.window=new EventTarget();globalThis.document=new EventTarget();document.hidden=false;
  const host=new Surface(),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(60,1,.1,100);camera.position.z=4;camera.updateMatrixWorld();
  const mesh=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());scene.add(mesh);
@@ -17,8 +17,13 @@ for(const gesture of ['tap','throw','cancel'])test(`${gesture}: paper discovery 
  const input=createHousePropInput(host,{getRoom:()=>room,getCamera:()=>camera,onActivate:id=>discoveries.push(id),wake(){},reduced:{matches:false}});input.setEnabled(true);
  function dispatch(type,x=50){const e=new Event(type,{cancelable:true});Object.assign(e,{button:0,pointerId:1,clientX:x,clientY:50});host.dispatchEvent(e);}
  dispatch('pointerdown');if(gesture!=='tap')dispatch('pointermove',80);
- dispatch(gesture==='cancel'?'pointercancel':'pointerup',80);
- assert.deepEqual(discoveries,gesture==='cancel'?[]:['memory']);
- assert.equal(releases,gesture==='throw'?1:0);assert.equal(cancelled,gesture==='cancel'?1:0);assert.equal(kicks,gesture==='tap'?1:0);
+ if(gesture==='escape')input.cancel();
+ else if(gesture==='blur')window.dispatchEvent(new Event('blur'));
+ else if(gesture==='hidden'){document.hidden=true;document.dispatchEvent(new Event('visibilitychange'));}
+ else dispatch(gesture==='cancel'?'pointercancel':gesture==='lostpointercapture'?gesture:'pointerup',80);
+ // Capture loss after a normal release must not undo the completed throw.
+ dispatch('lostpointercapture');
+ assert.deepEqual(discoveries,['tap','throw'].includes(gesture)?['memory']:[]);
+ assert.equal(releases,!['tap','escape'].includes(gesture)?1:0);assert.equal(cancelled,gesture==='escape'?1:0);assert.equal(kicks,gesture==='tap'?1:0);
  input.dispose();
 });

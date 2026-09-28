@@ -188,12 +188,12 @@ def hallway():
  mount([ob for ob in bpy.data.objects if ob not in before],(1.30,-3.70,0),-math.pi/2)
  area('Rainy window blue illumination',(1.12,-3.70,1.90),125,(.18,.40,1),1.45,(-1.25,-2.5,.75))
  S.world.node_tree.nodes['Background'].inputs[1].default_value=.09
- # A long, narrow runner and three separate pools of warm ceiling light.
+ # A long, narrow runner and two separate pools of warm ceiling light.
  box('Long woven corridor runner',(0,-.25,.012),(1.16,11.10,.025),'blue',.018)
  for x in [-.55,.55]:box('Runner lengthwise stitched border',(x,-.25,.029),(.027,10.96,.007),'paper',.002)
  for y in [-5.78,5.28]:
   for i in range(27):pipe('Runner fine fringe',[(-.52+i*.04,y,.021),(-.52+i*.04,y+(.065 if y>0 else -.065),.021)],.002,'paper')
- for y in [-4.3,1.2,4.65]:lamp(0,y,2.71)
+ for y in [-4.3,1.2]:lamp(0,y,2.71)
  for ob in bpy.data.objects:
   if ob.type=='LIGHT' and ob.name.startswith('Warm pool'):ob.data.energy=52
  # Plain ceiling attic hatch with a dangling pull cord, clear of the end door.
@@ -231,11 +231,111 @@ def hallway():
  area('Notice board pool',(.78,-.45,2.35),15,(1,.76,.51),.65,(1.19,-.2,1.6))
 
 
+def assembled_prop(name,before,hotspot=None):
+ # Physical tools/computer parts stay whole, even where their meshes do not touch.
+ parts=[o for o in bpy.context.scene.objects if o not in before and o.type in {'MESH','CURVE','FONT'}]
+ for o in parts:
+  bpy.ops.object.select_all(action='DESELECT');o.select_set(True);bpy.context.view_layer.objects.active=o
+  bpy.ops.object.convert(target='MESH')
+ bpy.ops.object.select_all(action='DESELECT')
+ for o in parts:o.select_set(True)
+ bpy.context.view_layer.objects.active=parts[0];bpy.ops.object.join();o=bpy.context.object;o.name=name;o['prop_assembly']=True
+ if hotspot:anchor(hotspot,o)
+ return o
+
+def desk_pose(ob,angle,dx=0,dy=0):
+ # Rotate whole assemblies around their centers, keeping parts attached.
+ from mathutils import Matrix
+ bpy.context.view_layer.update()
+ center=sum((ob.matrix_world@Vector(c) for c in ob.bound_box),Vector())/8
+ ob.matrix_world=Matrix.Translation(center+Vector((dx,dy,0)))@Matrix.Rotation(math.radians(angle),4,'Z')@Matrix.Translation(-center)@ob.matrix_world
+ return ob
+
+def workshop_projects():
+ mat('Circuit board green',(.025,.12,.075),.72)
+ # An open desktop chassis laid on its side exposes the build in progress.
+ before=set(bpy.data.objects);x=-.94;y=.88
+ box('Computer steel tray',(x,y,1.035),(.98,.72,.055),'metal',.012)
+ for xx in [x-.48,x+.48]:box('Computer chassis side',(xx,y,1.15),(.028,.72,.25),'metal',.005)
+ box('Computer rear IO panel',(x,y+.345,1.15),(.95,.025,.25),'metal',.004)
+ box('Motherboard',(x-.10,y-.015,1.072),(.66,.60,.016),'Circuit board green',.003)
+ box('Power supply',(x+.32,y+.12,1.145),(.23,.31,.17),'ink',.008)
+ for i in range(7):box('Power supply vent',(x+.32,y+.015+i*.032,1.233),(.17,.008,.002),'metal',.001)
+ for i in range(10):box('CPU aluminum heatsink',(x-.17+i*.016,y,1.14),(.008,.18,.105),'metal',.001)
+ cyl('CPU fan hub',(x-.10,y,1.203),.027,.018,'ink',verts=24)
+ for i in range(7):
+  a=i*math.tau/7;blade=box('CPU fan blade',(x-.10+math.cos(a)*.045,y+math.sin(a)*.045,1.21),(.066,.025,.008),'ink',.003);blade.rotation_euler.z=a+.45
+ for xx in [x-.34,x-.28]:
+  box('RAM socket',(xx,y,1.09),(.024,.27,.025),'ink',.002)
+  box('Installed RAM',(xx,y,1.14),(.009,.25,.08),'Circuit board green',.001)
+ for yy in [y-.24,y+.23]:
+  for xx in [x-.22,x-.10,x+.04]:box('Motherboard chip',(xx,yy,1.09),(.065,.055,.012),'ink',.001)
+ for i in range(4):cyl('Motherboard capacitor',(x+.08,y-.12+i*.065,1.107),.012,.047,'metal',verts=12)
+ for i,m in enumerate(['red','rubber','paper']):pipe('Power supply lead',[(x+.22,y+.15,1.24),(x+.14,y+.02,1.28+i*.008),(x+.18,y-.22,1.11)],.006,m)
+ desk_pose(assembled_prop('Open computer assembly',before,'destroyers'),-9,-.07,.06)
+ # A loose memory stick and screwdriver make the unfinished work legible.
+ before=set(bpy.data.objects)
+ box('Loose memory board',(-.20,.90,1.016),(.09,.36,.013),'Circuit board green',.002)
+ for i in range(5):box('Memory chip',(-.20,.77+i*.053,1.027),(.058,.037,.009),'ink',.001)
+ for i in range(18):box('RAM gold contact',(-.245,.74+i*.018,1.020),(.012,.009,.003),'brass',.0005)
+ desk_pose(assembled_prop('Loose RAM module',before),-31,.07,-.12)
+ before=set(bpy.data.objects)
+ pipe('Screwdriver shaft',[(-.35,.37,1.018),(-.07,.37,1.018)],.007,'metal')
+ box('Screwdriver grip',(-.42,.37,1.025),(.15,.041,.039),'red',.012)
+ desk_pose(assembled_prop('Computer screwdriver',before),24,-.04,-.02)
+ # Recognizable full-size woodworking tools occupy the right half of the bench.
+ before=set(bpy.data.objects)
+ box('Plane iron sole',(1.18,.92,1.02),(.53,.19,.036),'metal',.008)
+ box('Plane body',(1.18,.92,1.071),(.45,.17,.082),'ink',.012)
+ blade=box('Plane blade',(1.17,.92,1.14),(.07,.125,.14),'metal',.003);blade.rotation_euler.y=-.5
+ sphere('Plane front knob',(.99,.92,1.15),(.038,.043,.064),'wood')
+ pipe('Plane rear handle',[(1.34,.86,1.10),(1.39,.88,1.23),(1.34,.96,1.24),(1.30,.98,1.10)],.024,'wood')
+ desk_pose(assembled_prop('Woodworking hand plane',before,'zigzag'),-16,.02,-.05)
+ before=set(bpy.data.objects)
+ # Tapered saw blade with a serrated cutting edge and an open wooden handle.
+ verts=[(.52,.27,1.028),(1.39,.36,1.028),(1.39,.10,1.028)]
+ for i in range(32):verts.append((1.39-i*.027,.10-(.014 if i%2 else 0),1.028))
+ me=bpy.data.meshes.new('Handsaw blade');me.from_pydata(verts,[],[tuple(reversed(range(len(verts))))]);ob=bpy.data.objects.new('Handsaw steel blade',me);bpy.context.collection.objects.link(ob);me.materials.append(M['metal'])
+ pipe('Handsaw wooden handle',[(1.38,.34,1.04),(1.60,.34,1.04),(1.65,.12,1.04),(1.43,.10,1.04),(1.38,.34,1.04)],.035,'wood')
+ desk_pose(assembled_prop('Woodworking handsaw',before,'inkclipse'),11,-.06,.02)
+ before=set(bpy.data.objects)
+ pipe('Mallet handle',[(1.85,.59,1.028),(1.85,.91,1.028)],.022,'wood')
+ box('Mallet head',(1.85,1.00,1.059),(.22,.12,.12),'pale',.014)
+ desk_pose(assembled_prop('Wooden mallet',before),-27,.03,-.10)
+ before=set(bpy.data.objects)
+ box('Try square stock',(.55,.74,1.033),(.075,.29,.065),'wood',.004)
+ box('Try square blade',(.75,.865,1.035),(.42,.032,.012),'metal',.001)
+ desk_pose(assembled_prop('Carpenter try square',before),19,-.10,.08)
+ for i in range(2):
+  before=set(bpy.data.objects);xx=1.63+i*.18
+  box('Chisel steel blade',(xx,1.20,1.02),(.037,.15,.012),'metal',.002)
+  pipe('Chisel wooden grip',[(xx,1.32,1.026),(xx,1.48,1.026)],.025,'wood')
+  desk_pose(assembled_prop('Woodworking chisel',before),-18 if i==0 else 28,.01,-.12 if i==0 else -.04)
+
+ # The current woodworking job: a marked offcut, a pencil, and fresh curls.
+ before=set(bpy.data.objects)
+ offcut=box('Marked timber offcut',(.42,.38,1.018),(.34,.21,.041),'pale',.004)
+ for yy in [.34,.40]:pipe('Offcut pencil cut line',[(.28,yy,1.040),(.55,yy+.015,1.040)],.0015,'ink')
+ desk_pose(assembled_prop('Marked timber offcut',before),-13)
+ before=set(bpy.data.objects)
+ pipe('Carpenter pencil',[(.28,.57,1.006),(.48,.66,1.006)],.008,'red')
+ assembled_prop('Carpenter pencil',before)
+ for i in range(5):
+  before=set(bpy.data.objects);cx=.83+(i%3)*.07;cy=.48+(i//3)*.08
+  pipe('Curled wood shaving',[(cx+.028*math.cos(j*.45+i),cy+.021*math.sin(j*.45+i),1.003+j*.001) for j in range(13)],.003,'pale')
+  assembled_prop('Curled wood shaving',before)
+ # A handful of case screws left beside the loose RAM, not lined up in rows.
+ for x,y in [(-.04,.51),(.03,.58),(-.09,.61),(.07,.48)]:
+  before=set(bpy.data.objects)
+  pipe('Loose computer screw',[(x,y,1.004),(x+.025,y+.013,1.004)],.003,'metal')
+  sphere('Loose screw head',(x,y,1.004),(.007,.007,.003),'metal')
+  assembled_prop('Loose computer screw',before)
+
 def workshop():
  init('workshop')
  for ob in list(bpy.data.objects):
   if ob.type=='LIGHT':bpy.data.objects.remove(ob,do_unlink=True)
- S.camera.location=(0,-1.65,2.12)
+ S.camera.location=(0,-2.95,2.22)
  S.camera.rotation_euler=(Vector((0,.80,1.05))-S.camera.location).to_track_quat('-Z','Y').to_euler();S.camera.data.lens=21
  # Unfinished garage envelope: slab, exposed framing, rough sheathing, conduit.
  box('Bare poured concrete slab',(0,-1,-.09),(7,8,.18),'concrete',.002)
@@ -258,13 +358,15 @@ def workshop():
   box('Workbench stout front leg',(x,.04,.43),(.14,.14,.86),'pale',.004)
   pipe('Workbench diagonal brace',[(x,.08,.40),(x,.66,.83)],.055,'pale')
  # Objects are within arm's reach rather than on separate display tables.
- tab=box('Old graphics tablet',(-.98,.30,1.025),(1.05,.62,.055),'ink',.04);anchor('tablet',tab)
- box('Tablet active surface',(-.98,.28,1.058),(.85,.47,.008),'blue',.008)
- pipe('Held stylus',[(-1.39,.04,1.075),(-.78,.31,1.075)],.012,'metal')
- box('Keyboard',(-.98,.92,1.024),(.94,.30,.045),'metal',.01)
- for i in range(10):
-  for j in range(3):box('Keycap',(-1.37+i*.087,.83+j*.085,1.055),(.073,.067,.016),'cream',.003)
- pipe('Tablet cable',[(-1.48,.45,1.01),(-1.69,.57,1.01),(-1.68,.95,1.01),(-1.91,1.36,1.04)],.009,'rubber')
+ tab=box('Old graphics tablet',(-1.98,.35,1.015),(.46,.40,.030),'ink',.018);anchor('tablet',tab)
+ box('Tablet active surface',(-1.98,.35,1.034),(.39,.33,.004),'blue',.005)
+ pipe('Held stylus',[(-2.17,.17,1.045),(-1.88,.43,1.045)],.007,'metal')
+ pipe('Tablet cable',[(-2.18,.48,1.015),(-2.27,.61,1.014),(-2.24,.95,1.012)],.006,'rubber')
+ before=set(bpy.data.objects)
+ keyboard=box('Keyboard',(-.94,.12,1.014),(.96,.32,.025),'ink',.008)
+ top=print_plane('Keyboard printed keys','scene/house-textures/keyboard/keyboard-top.png',(-.94,.12,1.028),.945,.315);top.rotation_euler.x=-math.pi/2
+ desk_pose(assembled_prop('Keyboard',before),7,-.12,.005)
+ workshop_projects()
  clock=cyl('Working hours clock',(-1.62,1.42,2.04),.25,.07,'brass',(math.pi/2,0,0));anchor('working-hours',clock)
  cyl('Clock face',(-1.62,1.376,2.04),.224,.012,'paper',(math.pi/2,0,0))
  pipe('Clock hands',[(-1.76,1.365,2.11),(-1.62,1.365,2.04),(-1.62,1.365,2.21)],.009,'ink')
@@ -273,15 +375,6 @@ def workshop():
  crow=frame('Crowland study','CROWLAND',1.15,1.30,1.36,.54,.55);anchor('crowland',crow)
  sphere('Crow body',(1.12,1.24,1.40),(.105,.019,.065),'ink');sphere('Crow head',(1.23,1.235,1.46),(.045,.019,.04),'ink')
  pipe('Crow beak',[(1.26,1.23,1.46),(1.33,1.23,1.45)],.010,'ink');pipe('Crow branch',[(.92,1.23,1.27),(1.36,1.23,1.29)],.009,'wood')
- orb=sphere('Inkclipse spinning orb',(1.70,.77,1.23),(.19,.19,.19),'blue');anchor('inkclipse',orb)
- sphere('Ink on orb',(1.60,.62,1.31),(.085,.055,.075),'ink');cyl('Orb brass stand',(1.70,.77,1.023),.145,.06)
- zig=[]
- for i in range(5):zig.append(box('Zigzag puzzle piece',(-.13+i*.19,.97+(.12 if i%2 else 0),1.055),(.15,.15,.115),'red' if i%2 else 'cream',.009))
- anchor('zigzag',*zig)
- ship=box('Four crew ship prototype',(.50,.28,1.09),(.95,.35,.17),'metal',.065);anchor('destroyers',ship)
- box('Ship cabin',(.56,.30,1.23),(.41,.25,.15),'blue',.05)
- for x in [.13,.88]:cyl('Ship engine',(x,.29,1.10),.085,.36,'metal',(math.pi/2,0,0))
- for i in range(4):sphere('Crew seat marker',(.32+i*.12,.105,1.20),(.022,.017,.030),'red')
  # Pegboard and an ordinary task light over the work surface.
  box('Small practical pegboard',(.40,1.43,2.02),(.90,.04,.53),'oak',.006)
  for ix in range(8):
@@ -424,12 +517,12 @@ def attic():
 def basement():
  init('basement');S.camera.location=(3.6,-9,3.35);S.camera.rotation_euler=(Vector((0,1.0,1.25))-S.camera.location).to_track_quat('-Z','Y').to_euler()
  box('Concrete slab',(0,-3.2,-.10),(10,13.8,.2),'concrete');box('Basement ceiling',(0,-3.2,3.86),(10,13.8,.10),'concrete')
- box('Masonry backing',(0,3.6,2),(10,.10,4),'concrete')
- # Individual masonry courses and mortar form the full rear and side wall.
- for row in range(10):
-  for col in range(11):box('Old concrete block',(-4.8+col*.96+(row%2)*.46,3.40,.18+row*.35),(.93,.25,.32),'concrete',.012)
-  for col in range(16):
-   for side in [-1,1]:box('Side masonry',(side*5,-9.7+col*.85,.18+row*.35),(.25,.82,.32),'concrete',.012)
+ # Three solid wall slabs replace hundreds of individual block meshes.
+ # The UV-mapped matte paint carries surface variation without brick geometry.
+ mat('Cellar painted plaster',(.26,.32,.34),.96)
+ wall=box('Basement painted masonry rear wall',(0,3.40,2),(10,.25,4),'Cellar painted plaster',.002);wall['painted_wall']=True
+ for side in [-1,1]:
+  wall=box('Basement painted masonry side wall',(side*5,-3.25,2),(.25,13.7,4),'Cellar painted plaster',.002);wall['painted_wall']=True
  for x in [-4.6,-1,2.6]:pipe('Basement ceiling joist',[(x,-3,3.7),(x,3.5,3.7)],.09,'wood')
  pipe('Copper water pipe',[(-4.4,3.07,.15),(-4.4,3.07,3.3),(4.5,3.07,3.3)],.04,'brass');window(-2.2,3.22,2.95,1.8,.65)
  lamp(.8,1.0,2.7);area('Quiet warm cellar',(-3,-2,3),180,(1,.64,.36),3,(0,1,0))
@@ -475,8 +568,9 @@ def ordinary_clutter(room):
   bpy.ops.mesh.primitive_torus_add(major_segments=32,minor_segments=8,location=loc,major_radius=r,minor_radius=t,rotation=rot);ob=bpy.context.object;ob.name=n;ob.data.materials.append(M[m]);return ob
  def carton(n,x,y,z,w=.6,d=.5,h=.4):
   ob=box(n,(x,y,z+h/2),(w,d,h),'clay',.009);ob.rotation_euler.z=random.uniform(-.13,.13)
-  box('Carton packing tape',(x,y,z+h+.002),(.06,d*.94,.005),'paper',.002)
-  pipe('Carton top seam',[(x-w*.43,y,z+h+.004),(x+w*.43,y,z+h+.004)],.002,'ink');return ob
+  # Each carton is one prop; tape and the lid seam are surface artwork.
+  ob['prop_assembly']=True;ob['packing_tape']=True
+  return ob
  def can(x,y,z,r=.085,h=.18,m='metal'):
   cyl('Unlabeled utility can',(x,y,z+h/2),r,h,m);cyl('Can lid',(x,y,z+h+.003),r*.98,.013,'metal');return None
  def jar(x,y,z,r=.07,h=.23):
@@ -524,14 +618,8 @@ def ordinary_clutter(room):
   for i in range(18):
    y=random.uniform(-4.6,.3);x=random.choice([-.54,.54]);pipe('Pulled runner thread',[(x,y,.034),(x+random.uniform(-.045,.045),y+.05,.035),(x+.035,y+.09,.033)],.002,'paper')
  elif room=='workshop':
-  for x,y,r,h in [(-2.06,1.20,.09,.20),(-1.82,1.11,.065,.15),(1.94,1.29,.09,.23)]:can(x,y,.997,r,h)
-  jar(-1.82,.72,.997,.065,.16);jar(.05,1.32,.997,.055,.13)
-  coil(-1.85,.27,1.005,.14);hammer(-.29,.36,1.004);bolts(-.24,.64,1.004,9)
-  paper(.25,1.28,1.004,.30,.17);paper(.85,.64,1.004,.24,.16)
-  rag(1.12,.70,1.008,.29,.23,'Worn cloth')
-  for i in range(5):
-   ob=box('Unfinished small component',(-.12+i*.14,.06,1.027),(.065,.07,.045),'metal',.004);ob.rotation_euler.z=random.uniform(-.6,.6)
-  pipe('Loose red bench lead',[(-.43,1.20,1.005),(-.31,1.13,1.008),(-.30,.75,1.008),(-.10,.68,1.008)],.006,'red')
+  # Keep the work surfaces readable: screws by the computer, lumber below.
+  bolts(-.25,.63,1.004,5)
   carton('Tools beneath built-in bench',-1.15,.88,.025,.81,.63,.44);carton('Garage offcuts box',2.58,.55,.025,.44,.58,.38)
   for i in range(6):
    ob=box('Leaning scrap timber',(-2.55+i*.055,1.15,.70),(.045,.075,1.4),'pale',.003);ob.rotation_euler.y=-.13+i*.028
@@ -616,11 +704,15 @@ def print_plane(n,path,loc,w,h):
  for li,uv in zip(me.polygons[0].loop_indices,[(0,0),(1,0),(1,1),(0,1)]):me.uv_layers.active.data[li].uv=uv
  ob=bpy.data.objects.new(n,me);bpy.context.collection.objects.link(ob);ob.location=loc;me.materials.append(M[printed_material(path)]);return ob
 
-def displayed_print(n,path,loc,w,h,framed=False,angle=0,lean=0,frame_mat='wood',standing=False):
+def displayed_print(n,path,loc,w,h,framed=False,angle=0,lean=0,frame_mat='wood',standing=False,credit=None):
  from mathutils import Matrix
  before=set(bpy.data.objects)
  box(n+' backing',(0,.012,0),(w+.025,.024,h+.025),'paper',.002)
  print_plane(n+' image',path,(0,-.005,0),w,h)
+ if credit:
+  emit('Artwork credit',(.88,.90,.82),.7)
+  lettering=text(credit,(w/2-.022,-.008,-h/2+.025),.027,'Artwork credit')
+  lettering.name=n+' artist credit';lettering.data.align_x='RIGHT'
  if framed:
   for x in [-w/2-.018,w/2+.018]:box(n+' side frame',(x,-.005,0),(.045,.055,h+.09),frame_mat,.008)
   for z in [-h/2-.018,h/2+.018]:box(n+' frame rail',(0,-.005,z),(w+.09,.055,.045),frame_mat,.008)
@@ -665,7 +757,9 @@ def house_art(room):
  label=lambda n:'web/assets/labels/'+n+'-screenprint.webp'
  if room=='hallway':
   displayed_print('Odd entrance picture',odd(0),(1.575,1.65,1.85),.62,.70,True,-math.pi/2,frame_mat='pale')
-  displayed_print('Mismatched corridor picture',odd(1),(-1.575,1.55,1.65),.52,.65,True,math.pi/2,frame_mat='wood')
+  before=set(bpy.data.objects)
+  displayed_print('Bitey painting','scene/house-textures/bitey/bitey.jpeg',(-1.575,1.55,1.65),.72,.72,True,math.pi/2,frame_mat='wood',credit='Adam Phillips')
+  anchor('bitey',*[ob for ob in bpy.data.objects if ob not in before])
  elif room=='workshop':
   displayed_print('Red Earth garage poster',label('red-earth'),(1.75,1.43,2.03),.57,.46)
   displayed_print('Odd picture among bench tools',odd(2),(-1.30,1.31,1.29),.25,.27,True,lean=-.10,frame_mat='blue',standing=True)
@@ -680,6 +774,8 @@ def house_art(room):
   displayed_print('Cooties unframed stored print',label('cooties'),(-.94,.55,.64),.69,.552,lean=.13)
   box('Plain carton supporting stored cartridge art',(-.94,.82,.40),(.61,.38,.54),'clay',.01)
  elif room=='basement':
+  displayed_print('Moon garden basement picture','scene/house-textures/basement-art/moon-garden.png',(-1.00,3.255,2.12),1.10,.825,True,frame_mat='pale')
+  displayed_print('Fish boots basement picture','scene/house-textures/art/fish-boots.png',(-3.82,3.255,2.05),.65,.81,True,frame_mat='wood')
   displayed_print('Odd cellar wall picture',odd(2),(-4.855,.35,1.83),.77,.87,True,math.pi/2,frame_mat='wood')
   displayed_print('Small shelf picture',odd(0),(1.77,1.813,1.45),.35,.40,True,lean=-.08,frame_mat='pale',standing=True)
   displayed_print('Neverending Light leaning print',label('neverending-light'),(.03,2.965,.55),.97,.777,lean=.15)
@@ -747,7 +843,7 @@ def window_lighting(room):
   area('Front window moonlight',(1.12,-3.7,1.9),230,(.56,.72,1),1.5,(-1,-1.5,.8))
   area('Far window moonlight',(1.10,2.55,1.92),185,(.56,.72,1),1.5,(-1,3,.8))
  elif room=='workshop':
-  S.camera.location=(0,-2.25,2.22);S.camera.rotation_euler=(Vector((0,.8,1.60))-S.camera.location).to_track_quat('-Z','Y').to_euler();S.camera.data.lens=23
+  S.camera.location=(0,-2.95,2.22);S.camera.rotation_euler=(Vector((0,.8,1.60))-S.camera.location).to_track_quat('-Z','Y').to_euler();S.camera.data.lens=23
   window(-.60,1.39,2.65,1.32,.62)
   side_window((-2.78,.2,2.05),1.65,1.45,math.pi/2)
   area('Bench window moonlight',(-.6,1.18,2.65),160,(.60,.76,1),1.2,(0,.2,1))

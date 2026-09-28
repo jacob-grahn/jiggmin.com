@@ -1,0 +1,1 @@
+Bitey illustration by Adam Phillips, supplied by the site owner. Original JPEG preserved without cropping or modification. The hallway model overlays the artist credit at the bottom right and retains the square aspect ratio.

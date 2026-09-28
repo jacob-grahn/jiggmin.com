@@ -50,7 +50,7 @@ export function illustrateHouse(roots){
   const meshes=[];root.traverse(mesh=>{if(mesh.isMesh&&!mesh.userData.houseInk&&!seen.has(mesh)){seen.add(mesh);meshes.push(mesh);}});
   for(const mesh of meshes){
    if(mesh.userData.houseOutlined)continue;
-   const masonry=/corridor.wall|far.wall|masonry|plaster|shared.wall/i.test(mesh.name.replaceAll('_',' '));
+   const masonry=!mesh.userData.painted_wall&&/corridor.wall|far.wall|masonry|plaster|shared.wall/i.test(mesh.name.replaceAll('_',' '));
    const finish=original=>{
     const key=original.uuid+'-'+masonry;
     if(!materials.has(key)){

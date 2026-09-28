@@ -21,10 +21,10 @@ async function json(url) {
   return response.json();
 }
 
-export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoomChange = () => {}, getDen } = {}) {
-  let open = false, destroyed = false, room = 'hallway', roomTicket = 0, playTicket = 0;
+export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoomChange = () => {}, onCollectBonus = () => {}, getDen } = {}) {
+  let open = false, destroyed = false, room = 'hallway', roomTicket = 0;
   let data, manifest, anchors, view, travelling = false, contentRequest, discovered = new Set(), storage, persistence = true;
-  let player, playAbort, modalReturn, modalKind, bonusRequest, journalOnly=false, revealing=false;
+  let modalReturn, modalKind, journalOnly=false, revealing=false;
   try { storage = window.localStorage; } catch { persistence = false; }
   const media = window.matchMedia(HOUSE_MEDIA_QUERY);
   const root = el('section', 'house-overlay');
@@ -60,53 +60,47 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
 
   function resize() {
     if (!open) return;
-    stopPlayer();
-    if (modalKind === 'game') closeModal();
     if (!media.matches && !journalOnly) { exit(); return; }
     const rect = viewport.getBoundingClientRect();
     scene.style.width = `${Math.min(rect.width, rect.height * 1.6)}px`;
     view?.resize();
   }
   function updateJournal() { journal.textContent = `Journal · ${discovered.size}`; }
-  function stopPlayer() {
-    playTicket++; playAbort?.abort(); playAbort = null;
-    if (player) { try { player.ruffle().suspend(); } catch {} player.remove(); player = null; }
-  }
   function closeModal() {
     if (journalOnly) { journalOnly=false; exit(); return; }
-    stopPlayer(); shade.hidden = true; modalBody.replaceChildren(); modalKind = null;
+    shade.hidden = true; modalBody.replaceChildren(); modalKind = null;
     header.inert = viewport.inert = footer.inert = false;
     if (open && !travelling) view?.setActive(true);
     if (open && modalReturn?.isConnected && !modalReturn.closest('[hidden]')) modalReturn.focus();
   }
   function openModal(label, kind) {
     const wasOpen = !shade.hidden;
-    stopPlayer();
     if (!wasOpen) modalReturn = document.activeElement;
-    modalKind = kind; modalTitle.textContent = label; close.textContent = '×'; close.setAttribute('aria-label',kind==='game'?'Eject cartridge':'Dismiss paper');
+    modalKind = kind; modalTitle.textContent = label; close.textContent = '×'; close.setAttribute('aria-label','Dismiss paper');
     modalBody.replaceChildren(); shade.hidden = false;
     header.inert = viewport.inert = footer.inert = true;
     view?.setInteractive(false);
-    dialog.classList.toggle('house-dialog-game', kind === 'game');
     dialog.classList.toggle('house-paper', kind === 'notes');
     dialog.classList.toggle('house-journal', kind === 'journal'); close.focus();
   }
-  function noteCard(note, showTitle = true) {
+  function noteCard(note, showTitle = true, discovery = false) {
     const card = el('article', 'house-note');
     if (showTitle) card.append(el('h3', '', note.title));
     for (const paragraph of note.body.split(/\n\s*\n/)) card.append(el('p', '', paragraph));
     if (note.kind === 'cartridge' && note.gameId) {
-      card.append(button('Play cartridge', () => play(note)));
+      card.append(el('p','house-discovery',discovery?'Cartridge found. It will drop onto the den table when you return. Insert it into the console to play.':'Cartridge collected. Insert it into the den console to play.'));
     }
     return card;
   }
-  function showNotes(notes) {
+  function showNotes(notes,cartridgeLabel) {
     const added = discoverNotes(discovered, notes);
     persistence = saveJournal(storage, discovered); updateJournal();
+    for(const note of notes)if(note.kind==='cartridge')onCollectBonus(note.gameId);
     if (added) live.textContent = `${added === 1 ? 'A paper' : `${added} papers`} saved in your journal.`;
     openModal(notes.length === 1 ? notes[0].title : 'A few scraps', 'notes');
 
-    notes.forEach(note => modalBody.append(noteCard(note, notes.length !== 1)));
+    if(cartridgeLabel){const cartridge=el('figure','house-found-cartridge'),image=el('img');image.src=cartridgeLabel;image.alt=`${notes.find(note=>note.kind==='cartridge')?.title??'Found'} cartridge`;cartridge.append(image);modalBody.append(cartridge);}
+    notes.forEach(note => modalBody.append(noteCard(note, notes.length !== 1, true)));
     if (!persistence) modalBody.append(el('p', 'house-save-notice', 'Your journal will stay with you for this visit. This browser could not save it for later.'));
   }
   function showJournal() {
@@ -132,12 +126,13 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       revealing=true;view?.setInteractive(false);
       const ticket=roomTicket;
       try {
-        const origin=await view?.revealScrap(id);
+        const origin=await view?.revealScrap(id,unread.find(note=>note.kind==='cartridge')?.gameId);
         if (!open || ticket!==roomTicket) return;
         dialog.style.setProperty('--paper-x',`${(origin?.x??50)-50}vw`);
         dialog.style.setProperty('--paper-y',`${(origin?.y??50)-50}vh`);
-        showNotes(unread);
-      } finally { revealing=false; }
+        showNotes(unread,origin?.cartridgeLabel);
+      } catch { live.textContent='The discovery could not load. Please try that object again.'; }
+      finally { revealing=false;if(open&&ticket===roomTicket&&shade.hidden)view?.setInteractive(true); }
       return;
     }
     const locked = data.lockedDoors.find(door => door.id === id);
@@ -152,7 +147,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   }
   async function content() {
     if (data) return;
-    contentRequest ??= Promise.all([json('/data/house-notes.json?v=hall-landing-back-1'), json('/web/assets/house/hotspots.json?v=hall-landing-back-1'), json('/web/assets/house/anchors.json?v=hall-landing-back-1')])
+    contentRequest ??= Promise.all([json('/data/house-notes.json?v=bitey-1'), json('/web/assets/house/hotspots.json?v=bitey-1'), json('/web/assets/house/anchors.json?v=bitey-1')])
       .then(([notes, objects, positions]) => {
         const validData = validateHouseData(notes);
         for (const id of ROOMS) {
@@ -226,34 +221,6 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       if (ticket === roomTicket) { travelling = false; back.disabled = false; view?.setActive(shade.hidden); }
     }
   }
-  async function play(note) {
-    openModal(note.title, 'game');
-    const status = el('p', 'house-game-status', 'Loading the cartridge…'); status.setAttribute('role', 'status');
-    const stage = el('div', 'house-game-stage'); modalBody.append(status, stage);
-    const ticket = playTicket; playAbort = new AbortController(); const signal = playAbort.signal;
-    try {
-      bonusRequest ??= json('/data/bonus-games.json').catch(error => { bonusRequest = null; throw error; });
-      const bonus = await bonusRequest;
-      if (ticket !== playTicket || !open) return;
-      const game = bonus.games?.find(game => game.id === note.gameId);
-      if (!game || typeof game.file !== 'string' || !/^games\/bonus\/[a-z0-9-]+\/game\.swf$/.test(game.file)) throw new Error('This cartridge is unavailable.');
-      if (!window.RufflePlayer?.newest) throw new Error('The cartridge player could not start. Return to the den and try again.');
-      const response = await fetch(`/${game.file}`, {signal});
-      if (!response.ok) throw new Error('The cartridge could not load.');
-      const bytes = await response.arrayBuffer();
-      if (ticket !== playTicket || !open) return;
-      const width = Number(game.embedWidth) || 700, height = Number(game.embedHeight) || 400;
-      stage.style.aspectRatio = `${width}/${height}`;
-      const active = window.RufflePlayer.newest().createPlayer(); active.tabIndex = 0; player = active; stage.append(active);
-      await active.ruffle().load({data:bytes,swfFileName:`${game.id}.swf`,autoplay:'on',allowScriptAccess:false,allowNetworking:'internal',scale:'showAll',logLevel:'error'});
-      if (ticket !== playTicket || !open) { try { active.ruffle().suspend(); } catch {} active.remove(); return; }
-      status.textContent = 'Click inside the game to play. Eject returns to the room.';
-    } catch (error) {
-      if (ticket !== playTicket || !open || signal.aborted) return;
-      stopPlayer(); status.textContent = error.message || 'The cartridge could not load.';
-      modalBody.append(button('Try again', () => play(note)));
-    }
-  }
   async function returnToDen() {
     if (travelling) return;
     travelling = true; back.disabled = true; hotspots.inert = true;
@@ -285,7 +252,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     if (!open) { journalOnly=true;open=true;root.hidden=false;root.inert=false;root.classList.add('house-journal-only');onOpen(); }
     showJournal();
   }, get isOpen() { return open; }, destroy() {
-    exit(); destroyed = true; roomTicket++; stopPlayer();
+    exit(); destroyed = true; roomTicket++;
     document.removeEventListener('keydown', keydown, true); window.removeEventListener('resize', resize); view?.dispose(); root.remove();
   } };
 }

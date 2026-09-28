@@ -64,3 +64,55 @@ test('wiggle returns exactly home and reduced motion clears the spring',async()=
  system.kick(p);system.update(1/60);assert.ok(p.root.quaternion.angleTo(p.rest)>0);
  system.update(1/60,true);assert.ok(p.root.quaternion.angleTo(p.rest)<1e-8);assert.equal(p.spring.angle,0);
 });
+
+for(const height of [-4,3.2])test(`Throws stay in rooms at elevation ${height} without snapping home`,()=>{
+ const scene=new THREE.Scene(),model=new THREE.Group();scene.add(model);model.position.y=height;
+ const floor=new THREE.Mesh(new THREE.BoxGeometry(2,.2,2));floor.name='Floorboard';model.add(floor);
+ const cube=new THREE.Mesh(new THREE.BoxGeometry(.15,.15,.15));cube.name='Ordinary block';cube.position.set(0,.5,0);model.add(cube);
+ const system=createHouseProps(model,scene),prop=system.props[0],{physics}=system;
+ physics.reset=()=>assert.fail('throws must not reset home');
+ physics.grab(prop.id,prop.home);physics.release({x:8,y:4,z:3});
+ for(let i=0;i<480;i++)system.update(1/120);
+ assert.equal(physics.items.get(prop.id).body.type,1);
+ assert.ok(prop.root.position.y>=height-.1,`fell below room: ${prop.root.position.y}`);
+ assert.ok(Math.abs(prop.root.position.x)<1.25,'room walls must contain basement throws');
+ assert.ok(prop.root.position.distanceTo(prop.home)>.1);
+});
+
+test('hallway cartons are independent props with tape textured onto each box',async()=>{
+ const {props,physics}=await roomProps('hallway');
+ const names=['Parcel by the wall','Smaller parcel leaning nearby','Low ordinary parcel'];
+ const cartons=names.map(name=>props.find(p=>p.title===name));
+ assert.ok(cartons.every(Boolean),'each carton must have its own prop');
+ assert.equal(new Set(cartons.map(p=>p.id)).size,3);
+ assert.ok(!props.some(p=>/Carton packing tape|Carton top seam/.test(p.title)),'tape and seams are not loose props');
+ for(const p of cartons){
+  assert.equal(p.mode,'throw');
+  const owners=new Set(p.root.children.map(mesh=>mesh.name.split('__')[0]));
+  assert.equal(owners.size,1,'a carton must not absorb another box');
+  physics.grab(p.id,p.home);
+  assert.equal(physics.held.id,p.id);
+  for(const other of cartons.filter(other=>other!==p))assert.equal(physics.items.get(other.id).body.type,4);
+  physics.cancel();
+ }
+ const bytes=readFileSync('web/assets/house/hallway.glb'),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
+ assert.ok(!doc.nodes.some(n=>/Carton_packing_tape|Carton_top_seam/.test(n.name??'')));
+ const taped=doc.materials.filter(m=>m.name.includes('taped cardboard'));
+ assert.equal(taped.length,3);
+ for(const material of taped)assert.ok(material.pbrMetallicRoughness.baseColorTexture,'tape must be in the box material');
+});
+
+test('workshop has intact computer and woodworking props with a flat printed keyboard',async()=>{
+ const {props}=await roomProps('workshop');
+ const computer=props.find(p=>p.title==='Open computer assembly');
+ assert.ok(computer);assert.ok(computer.home.x<0);assert.equal(computer.hotspot,'destroyers');
+ for(const title of ['Woodworking handsaw','Woodworking hand plane','Wooden mallet','Carpenter try square','Woodworking chisel']){
+  const prop=props.find(p=>p.title===title);assert.ok(prop,title);assert.ok(prop.home.x>0,title);assert.equal(prop.mode,'throw',title);
+  assert.equal(new Set(prop.root.children.map(mesh=>mesh.name.split('__')[0])).size,1,`${title} must stay assembled`);
+ }
+ const keyboard=props.find(p=>p.title==='Keyboard');assert.ok(keyboard);assert.equal(keyboard.mode,'throw');assert.ok(keyboard.size.y<.04);
+ assert.ok(!props.some(p=>/Keycap|Inkclipse spinning orb|Zigzag puzzle piece|Four crew ship|Unfinished small component/.test(p.title)));
+ const bytes=readFileSync('web/assets/house/workshop.glb'),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
+ const printed=doc.materials.find(m=>m.name==='Print keyboard-top');assert.ok(printed?.pbrMetallicRoughness.baseColorTexture);
+ const camera=doc.nodes.find(n=>n.camera!==undefined);assert.ok(camera.translation[2]>2.9,'camera should stand farther back from bench');
+});

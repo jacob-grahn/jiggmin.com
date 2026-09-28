@@ -27,3 +27,13 @@ test('Each room owns and disposes its ink materials without affecting another ro
  const resources=createRoomResources();resources.capture(a);resources.dispose();
  assert.equal(disposedA,1);assert.equal(disposedB,0);
 });
+
+test('painted basement walls keep their texture without adding shader brick joints',()=>{
+ const wall=new THREE.Mesh(new THREE.BoxGeometry(10,4,.25),new THREE.MeshStandardMaterial({map:new THREE.Texture()}));
+ wall.name='Basement painted masonry rear wall';wall.userData.painted_wall=true;wall.updateMatrixWorld(true);
+ illustrateHouse([wall]);
+ const shader={vertexShader:'#include <begin_vertex>',fragmentShader:'#include <color_fragment>\n#include <opaque_fragment>'};
+ wall.material.onBeforeCompile(shader,{});
+ assert.ok(!shader.fragmentShader.includes('brickCell'));
+ assert.ok(wall.material.map,'paint texture must survive illustration');
+});

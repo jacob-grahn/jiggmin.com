@@ -1,5 +1,8 @@
+import {createBonusCollection,getBonusGame} from './bonus-collection.js';
+import {createBonusCartridge,bonusDeliveryPoses} from './bonus-cartridge-model.js';
+import {cartridgeRoom} from './cartridge-storage.js';
 import * as THREE from 'three';
-import {createHouseEntry} from './house-entry.js?v=house-ink-4';
+import {createHouseEntry} from './house-entry.js?v=bonus-cartridges-1';
 import {createDenJournal} from './den-journal.js';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
 import {inSlot,slotTarget,playbackFile} from './interaction.js?v=aligned-slot-1';
@@ -17,6 +20,10 @@ import {illustrateObject} from './den-illustration.js?v=midnight-ink-target-1';
 import {createMobileController} from './mobile-controller.js?v=profiles-2';
 const $=id=>document.getElementById(id),room=$('room'),canvas=$('cartridges'),status=$('status'),screen=$('screen'),slot=$('slot'),tip=$('tooltip');
 const say=text=>status.textContent=text;
+let basementCartridges=[];
+let bonusStorage;try{bonusStorage=window.localStorage;}catch{}
+const bonusCollection=createBonusCollection(bonusStorage),bonusPrepared=new Map();
+let bonusSync;
 let renderer,camera,scene,environment,physics,cord,roots=[],games,meta,drag=null,inserted=null,player=null,loadId=0,lastTime=0,dirty=true;
 const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),intersection=new THREE.Vector3();
 const motions=new Map(),recovery=new RecoveryQueue();
@@ -33,15 +40,42 @@ const currentMode=()=>currentGame()?.gameplay.mode||'controller';
 const isCartridge=root=>root.userData.role==='draggable_cartridge';
 let houseOpen=false;
 const denMain=document.querySelector('main');
-const houseEntry=createHouseEntry({host:denMain,getDen:()=>({scene,camera}),
+const houseEntry=createHouseEntry({host:denMain,getDen:()=>({scene,camera,basementCartridges}),
+ onCollectBonus(id){bonusCollection.collect(id);},
  onOpen(){
   if(drag)finishDrag({pointerId:drag.id},false,true);
   eject();mobileControls?.release();tip.hidden=true;
+  // House travel inherits this camera; leave TV playback zoom before entering.
+  if(camera)updateZoom(0,true);
   houseOpen=true;denMain.inert=true;denMain.setAttribute('aria-hidden','true');lastTime=0;
  },
- onExit(){houseOpen=false;denMain.inert=false;denMain.removeAttribute('aria-hidden');lastTime=0;dirty=true;recovery.defer(performance.now()/1000);},
+ onExit(){houseOpen=false;denMain.inert=false;denMain.removeAttribute('aria-hidden');lastTime=0;dirty=true;recovery.defer(performance.now()/1000);syncBonusCartridges().catch(error=>showError(error.message));},
  onError:showError,
 });
+function syncBonusCartridges(){
+ if(!physics||houseOpen)return Promise.resolve();
+ return bonusSync??=(async()=>{
+  for(const [index,id] of bonusCollection.found.entries()){
+   if(roots.some(root=>gameId(root)===id))continue;
+   const game=await getBonusGame(id);
+   if(!bonusPrepared.has(id))bonusPrepared.set(id,await createBonusCartridge(id));
+   if(houseOpen)return;
+   const root=bonusPrepared.get(id);bonusPrepared.delete(id);
+   if(!games.some(game=>game.id===id))games.push(game);
+   optimizeCartridge(root);illustrateObject(root);scene.add(root);roots.push(root);
+   const {start,drop}=bonusDeliveryPoses(camera,index),pending=bonusCollection.pending(id);
+   const slotIndex=pending?-1:emptyShelfSlot(root);
+   const pose=slotIndex>=0?shelfSlots[slotIndex]:pending&&!reducedMotion.matches?start:drop;
+   root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);
+   physics.add(id,pose);
+   if(slotIndex>=0){stored.set(root,slotIndex);physics.items.get(id).supported=true;}
+   else if(pending&&!reducedMotion.matches)animate(root,[drop],[.85],'delivery');
+   else physics.place(id,drop);
+   bonusCollection.delivered(id);recovery.touch(root,performance.now()/1000);dirty=true;
+   if(pending)say(`${game.title} found! Dropping your cartridge onto the table. Insert it into the console to play.`);
+  }
+ })().finally(()=>{bonusSync=null;});
+}
 function coords(e){const r=room.getBoundingClientRect();return [(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height];}
 function setRay(e){ray.firstHitOnly=true;const [x,y]=coords(e);pointer.set(x*2-1,1-y*2);ray.setFromCamera(pointer,camera);}
 function pick(e){
@@ -85,6 +119,9 @@ function updateMotions(dt){
   m.elapsed=0;m.segment++;
   if(m.segment<m.durations.length)continue;
   motions.delete(root);
+  if(m.kind==='delivery'){
+   physics.place(gameId(root),b);const body=physics.items.get(gameId(root)).body;body.velocity.set(0,-.2,0);body.angularVelocity.set(.35,.15,.1);
+  }
   if(m.kind==='return'){
    if(!shelfSlotFree(root,m.slotIndex)){
     const index=emptyShelfSlot(root),front={position:{...b.position,z:.85},quaternion:b.quaternion};
@@ -281,6 +318,7 @@ function applyRoute(){
  houseEntry.exit();
  if(!physics)return;if(drag)finishDrag({pointerId:drag.id},true);
  const route=resolveRoute(location.pathname,games);
+ if(route.kind==='game'&&cartridgeRoom(route.game)==='basement'){eject({updateUrl:false});say(`${route.game.title} is marked broken and stored on the basement archive shelf.`);return;}
  if(route.kind==='game'){insert(roots.find(r=>gameId(r)===route.game.id),{updateUrl:false});return;}
  eject({updateUrl:false});say(route.kind==='missing'?'That game isn’t in this collection. Pick a cartridge to play.':'Pick up a cartridge. Place it in the console—or give it a toss.');
 }
@@ -317,6 +355,9 @@ async function init(){
  }
  const tablePoses=roots.filter(r=>r.userData.storage==='table').map(r=>({position:r.position.clone(),quaternion:r.quaternion.clone()}));
  await Promise.all(roots.map(root=>remodelCartridge(root,games.find(g=>g.id===gameId(root)))));
+ basementCartridges=roots.filter(root=>cartridgeRoom(games.find(game=>game.id===gameId(root)))==='basement');
+ for(const root of basementCartridges)root.removeFromParent();
+ roots=roots.filter(root=>!basementCartridges.includes(root));
  const order=shuffled(roots);
  for(let i=0;i<order.length;i++){
   const root=order[i];optimizeCartridge(root);illustrateObject(root);root.scale.z*=CARTRIDGE_DEPTH_SCALE;
@@ -358,6 +399,7 @@ async function init(){
   if(!document.hidden&&!houseOpen){mobileControls.update(dt);physics.step(dt);updateMotions(dt);syncObjects();recoverCartridges(dt);updateZoom(dt);dirty=controllerDock.update(dt)||dirty;const flicker=environment.updateIdle(time/1000);dirty=environment.reactions.update(dt,reducedMotion.matches)||dirty;if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
  });
  if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
+ await syncBonusCartridges().catch(error=>showError(error.message));
  applyRoute();houseEntry.setReady();
 }
 init().catch(error=>{console.error(error);showError(`The den couldn’t open. ${error.message}. Refresh to retry.`);});

@@ -8,7 +8,7 @@ const art = JSON.parse(readFileSync('web/assets/house/hotspots.json','utf8'));
 const bonus = JSON.parse(readFileSync('data/bonus-games.json','utf8'));
 const roomIds = ['hallway','workshop','attic','basement'];
 const expectedHotspots = {
-  hallway:['plate','contests','door-workshop','door-attic','door-basement','door-den','locked-door-2'],
+  hallway:['plate','contests','bitey','door-workshop','door-attic','door-basement','door-den','locked-door-2'],
   workshop:['tablet','working-hours','greg','crowland','inkclipse','zigzag','destroyers'],
   attic:['tricycle','longtide','questions','derron','farm','secret'],
   basement:['community','neverending','voices','d-note'],

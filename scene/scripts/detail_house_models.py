@@ -104,7 +104,7 @@ def detail_mesh(o,finished):
    if 'timber' in kinds and longest in axes:axes=[i for i in axes if i!=longest]+[longest]
    for li in poly.loop_indices:
     co=mesh.vertices[mesh.loops[li].vertex_index].co
-    density=(.24,2.0) if 'timber' in kinds else tuple(span[a] for a in axes)
+    density=(1.5,1.5) if o.get('painted_wall') else (.24,2.0) if 'timber' in kinds else tuple(span[a] for a in axes)
     uv.data[li].uv=tuple((co[a]-lo[a])/density[j]+offset[j] for j,a in enumerate(axes))
  # Small, deterministic asymmetry: crushed carton corners, paper folds and
  # battered metal. Structural walls and artwork planes keep their alignment.
@@ -187,6 +187,32 @@ def small_details(objects):
     p=bpy.context.object;p.dimensions=(.004,.002,.021);p.rotation_euler.y=a;p.data.materials.append(ink);parts.append(p)
   join_details(o,parts)
 
+def carton_surface(o):
+ # Bake tape into the top face, with UVs in box-local coordinates so it turns
+ # and tumbles with the carton. No extra pickable mesh or collision shape.
+ base=o.data.materials[0];material=base.copy();material.name=o.name+' taped cardboard'
+ height,var,cloud,scars=FIELDS['cardboard'];n=var.shape[0];y,x=np.mgrid[0:n,0:n]/n
+ col=np.array(base.diffuse_color[:3]);linear=np.clip(col[None,None,:]*(1+var[:,:,None]),0,1)
+ seam=(np.abs(y-.5)<.004)&(np.abs(x-.5)<.43)
+ linear[seam]*=.35
+ width=.06/o.dimensions.x
+ tape=(np.abs(x-.5)<width/2)&(y>.03)&(y<.97)
+ linear[tape]=np.array([.58,.48,.30])*(1+var[tape,None]*.4)
+ rgb=np.where(linear<=.0031308,linear*12.92,1.055*linear**(1/2.4)-.055)
+ p=material.node_tree.nodes.get('Principled BSDF');basecolor=p.inputs['Base Color']
+ for link in list(basecolor.links):material.node_tree.links.remove(link)
+ tx=material.node_tree.nodes.new('ShaderNodeTexImage');tx.image=image('carton-'+re.sub(r'[^a-z0-9]+','-',o.name.lower()),rgb)
+ material.node_tree.links.new(tx.outputs['Color'],basecolor)
+ index=len(o.data.materials);o.data.materials.append(material)
+ coords=np.array([v.co[:] for v in o.data.vertices]);lo=coords.min(axis=0);span=coords.max(axis=0)-lo
+ uv=o.data.uv_layers.active
+ for poly in o.data.polygons:
+  if poly.normal.z<.9:continue
+  poly.material_index=index
+  for li in poly.loop_indices:
+   co=o.data.vertices[o.data.loops[li].vertex_index].co
+   uv.data[li].uv=((co.x-lo[0])/span[0],(co.y-lo[1])/span[1])
+
 def finish_house(room):
  objects=[o for o in bpy.context.scene.objects if o.type=='MESH']
  # Shared palette colors also appear on different substrates. Give cloth its
@@ -200,7 +226,9 @@ def finish_house(room):
      copy=m.copy();copy.name='Woven cotton '+m.name;cloth[m]=copy
     o.data.materials[i]=cloth[m]
  finished=finish_materials(objects)
- for o in objects:detail_mesh(o,finished)
+ for o in objects:
+  detail_mesh(o,finished)
+  if o.get('packing_tape'):carton_surface(o)
  small_details(objects)
  counts={}
  for o in objects:
