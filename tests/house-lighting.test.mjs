@@ -21,9 +21,9 @@ test('room lights cannot illuminate adjacent rooms; removing a room preserves re
   passes.push(lights);
  }};
  renderIsolatedRooms(renderer,world,camera,['hallway','basement']);
- assert.deepEqual(passes,[['constant fill','stairs'],['constant fill','hallway'],['constant fill','basement']]);
+ assert.deepEqual(passes,[['constant fill','stairs'],['constant fill','hallway'],['constant fill','basement'],['constant fill']]);
  assert.equal(clears,1);assert.equal(renderer.autoClear,true);assert.equal(camera.layers.mask,1);
  basement.forEach(root=>root.removeFromParent());passes.length=0;
  renderIsolatedRooms(renderer,world,camera,['hallway']);
- assert.deepEqual(passes,[['constant fill','stairs'],['constant fill','hallway']]);
+ assert.deepEqual(passes,[['constant fill','stairs'],['constant fill','hallway'],['constant fill']]);
 });

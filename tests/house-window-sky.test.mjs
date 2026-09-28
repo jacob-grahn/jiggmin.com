@@ -1,30 +1,36 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
-import {createMoonlitWindows} from '../web/house-window-sky.js';
+import {createMoonlitWindows,createMoonlitSky} from '../web/house-window-sky.js';
 
-test('Every non-den window becomes a shared sky opening, while glass and other surfaces remain intact',()=>{
- const sky=new THREE.Texture();
- for(const [room,count] of Object.entries({hallway:2,basement:3,workshop:2,attic:1})){
-  const bytes=readFileSync(`scene/exports/house/${room}.glb`),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
-  const root=new THREE.Group();
-  for(const node of doc.nodes.filter(n=>n.mesh!==undefined)){
-   const mesh=new THREE.Mesh(new THREE.PlaneGeometry(),new THREE.MeshStandardMaterial());mesh.name=node.name.replaceAll(' ','_');root.add(mesh);
-  }
-  const originals=new Map(root.children.map(o=>[o,o.material]));
-  assert.equal(createMoonlitWindows(root,sky),count);
-  const replaced=root.children.filter(o=>o.material!==originals.get(o));assert.equal(replaced.length,count);
-  for(const mesh of replaced){assert.equal(mesh.material.map,sky);assert.equal(mesh.material.toneMapped,false);assert.equal(mesh.material.color.getHex(),0xffffff);}
- }
+test('Exterior frames preserve physical dimensions and upright branches in transformed rooms',async()=>{
+ const {windowExteriorFrame}=await import('../web/house-window-exterior.js');
+ const root=new THREE.Group();root.position.set(6,-4,1.8);root.rotation.y=-Math.PI/2;
+ const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.8,.65));mesh.position.set(-2.2,2.95,3.29);root.add(mesh);
+ const frame=windowExteriorFrame(mesh);
+ assert.ok(frame.center.distanceTo(mesh.getWorldPosition(new THREE.Vector3()))<1e-6);
+ assert.ok(Math.abs(frame.size.x-1.8)<1e-6);assert.ok(Math.abs(frame.size.y-.65)<1e-6);
+ assert.ok(Math.abs(frame.right.y)<1e-6);assert.ok(Math.abs(frame.right.dot(frame.normal))<1e-6);
+ assert.ok(Math.abs(frame.normal.length()-1)<1e-6);
 });
 
-test('Sky openings retain clipping and sample sightlines instead of fitting a picture to every window',()=>{
- const plane=new THREE.Plane(),source=new THREE.MeshBasicMaterial({clippingPlanes:[plane],side:THREE.DoubleSide});
- const root=new THREE.Group(),mesh=new THREE.Mesh(new THREE.PlaneGeometry(),source);mesh.name='Garden_beyond_window';root.add(mesh);
- createMoonlitWindows(root,new THREE.Texture());
- assert.equal(mesh.material.clippingPlanes,source.clippingPlanes);assert.equal(mesh.material.side,source.side);
- const shader={vertexShader:'#include <begin_vertex>',fragmentShader:'#include <map_fragment>'};mesh.material.onBeforeCompile(shader);
- assert.match(shader.vertexShader,/modelMatrix/);assert.match(shader.fragmentShader,/exteriorWorldPosition-cameraPosition/);
- assert.doesNotMatch(shader.fragmentShader,/vMapUv/);
+test('Window glass is transparent, retains clipping, and has no exterior image shader',()=>{
+ const root=new THREE.Group(),plane=new THREE.Plane(),source=new THREE.MeshBasicMaterial({clippingPlanes:[plane]});
+ const window=new THREE.Mesh(new THREE.PlaneGeometry(2,1.5),source);window.name='Garden beyond window';root.add(window);
+ const other=new THREE.Mesh(new THREE.BoxGeometry(),source);other.name='Window jamb';root.add(other);
+ const result=createMoonlitWindows(root,new THREE.Texture(),new THREE.Vector3(0,0,2));
+ assert.equal(result.count,1);assert.equal(window.material.transparent,true);assert.equal(window.material.depthWrite,false);
+ assert.ok(window.material.opacity<.1);assert.equal(window.material.map,null);assert.equal(window.material.clippingPlanes[0],plane);
+ assert.equal(other.material,source);assert.equal(result.frames[0].normal.z,-1);
+ result.exterior.updateMatrixWorld(true);
+ const trees=[];result.exterior.traverse(o=>{if(/bare branches|pine silhouette/.test(o.name))trees.push(o);});
+ assert.equal(trees.length,2);
+ for(const tree of trees){assert.ok(tree.geometry.attributes.position.count>30);assert.equal(tree.material.transparent,false);}
+});
+
+test('Sky is a separate enclosing environment with no depth writes',()=>{
+ const sky=createMoonlitSky(new THREE.Texture());
+ assert.equal(sky.geometry.type,'SphereGeometry');assert.equal(sky.material.side,THREE.BackSide);
+ assert.equal(sky.material.depthWrite,false);assert.equal(sky.material.depthTest,false);
+ assert.equal(sky.frustumCulled,false);
 });

@@ -12,5 +12,7 @@ export function renderIsolatedRooms(renderer,world,camera,roomIds){
   for(const layer of [0,...roomIds.map(id=>ROOM_LAYERS[id])]){
    camera.layers.set(layer);renderer.render(world,camera);
   }
+  // All opaque rooms must be present in depth before transparent window glass.
+  camera.layers.set(6);renderer.render(world,camera);
  }finally{camera.layers.mask=mask;renderer.autoClear=autoClear;}
 }

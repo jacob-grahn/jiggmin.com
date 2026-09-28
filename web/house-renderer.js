@@ -9,7 +9,7 @@ import {createHouseProps} from './house-props.js?v=stairs-1';
 import {createHousePropInput} from './house-prop-input.js?v=bitey-1';
 import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=stairs-1';
 import {createHiddenScraps} from './house-scraps.js';
-import {createMoonlitWindows,MOONLIT_SKY_URL} from './house-window-sky.js';
+import {createMoonlitWindows,createMoonlitSky,MOONLIT_SKY_URL,WINDOW_GLASS_LAYER} from './house-window-sky.js';
 import {resizeHouseCamera} from './house-camera.js';
 import * as THREE from 'three';
 import {GLTFLoader} from './model-loader.js';
@@ -78,20 +78,21 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    if(o.isMesh&&clipping&&!o.userData.bake_connection){for(const mat of Array.isArray(o.material)?o.material:[o.material])mat.clippingPlanes=[clipping];}
   });
   ceiling.forEach(o=>o.removeFromParent());
-  createMoonlitWindows(gltf.scene,sky);
-  resources.capture(gltf.scene);
   const doors=id==='hallway'?setupDoors(gltf.scene):new Map();
   const authored=gltf.cameras[0];if(!authored)throw Error('Missing room camera');authored.updateWorldMatrix(true,false);
   const view=authored.clone();authored.getWorldPosition(view.position);authored.getWorldQuaternion(view.quaternion);
   if(spec.eyeHeight){const target=view.position.clone().add(view.getWorldDirection(new THREE.Vector3()).multiplyScalar(10));view.position.y=spec.position[1]+spec.eyeHeight;view.lookAt(target);}
   if(spec.viewPosition){view.position.fromArray(spec.viewPosition);view.lookAt(new THREE.Vector3(...spec.viewTarget));}
+  const windows=createMoonlitWindows(gltf.scene,sky,view.position);world.add(windows.exterior);
+  resources.capture(gltf.scene);
   const props=createHouseProps(gltf.scene,world);
   const propMaterials=new Map();
   for(const prop of props.props)prop.root.traverse(o=>{if(!o.isMesh||!clipping)return;const unclipped=m=>{if(!propMaterials.has(m)){const copy=m.clone();copy.clippingPlanes=null;propMaterials.set(m,copy);}return propMaterials.get(m);};o.material=Array.isArray(o.material)?o.material.map(unclipped):unclipped(o.material);});
   const scraps=createHiddenScraps(props.props,view,world,collected);
-  const roots=[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot),...Array.from(scraps.values(),s=>s.mesh)];
+  const roots=[gltf.scene,windows.exterior,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot),...Array.from(scraps.values(),s=>s.mesh)];
   illustrateHouse(roots);
   roots.forEach(root=>resources.capture(root));assignRoomLighting(roots,id);
+  windows.glass.forEach(mesh=>mesh.layers.set(WINDOW_GLASS_LAYER));
   const room={id,resources,roots,scene:world,model:gltf.scene,view,doors,props,scraps,pickRoots:[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot)]};rooms.set(id,room);
  }
  function refreshDen(){
@@ -139,6 +140,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    const response=await fetch('/web/assets/house/layout.json?v=stairs-1');if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
    // The baked hallway asset includes its ceiling and landing surfaces.
    connections=buildConnections({...layout,geometry:layout.geometry.filter(part=>!isHallwayConnection(part.name)&&!part.name.startsWith('Basement stair'))});
+   connections.group.add(createMoonlitSky(await new THREE.TextureLoader().loadAsync(MOONLIT_SKY_URL)));
    // The replacement ceiling belongs to the hallway, including its lighting.
    assignRoomLighting(connections.group.children.filter(o=>o.name.startsWith('Hall ceiling')||o.name.startsWith('Hall landing')||o.name==='Den shared wall extension'),'hallway');
    connections.resources=createRoomResources();connections.resources.capture(connections.group);
