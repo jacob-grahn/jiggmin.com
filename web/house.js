@@ -1,4 +1,4 @@
-import {createHouseRenderer} from './house-renderer.js?v=hallway-uv-bake-7';
+import {createHouseRenderer} from './house-renderer.js?v=moonlit-windows-1';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 export const HOUSE_MEDIA_QUERY = '(min-width: 1000px) and (min-aspect-ratio: 69/50) and (pointer: fine)';

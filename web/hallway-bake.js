@@ -9,19 +9,23 @@ export function prepareHallwayBake(model){
  const frontFixture=[];
  model.traverse(mesh=>{if(/^(Brass[ _]shade|Opal[ _]lamp|Lamp[ _]stem)$/.test(mesh.name))frontFixture.push(mesh);});
  for(const mesh of frontFixture)mesh.removeFromParent();
+ return prepareSurfaceBake(model,'hallway');
+}
+
+export function prepareSurfaceBake(model,room){
  const materials=new Map();let count=0;
  model.traverse(mesh=>{
-  if(!mesh.isMesh||!mesh.userData.hallway_baked)return;
+  if(!mesh.isMesh||!mesh.userData[room+'_baked'])return;
   const convert=source=>{
    if(!materials.has(source)){
     const map=source.emissiveMap??source.map;
-    if(!map)throw Error('Hallway bake is missing its surface texture');
-    materials.set(source,new THREE.MeshBasicMaterial({name:'Hallway UV baked lighting',map,color:0xffffff,side:THREE.DoubleSide,toneMapped:false}));
+    if(!map)throw Error(`${room} bake is missing its surface texture`);
+    materials.set(source,new THREE.MeshBasicMaterial({name:`${room} UV baked lighting`,map,color:0xffffff,side:THREE.DoubleSide,toneMapped:false}));
    }
    return materials.get(source);
   };
   mesh.material=Array.isArray(mesh.material)?mesh.material.map(convert):convert(mesh.material);count++;
  });
- if(!count)throw Error('Hallway has no baked surfaces');
+ if(!count)throw Error(`${room} has no baked surfaces`);
  return count;
 }

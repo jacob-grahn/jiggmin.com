@@ -1,4 +1,4 @@
-import {prepareHallwayBake,isHallwayConnection} from './hallway-bake.js?v=front-fixture-removed';
+import {prepareHallwayBake,prepareSurfaceBake,isHallwayConnection} from './hallway-bake.js?v=basement-1';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
 import {createBasementCartridges} from './cartridge-storage.js';
 import {illustrateHouse} from './house-illustration.js?v=3';
@@ -9,7 +9,7 @@ import {createHouseProps} from './house-props.js';
 import {createHousePropInput} from './house-prop-input.js?v=bitey-1';
 import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=bitey-1';
 import {createHiddenScraps} from './house-scraps.js';
-import {createWindowParallax} from './house-window-parallax.js';
+import {createMoonlitWindows,MOONLIT_SKY_URL} from './house-window-sky.js';
 import {resizeHouseCamera} from './house-camera.js';
 import * as THREE from 'three';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
@@ -43,7 +43,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    Object.assign(button.style,{left:`${left*100}%`,top:`${top*100}%`,width:`${(right-left)*100}%`,height:`${(bottom-top)*100}%`});
   }
  }
- function render(){if(camera){for(const room of rooms.values())room.windowParallax?.update(camera);renderIsolatedRooms(renderer,world,camera,[...rooms.keys()]);updateTargets();}}
+ function render(){if(camera){renderIsolatedRooms(renderer,world,camera,[...rooms.keys()]);updateTargets();}}
  function resize(){input.cancel();const {width,height}=host.getBoundingClientRect();renderer.setSize(width,height,false);if(camera){resizeHouseCamera(camera,width/height);render();}}
  function setupDoors(model){
   const doors=new Map(),leaves=[];model.updateMatrixWorld(true);
@@ -63,10 +63,11 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   }
   return doors;
  }
- function addRoom(id,gltf){
+ function addRoom(id,gltf,sky){
   if(id==='basement')for(const cartridge of createBasementCartridges(getDen?.()?.basementCartridges??[]))gltf.scene.add(cartridge);
   const resources=createRoomResources();resources.capture(gltf.scene);
   if(id==='hallway')prepareHallwayBake(gltf.scene);
+  if(id==='basement')prepareSurfaceBake(gltf.scene,'basement');
   const spec=layout.rooms[id],matrix=roomMatrix(spec);gltf.scene.applyMatrix4(matrix);world.add(gltf.scene);gltf.scene.updateMatrixWorld(true);
   const ceiling=[];
   const clipping=spec.front===undefined?null:new THREE.Plane(new THREE.Vector3(0,0,-1),spec.front).applyMatrix4(matrix);
@@ -77,6 +78,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    if(o.isMesh&&clipping){for(const mat of Array.isArray(o.material)?o.material:[o.material])mat.clippingPlanes=[clipping];}
   });
   ceiling.forEach(o=>o.removeFromParent());
+  createMoonlitWindows(gltf.scene,sky);
+  resources.capture(gltf.scene);
   const doors=id==='hallway'?setupDoors(gltf.scene):new Map();
   const authored=gltf.cameras[0];if(!authored)throw Error('Missing room camera');authored.updateWorldMatrix(true,false);
   const view=authored.clone();authored.getWorldPosition(view.position);authored.getWorldQuaternion(view.quaternion);
@@ -88,9 +91,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   const scraps=createHiddenScraps(props.props,view,world,collected);
   const roots=[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot),...Array.from(scraps.values(),s=>s.mesh)];
   illustrateHouse(roots);
-  const windowParallax=id==='hallway'?createWindowParallax(gltf.scene,view):null;
   roots.forEach(root=>resources.capture(root));assignRoomLighting(roots,id);
-  const room={id,resources,roots,windowParallax,scene:world,model:gltf.scene,view,doors,props,scraps,pickRoots:[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot)]};rooms.set(id,room);
+  const room={id,resources,roots,scene:world,model:gltf.scene,view,doors,props,scraps,pickRoots:[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot)]};rooms.set(id,room);
  }
  function refreshDen(){
   const source=getDen?.();if(!source?.scene||!source.camera)return;
@@ -147,9 +149,12 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  async function ensureRoom(id,ticket){
   if(rooms.has(id))return;
   if(id==='den'){refreshDen();return;}
-  const gltf=await loader.loadAsync(`/web/assets/house/${id==='hallway'?'hallway-baked':id}.glb${id==='attic'?'?v=tricycle-2':id==='hallway'?'?v=uv-bake-7':id==='workshop'?'?v=desk-in-progress-1':''}`);
+  const gltf=await loader.loadAsync(`/web/assets/house/${id==='hallway'||id==='basement'?id+'-baked':id}.glb${id==='attic'?'?v=tricycle-2':id==='hallway'?'?v=uv-bake-7':id==='basement'?'?v=uv-bake-1':id==='workshop'?'?v=desk-in-progress-1':''}`);
   if(ticket!==revision){const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();return;}
-  addRoom(id,gltf);
+  let sky;
+  try{sky=await new THREE.TextureLoader().loadAsync(MOONLIT_SKY_URL);}catch(error){const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();throw error;}
+  if(ticket!==revision){sky.dispose();const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();return;}
+  addRoom(id,gltf,sky);
  }
  function cancel(){
   setActive(false);targets.clear();revision++;cancelAnimationFrame(frame);finish?.();finish=null;current=null;camera=null;
