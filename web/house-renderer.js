@@ -1,3 +1,4 @@
+import {prepareHallwayBake,isHallwayConnection} from './hallway-bake.js?v=front-fixture-removed';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
 import {createBasementCartridges} from './cartridge-storage.js';
 import {illustrateHouse} from './house-illustration.js?v=3';
@@ -65,6 +66,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  function addRoom(id,gltf){
   if(id==='basement')for(const cartridge of createBasementCartridges(getDen?.()?.basementCartridges??[]))gltf.scene.add(cartridge);
   const resources=createRoomResources();resources.capture(gltf.scene);
+  if(id==='hallway')prepareHallwayBake(gltf.scene);
   const spec=layout.rooms[id],matrix=roomMatrix(spec);gltf.scene.applyMatrix4(matrix);world.add(gltf.scene);gltf.scene.updateMatrixWorld(true);
   const ceiling=[];
   const clipping=spec.front===undefined?null:new THREE.Plane(new THREE.Vector3(0,0,-1),spec.front).applyMatrix4(matrix);
@@ -133,7 +135,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  async function load(){
   if(!loading)loading=(async()=>{
    const response=await fetch('/web/assets/house/layout.json?v=bitey-1');if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
-   connections=buildConnections(layout);
+   // The baked hallway asset includes its ceiling and landing surfaces.
+   connections=buildConnections({...layout,geometry:layout.geometry.filter(part=>!isHallwayConnection(part.name))});
    // The replacement ceiling belongs to the hallway, including its lighting.
    assignRoomLighting(connections.group.children.filter(o=>o.name.startsWith('Hall ceiling')||o.name.startsWith('Hall landing')||o.name==='Den shared wall extension'),'hallway');
    connections.resources=createRoomResources();connections.resources.capture(connections.group);
@@ -144,7 +147,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  async function ensureRoom(id,ticket){
   if(rooms.has(id))return;
   if(id==='den'){refreshDen();return;}
-  const gltf=await loader.loadAsync(`/web/assets/house/${id}.glb${id==='attic'?'?v=tricycle-2':id==='hallway'?'?v=bitey-1':id==='workshop'?'?v=desk-in-progress-1':''}`);
+  const gltf=await loader.loadAsync(`/web/assets/house/${id==='hallway'?'hallway-baked':id}.glb${id==='attic'?'?v=tricycle-2':id==='hallway'?'?v=uv-bake-7':id==='workshop'?'?v=desk-in-progress-1':''}`);
   if(ticket!==revision){const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();return;}
   addRoom(id,gltf);
  }

@@ -1,0 +1,23 @@
+{
+  "staticMeshes": 357,
+  "connections": [
+    "Hall ceiling beside hatch",
+    "Hall ceiling beside hatch",
+    "Hall ceiling beyond hatch",
+    "Hall ceiling beyond hatch",
+    "Den shared wall extension",
+    "Hall landing floor",
+    "Hall landing ceiling",
+    "Hall landing right wall"
+  ],
+  "samples": 128,
+  "denoised": true,
+  "exposure": -1.3,
+  "saturation": 1.2,
+  "resolution": 4096,
+  "ceilingResolution": 2048,
+  "ceilingPaint": "light cream",
+  "ceilingLightsOn": false,
+  "lighting": "blue windows only",
+  "excludedMovableShadows": true
+}
