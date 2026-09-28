@@ -1,4 +1,4 @@
-import {createHouseRenderer} from './house-renderer.js?v=hall-landing-back-1';
+import {createHouseRenderer} from './house-renderer.js?v=house-ink-4';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 export const HOUSE_MEDIA_QUERY = '(min-width: 1000px) and (min-aspect-ratio: 69/50) and (pointer: fine)';

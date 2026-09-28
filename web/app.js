@@ -1,25 +1,26 @@
 import * as THREE from 'three';
-import {createHouseEntry} from './house-entry.js?v=hall-landing-back-1';
+import {createHouseEntry} from './house-entry.js?v=house-ink-4';
 import {createDenJournal} from './den-journal.js';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
-import {inSlot,playbackFile} from './interaction.js?v=swf-compat-1';
+import {inSlot,slotTarget,playbackFile} from './interaction.js?v=aligned-slot-1';
 import {resolveRoute,writeGameUrl} from './routes.js';
 import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
-import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=raycast-bvh-1';
+import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=painted-brick-1';
 import {createControllerCord} from './controller-cord.js?v=2';
 import {remodelCartridge} from './cartridge-model.js?v=screenprint-3';
-import {SHELF_SLOTS,shuffled,RecoveryQueue,ease} from './library-behavior.js?v=queued-recovery-1';
-import {UPPER_SLOTS,framing,captureSceneAnchors,composeCamera,projectWorld,createUpperShelf,cartridgeVisible} from './responsive-scene.js?v=raycast-bvh-1';
+import {SHELF_SLOTS,SHELF_FILL_ORDER,remapShelfAssignments,shuffled,RecoveryQueue,ease} from './library-behavior.js?v=visible-shelf-1';
+import {UPPER_SLOTS,framing,captureSceneAnchors,composeCamera,projectWorld,createUpperShelf,cartridgeVisible} from './responsive-scene.js?v=painted-brick-1';
 import {createControllerDock} from './controller-dock.js';
 import {detailController} from './controller-detail.js';
 import {addSurfacePatina} from './surface-patina.js';
+import {illustrateObject} from './den-illustration.js?v=midnight-ink-target-1';
 import {createMobileController} from './mobile-controller.js?v=profiles-2';
 const $=id=>document.getElementById(id),room=$('room'),canvas=$('cartridges'),status=$('status'),screen=$('screen'),slot=$('slot'),tip=$('tooltip');
 const say=text=>status.textContent=text;
 let renderer,camera,scene,environment,physics,cord,roots=[],games,meta,drag=null,inserted=null,player=null,loadId=0,lastTime=0,dirty=true;
 const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),intersection=new THREE.Vector3();
 const motions=new Map(),recovery=new RecoveryQueue();
-let anchors,baseCameraHeight,cameraDrop=0,audioContext,controller,upperShelf,upperBodies=[],upperMode=false,shelfSlots=SHELF_SLOTS,mobileControls;
+let dropTarget,anchors,baseCameraHeight,cameraDrop=0,audioContext,controller,upperShelf,upperBodies=[],upperMode=false,shelfSlots=SHELF_SLOTS,mobileControls;
 let focusY=.41,controllerDock=null;
 const stored=new Map();
 const touchLayout=matchMedia('(max-width:900px), (pointer:coarse)');
@@ -97,6 +98,7 @@ function updateMotions(dt){
  }
 }
 function shelfSlotFree(root,index){
+ if(shelfSlots[index].blocked)return false;
  if([...motions].some(([other,m])=>other!==root&&m.slotIndex===index))return false;
  const p=shelfSlots[index].position,box=new THREE.Box3(new THREE.Vector3(p.x-.057,p.y+.01,p.z-.26),new THREE.Vector3(p.x+.057,p.y+.455,p.z+.26));
  return !roots.some(other=>other!==root&&other!==inserted&&box.intersectsBox(new THREE.Box3().setFromObject(other)));
@@ -134,6 +136,7 @@ function setShelfLayout(upper){
  for(const [root,m] of [...motions])if(m.kind==='return')cancelMotion(root);
  upperMode=upper;shelfSlots=upper?UPPER_SLOTS:SHELF_SLOTS;
  upperShelf.group.visible=upper;for(const body of upperBodies)body.collisionFilterMask=upper?-1:0;
+ const assignments=remapShelfAssignments(stored,shelfSlots);stored.clear();for(const [root,index] of assignments)stored.set(root,index);
  for(const [root,index] of stored){const pose=shelfSlots[index];physics.place(gameId(root),pose,true);root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);recovery.moved(root,performance.now()/1000);}
  recovery.defer(performance.now()/1000);dirty=true;
 }
@@ -141,7 +144,9 @@ function updateProjection(){
  composeCamera(camera,{aspect:room.clientWidth/room.clientHeight,zoom:camera.zoom,focusY,height:baseCameraHeight-cameraDrop},anchors.focus);
  meta.screen=anchors.screen.map(p=>projectWorld(p,camera));
  meta.slot=projectWorld(anchors.slot,camera);
- slot.style.left=`${meta.slot[0]*100}%`;slot.style.top=`${meta.slot[1]*100}%`;slot.style.width=`${15*camera.zoom*1.6/camera.aspect}%`;
+ dropTarget=slotTarget(meta.slot,camera.aspect,camera.zoom);
+ slot.style.left=`${dropTarget.center[0]*100}%`;slot.style.top=`${dropTarget.center[1]*100}%`;
+ slot.style.width=`${dropTarget.width*100}%`;slot.style.height=`${dropTarget.height*100}%`;
  screenTransform();updateTouchSurface();dirty=true;
 }
 function updateZoom(dt,immediate=false){
@@ -223,11 +228,9 @@ function finishDrag(e,cancel=false,interrupted=false){
  updateTouchSurface();
  if(cancel){physics.cancel();syncObjects();if(d.wasInserted)insert(d.root,{updateUrl:false});else say(`${d.root.userData.title} returned to where you picked it up.`);return;}
  const velocity=performance.now()-d.lastMove>120?new THREE.Vector3():d.velocity;
- const body=physics.items.get(gameId(d.root)).body;
- const nearDock=new THREE.Vector3(body.position.x,body.position.y,body.position.z).distanceTo(new THREE.Vector3(-.13,1.25,1.17))<(touchLayout.matches?1.8:1);
  const [x,y]=interrupted?[-1,-1]:coords(e);
- const centered=Math.abs(x-meta.slot[0])<.045&&Math.abs(y-meta.slot[1])<.025;
- const shouldDock=isCartridge(d.root)&&inSlot(x,y,meta.slot)&&nearDock&&(velocity.length()<3||centered);
+ const centered=inSlot(x,y,dropTarget,.55);
+ const shouldDock=isCartridge(d.root)&&inSlot(x,y,dropTarget)&&(velocity.length()<3||centered);
  physics.release(velocity);
  if(shouldDock){insert(d.root);return;}
  if(d.wasInserted){writeGameUrl(null);document.title='Jiggmin - Midnight';}
@@ -252,11 +255,11 @@ function moveGrip(e,first=false){
  intersection.x=THREE.MathUtils.clamp(intersection.x,-3.6,3.8);intersection.y=THREE.MathUtils.clamp(intersection.y,.13,4.5);intersection.z=THREE.MathUtils.clamp(intersection.z,-1.7,4);
  // Touch has no scroll wheel for depth. Guide the grip toward the physical
  // slot when the finger enters its projected target, including from the high rack.
- if(touchLayout.matches&&isCartridge(drag.root)&&inSlot(...coords(e),meta.slot))intersection.z=1.35;
+ if(touchLayout.matches&&isCartridge(drag.root)&&inSlot(...coords(e),dropTarget))intersection.z=1.35;
  const now=performance.now(),dt=Math.max((now-drag.lastMove)/1000,.008);
  if(!first){const speed=intersection.clone().sub(drag.lastPoint).divideScalar(dt);drag.velocity.lerp(speed,.45);if(drag.velocity.length()>8)drag.velocity.setLength(8);}
  drag.lastPoint.copy(intersection);drag.lastMove=now;physics.move(intersection);
- room.classList.toggle('over-slot',isCartridge(drag.root)&&inSlot(...coords(e),meta.slot));
+ room.classList.toggle('over-slot',isCartridge(drag.root)&&inSlot(...coords(e),dropTarget));
 }
 room.addEventListener('pointermove',e=>{
  if(!physics)return;
@@ -293,14 +296,14 @@ async function init(){
  const loader=new GLTFLoader();
  const json=async path=>{const r=await fetch(path);if(!r.ok)throw Error(`Could not load ${path}`);return r.json();};
  const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel,propLighting,profiles]=await Promise.all([
-  json('/data/games.json?v=swf-compat-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=grounded-props-2'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=grounded-props-2'),json('/web/assets/colliders.json?v=grounded-props-2'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=grounded-props-2'),json('/data/gameplay.json?v=swf-compat-1')
+  json('/data/games.json?v=swf-compat-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=painted-brick-1'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=painted-brick-1'),json('/web/assets/colliders.json?v=painted-brick-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=painted-brick-1'),json('/data/gameplay.json?v=swf-compat-1')
  ]);
  games=manifest.games;for(const game of games){game.gameplay=profiles.games[game.id];if(!game.gameplay)throw Error(`Missing gameplay profile: ${game.id}`);}meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;
  environment=prepareRoom(roomModel,camera,lighting,propLighting);scene.add(environment.group);
  const journal=createDenJournal();scene.add(journal.group);environment.props.push(...journal.meshes);environment.occluders.push(...journal.meshes);
  physics=new CartridgePhysics(colliders);
- upperShelf=createUpperShelf();scene.add(upperShelf.group);upperShelf.group.visible=false;
+ upperShelf=createUpperShelf();illustrateObject(upperShelf.group);illustrateObject(journal.group);scene.add(upperShelf.group);upperShelf.group.visible=false;
  upperBodies=physics.addStatic(upperShelf.colliders);for(const b of upperBodies)b.collisionFilterMask=0;
  carts.scene.traverse(o=>{
   if(o.userData.role==='draggable_cartridge')roots.push(o);
@@ -316,9 +319,9 @@ async function init(){
  await Promise.all(roots.map(root=>remodelCartridge(root,games.find(g=>g.id===gameId(root)))));
  const order=shuffled(roots);
  for(let i=0;i<order.length;i++){
-  const root=order[i];optimizeCartridge(root);root.scale.z*=CARTRIDGE_DEPTH_SCALE;
-  const index=i-5,pose=i<5?tablePoses[i]:SHELF_SLOTS[(index%3)*9+Math.floor(index/3)];
-  root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);root.userData.storage=i<5?'table':'rack';if(i>=5)stored.set(root,(index%3)*9+Math.floor(index/3));
+  const root=order[i];optimizeCartridge(root);illustrateObject(root);root.scale.z*=CARTRIDGE_DEPTH_SCALE;
+  const index=i-5,pose=i<5?tablePoses[i]:SHELF_SLOTS[SHELF_FILL_ORDER[index]];
+  root.position.copy(pose.position);root.quaternion.copy(pose.quaternion);root.userData.storage=i<5?'table':'rack';if(i>=5)stored.set(root,SHELF_FILL_ORDER[index]);
   if(i<5){
    if(framing(room.clientWidth/room.clientHeight,false).upper){
     const [x,z]=[[-.87,1.8],[.87,1.8],[-.6,2.18],[0,2.18],[.6,2.18]][i];root.position.x=x;root.position.z=z;
@@ -335,7 +338,7 @@ async function init(){
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;for(const mat of (Array.isArray(o.material)?o.material:[o.material]))addSurfacePatina(mat,{grain:.09,wear:.06});}
  });
  if(!controller)throw Error('Controller model is missing');
- detailController(controller);
+ detailController(controller);illustrateObject(controller);
  controller.userData.title='J/01 controller';roots.push(controller);
  physics.addController(gameId(controller),{position:controller.position,quaternion:controller.quaternion});
  cord=createControllerCord(controller);scene.add(cord.mesh);

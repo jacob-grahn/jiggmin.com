@@ -3,7 +3,7 @@ import bpy,json,re,math
 from pathlib import Path
 from mathutils import Vector,Matrix
 R=Path(__file__).resolve().parents[2]; S=bpy.context.scene
-OUT=R/'scene/renders/detailed-export';OUT.mkdir(parents=True,exist_ok=True)
+OUT=R/('scene/renders/illustrated-export' if S.get('illustrated_den') else 'scene/renders/detailed-export');OUT.mkdir(parents=True,exist_ok=True)
 roots=[o for o in S.objects if o.get('role') in {'draggable_cartridge','mobile_controller','controller_cable'}]
 dynamic={o for root in roots for o in [root,*root.children_recursive]}
 for o in dynamic:o.hide_render=True
@@ -56,7 +56,8 @@ for o in exports:o.hide_render=True
 # Widen in both axes while leaving the runtime camera and screen anchors unchanged.
 S.camera.data.lens/=2.3;S.camera.data.sensor_fit='HORIZONTAL';S.camera.data.dof.use_dof=False
 S.render.resolution_x=5120;S.render.resolution_y=1600;S.render.resolution_percentage=100
-S.render.engine='CYCLES';S.cycles.samples=24;S.cycles.use_denoising=True
+S.render.engine='CYCLES';S.cycles.samples=16 if S.get('illustrated_den') else 24;S.cycles.use_denoising=True
+if S.get('illustrated_den'):S.render.line_thickness=1.4
 S.render.filepath=str(OUT/'room-props.png')
 bpy.ops.render.render(write_still=True)
 print('WIDE_PLATE_RENDERED',flush=True)
@@ -67,7 +68,11 @@ points=[world_to_camera_view(S,S.camera,o.matrix_world@Vector(v)) for o in sourc
 S.render.use_border=True;S.render.use_crop_to_border=False
 S.render.border_min_x=max(0,min(p.x for p in points)-.025);S.render.border_max_x=min(1,max(p.x for p in points)+.025)
 S.render.border_min_y=max(0,min(p.y for p in points)-.025);S.render.border_max_y=min(1,max(p.y for p in points)+.025)
-for o in sources:o.visible_camera=False
+for o in sources:
+ o.visible_camera=False
+ if S.get('illustrated_den'):
+  ink=bpy.data.collections.get('Illustrated contour sources')
+  if ink and o.name in ink.objects:ink.objects.unlink(o)
 S.render.filepath=str(OUT/'room-clean-patch.png');bpy.ops.render.render(write_still=True)
 (OUT/'border.json').write_text(json.dumps([S.render.border_min_x,S.render.border_min_y,S.render.border_max_x,S.render.border_max_y]))
 print('DETAILED_EXPORT_COMPLETE',flush=True)

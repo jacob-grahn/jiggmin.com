@@ -82,12 +82,12 @@ export function prepareRoom(gltf, camera, lighting, propLighting=lighting) {
 
 export function addCartridgeLighting(scene,renderer) {
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
-  scene.add(new THREE.HemisphereLight(0x6d909b,0x23180f,.85));
+  scene.add(new THREE.HemisphereLight(0x8b81ac,0x281b37,.85));
   const fill=new THREE.DirectionalLight(0xa4bdc5,1.1);fill.position.set(-.5,2.8,6);scene.add(fill);
-  const moon=new THREE.DirectionalLight(0x95c6e6,1.45);moon.position.set(-3.5,4,1);moon.target.position.set(-.7,.5,1);
+  const moon=new THREE.DirectionalLight(0x79a5ff,2.0);moon.position.set(-3.5,4,1);moon.target.position.set(-.7,.5,1);
   moon.castShadow=true;moon.shadow.mapSize.set(2048,2048);moon.shadow.camera.left=-5;moon.shadow.camera.right=5;moon.shadow.camera.top=5;moon.shadow.camera.bottom=-5;moon.shadow.camera.near=.2;moon.shadow.camera.far=14;moon.shadow.normalBias=.008;moon.shadow.bias=-.00015;moon.shadow.radius=3;scene.add(moon,moon.target);
-  const lamp=new THREE.PointLight(0xffb66c,14,7,2);lamp.position.set(2.7,2.05,-.65);scene.add(lamp);
-  const crt=new THREE.PointLight(0x69cddb,3.2,4,2);crt.position.set(0,1.9,.8);scene.add(crt);
+  const lamp=new THREE.PointLight(0xffad58,12,7,2);lamp.position.set(2.7,2.05,-.65);scene.add(lamp);
+  const crt=new THREE.PointLight(0x69cddb,4.8,4,2);crt.position.set(0,1.9,.8);scene.add(crt);
   return {crt};
 }
 

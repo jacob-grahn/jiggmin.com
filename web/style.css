@@ -7,14 +7,14 @@
 @media(max-width:900px), (pointer:coarse){#tooltip{display:none}}
  #mobile-controller{display:block;position:absolute;width:min(410px,calc(100% - 28px));height:178px;left:50%;top:var(--pad-top,68%);margin:0;z-index:8;opacity:0;pointer-events:none;transform:translate(-65%,100px) scale(.55) rotate(-8deg);transition:transform 1.1s cubic-bezier(.22,.8,.24,1),opacity .5s;filter:drop-shadow(0 18px 15px #0009)}
  #mobile-controller.raised{opacity:1;transform:translate(-50%,0) scale(var(--pad-scale,1));transform-origin:top center;pointer-events:auto}
- .pad-face{position:absolute;inset:0;border:2px solid #5c6e6d;border-bottom:12px solid #17232a;border-radius:25px 25px 32px 32px;background:linear-gradient(155deg,#788d88,#4b6666 42%,#354b50);box-shadow:inset 0 2px 2px #becfc56b,0 6px 0 #0d161c,0 9px 0 #26383d}
+ .pad-face{position:absolute;inset:0;border:2px solid #0e0b17;border-bottom:12px solid #201b2c;border-radius:25px 25px 32px 32px;background:linear-gradient(155deg,#85818b 0 15%,#646374 15% 72%,#434153 72%);box-shadow:inset 0 2px 0 #b7a7a0,0 6px 0 #0b0911,0 9px 0 #302639}
  #mobile-controller button{position:absolute;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;padding:0;min-width:44px;min-height:44px;outline-offset:5px}
- #touch-stick,#touch-aim{width:112px;height:112px;left:15px;top:27px;border-radius:50%;border:3px solid #263940;background:radial-gradient(ellipse,#121b24 25%,#3c5158 64%,#1e3036 66%);box-shadow:inset 0 5px 10px #07111c,0 2px 0 #91a5a255}
- #touch-stick span,#touch-aim span{position:absolute;width:69px;height:69px;left:18px;top:16px;border-radius:50%;background:radial-gradient(ellipse at 45% 30%,#6b7e83,#354854 58%,#132531 64%);box-shadow:0 12px 0 -5px #101a24,0 16px 12px #07111eb3;pointer-events:none}
- #mobile-controller .pad-action{width:60px;height:60px;border-radius:50%;border:2px solid #779b96;background:radial-gradient(ellipse at 40% 20%,#679b8e,#315e59);box-shadow:0 7px 0 #192f33,0 10px 9px #0e20288c;color:#e2e4ca;font-size:22px;font-weight:bold}
- #touch-a{right:84px;top:82px}#mobile-controller #touch-b{right:15px;top:43px;background:radial-gradient(ellipse at 40% 20%,#b6a37e,#746143);border-color:#b8a685}
+ #touch-stick,#touch-aim{width:112px;height:112px;left:15px;top:27px;border-radius:50%;border:3px solid #100e1a;background:radial-gradient(ellipse,#181525 0 48%,#3d394f 49% 64%,#252133 65%);box-shadow:inset 0 4px 0 #100e1b,0 2px 0 #a59aab}
+ #touch-stick span,#touch-aim span{position:absolute;width:69px;height:69px;left:18px;top:16px;border-radius:50%;background:radial-gradient(ellipse at 40% 25%,#76748c 0 28%,#494559 29% 60%,#262132 61%);border:2px solid #100d19;box-shadow:0 10px 0 -4px #100d19,3px 14px 0 -3px #1c1729;pointer-events:none}
+ #mobile-controller .pad-action{width:60px;height:60px;border-radius:50%;border:2px solid #12101c;background:linear-gradient(145deg,#91b1a3 0 24%,#537f79 25% 72%,#344850 73%);box-shadow:0 6px 0 #151220,2px 9px 0 #302737;color:#e2e4ca;font-size:22px;font-weight:bold}
+ #touch-a{right:84px;top:82px}#mobile-controller #touch-b{right:15px;top:43px;background:linear-gradient(145deg,#e2ba77 0 24%,#b48648 25% 72%,#684849 73%);border-color:#18111c}
  #mobile-controller .pad-action[aria-pressed=true]{transform:translateY(5px);box-shadow:0 2px 0 #192f33}
- #mobile-controller #touch-quit{left:calc(50% - 27px);top:20px;width:54px;height:44px;background:#253940;border-color:#607777;font-size:9px;letter-spacing:1px;border-radius:8px}
+ #mobile-controller #touch-quit{left:calc(50% - 27px);top:20px;width:54px;height:44px;background:#302b3f;border-color:#100d19;font-size:9px;letter-spacing:1px;border-radius:8px}
  .pad-brand{position:absolute;left:calc(50% - 24px);bottom:13px;font-size:9px;color:#a3b6ad;letter-spacing:3px}.pad-led{position:absolute;left:calc(50% - 3px);top:75px;width:5px;height:5px;border-radius:50%;background:#94e4bd;box-shadow:0 0 8px #74eac4}
 
 @media(prefers-reduced-motion:reduce){#mobile-controller{transition:none}}
@@ -48,7 +48,7 @@ body{display:block;overflow:hidden}main{position:relative;width:100%;height:100s
 #mobile-controller[data-layout="twin-sticks"] #pad-mapping{left:0;width:100%;top:151px;font-size:8px}
 #mobile-controller[data-layout="twin-sticks"] .pad-brand,#mobile-controller[data-layout="arrows"] .pad-brand{display:none}
 #arrow-pad{position:absolute;left:calc(50% - 100px);top:67px;width:200px;height:88px}
-#mobile-controller #arrow-pad button{width:48px;height:44px;border-radius:8px;font-size:26px;background:linear-gradient(#415858,#233b41);box-shadow:0 4px 0 #14232a}
+#mobile-controller #arrow-pad button{width:48px;height:44px;border-radius:8px;font-size:26px;background:linear-gradient(145deg,#777285 0 22%,#494459 23%);border:2px solid #100d19;box-shadow:0 4px 0 #15101f}
 #arrow-pad [data-key="ArrowUp"]{left:76px;top:-12px}
 #arrow-pad [data-key="ArrowLeft"]{left:24px;top:36px}
 #arrow-pad [data-key="ArrowDown"]{left:76px;top:36px}

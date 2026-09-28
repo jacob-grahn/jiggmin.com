@@ -1,8 +1,8 @@
 """Assemble the clean background plate and install the matching browser assets."""
-import json, shutil, struct
+import json, shutil, struct, sys
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter
-R=Path(__file__).resolve().parents[2];source=R/'scene/renders/detailed-export';target=R/'web/assets'
+R=Path(__file__).resolve().parents[2];source=R/('scene/renders/illustrated-export' if '--illustrated' in sys.argv else 'scene/renders/detailed-export');target=R/'web/assets'
 full=Image.open(source/'room-props.png').convert('RGB');patch=Image.open(source/'room-clean-patch.png').convert('RGB')
 assert full.size==patch.size
 w,h=full.size;x0,y0,x1,y1=json.loads((source/'border.json').read_text())
@@ -26,3 +26,9 @@ for name in ['room.glb','room-lighting.webp','room-props.webp']:
  size=(target/name).stat().st_size
  assert size<25*1024*1024,(name,size,'exceeds the hosting asset limit')
  print(name,round(size/1024),'KiB')
+
+if '--illustrated' in sys.argv:
+ # Recover the original camera crop from the final wide plate, keeping the
+ # loading image in sync even when only the full bake was rebuilt.
+ cw,ch=w/2.3,h/1.15
+ full.crop((round((w-cw)/2),round((h-ch)/2),round((w+cw)/2),round((h+ch)/2))).resize((1600,1000),Image.Resampling.LANCZOS).save(target/'den.webp',quality=93,method=6)

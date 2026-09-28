@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import * as THREE from 'three';
 import {framing,captureSceneAnchors,composeCamera,projectWorld} from '../web/responsive-scene.js';
-import {inSlot,playbackFile} from '../web/interaction.js';
+import {inSlot,slotTarget,playbackFile} from '../web/interaction.js';
 const manifest=JSON.parse(readFileSync(new URL('../data/games.json',import.meta.url)));
 const bytes=readFileSync(new URL('../web/assets/cartridges.glb',import.meta.url));
 const gltf=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString());
@@ -22,7 +22,7 @@ test('Exported camera projects the real slot onto the mouse drop target',()=>{
  const slot=new THREE.Vector3(-.13,1.04,1.17).project(camera);
  assert.ok(Math.abs((slot.x+1)/2-meta.slot[0])<.0001);
  assert.ok(Math.abs((1-slot.y)/2-meta.slot[1])<.0001);
- assert.ok(inSlot(...meta.slot,meta.slot));assert.equal(inSlot(.1,.1,meta.slot),false);
+ assert.ok(inSlot(...meta.slot,slotTarget(meta.slot)));assert.equal(inSlot(.1,.1,slotTarget(meta.slot)),false);
 });
 test('Only validated standalone main payloads bypass a loader',()=>{
  const pr3=manifest.games.find(g=>g.id==='platform-racing-3');
@@ -45,5 +45,20 @@ test('Lower browsing camera preserves TV focus and projects the real slot throug
   const actualSlot=projectWorld(new THREE.Vector3(-.13,1.04,1.17),camera),trackedSlot=projectWorld(anchors.slot,camera);
   assert.ok(Math.hypot(actualSlot[0]-trackedSlot[0],actualSlot[1]-trackedSlot[1])<.0001);
   for(const [x,y] of [...anchors.screen,anchors.slot].map(p=>projectWorld(p,camera)))assert.ok(x>0&&x<1&&y>0&&y<1);
+ }
+});
+
+
+test('Cartridge drop bounds follow the visible ellipse across camera framing',()=>{
+ for(const aspect of [390/844,1.6,844/390])for(const playing of [false,true]){
+  const {zoom}=framing(aspect,playing);
+  const target=slotTarget([.48,.72],aspect,zoom),[x,y]=target.center;
+  // Visible horizontal and vertical edges accept drops just inside, never outside.
+  for(const [dx,dy] of [[.99,0],[0,.99],[-.99,0],[0,-.99]])
+   assert.ok(inSlot(x+dx*target.width/2,y+dy*target.height/2,target));
+  for(const [dx,dy] of [[1.01,0],[0,1.01],[-1.01,0],[0,-1.01],[.8,.8]])
+   assert.equal(inSlot(x+dx*target.width/2,y+dy*target.height/2,target),false);
+  assert.ok(inSlot(x,y,target,.55));
+  assert.equal(inSlot(x+target.width*.4,y,target,.55),false);
  }
 });

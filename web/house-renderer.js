@@ -1,3 +1,4 @@
+import {illustrateHouse} from './house-illustration.js?v=3';
 import {repairDenProjection} from './den-projection.js';
 import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
 import {createRoomResources} from './house-resources.js';
@@ -79,6 +80,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   for(const prop of props.props)prop.root.traverse(o=>{if(!o.isMesh||!clipping)return;const unclipped=m=>{if(!propMaterials.has(m)){const copy=m.clone();copy.clippingPlanes=null;propMaterials.set(m,copy);}return propMaterials.get(m);};o.material=Array.isArray(o.material)?o.material.map(unclipped):unclipped(o.material);});
   const scraps=createHiddenScraps(props.props,view,world,collected);
   const roots=[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot),...Array.from(scraps.values(),s=>s.mesh)];
+  illustrateHouse(roots);
   roots.forEach(root=>resources.capture(root));assignRoomLighting(roots,id);
   const room={id,resources,roots,scene:world,model:gltf.scene,view,doors,props,scraps,pickRoots:[gltf.scene,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot)]};rooms.set(id,room);
  }
@@ -94,6 +96,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    function cloneMaterial(original){
     if(materials.has(original))return materials.get(original);
     const mat=original.clone();materials.set(original,mat);
+    if(original.userData.denIllustrated){mat.onBeforeCompile=original.onBeforeCompile;mat.customProgramCacheKey=original.customProgramCacheKey;}
     for(const [key,value] of Object.entries(original))if(value?.isTexture)mat[key]=ownTexture(value);
     for(const [key,uniform] of Object.entries(original.uniforms??{}))if(uniform.value?.isTexture)mat.uniforms[key].value=ownTexture(uniform.value);
     if(mat.uniforms?.bakeProjection&&!mat.vertexShader.includes('bakeModelMatrix'))mat.uniforms.bakeProjection.value.multiply(inverse);
@@ -127,7 +130,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    connections=buildConnections(layout);
    // The replacement ceiling belongs to the hallway, including its lighting.
    assignRoomLighting(connections.group.children.filter(o=>o.name.startsWith('Hall ceiling')||o.name.startsWith('Hall landing')||o.name==='Den shared wall extension'),'hallway');
-   world.add(connections.group);
+   connections.resources=createRoomResources();connections.resources.capture(connections.group);
+   illustrateHouse([connections.group]);connections.resources.capture(connections.group);world.add(connections.group);
   })().catch(error=>{loading=null;throw error;});
   await loading;
  }
@@ -220,6 +224,6 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    return result;
   },
   bindTargets(value){targets=value;updateTargets();},activateProp(prop){input.activate(prop);},
-  dispose(){cancel();input.dispose();const resources=createRoomResources();resources.capture(world);resources.dispose();renderer.dispose();renderer.domElement.remove();}
+  dispose(){cancel();input.dispose();connections?.resources?.dispose();const resources=createRoomResources();resources.capture(world);resources.dispose();renderer.dispose();renderer.domElement.remove();}
  };
 }

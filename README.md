@@ -50,6 +50,10 @@ Keyboard inputs use bubbling events with legacy key codes sent to Ruffle. The vi
 
 Click or tap the mug, pothos, or reading lamp for a small, damped wobble. Repeated nudges add momentum without snapping the prop back to its starting pose. These decorative reactions respect reduced-motion preferences.
 
+## Illustrated den
+
+The den now uses baked black contours, toon materials, violet shadow fill, and stronger amber practical lighting. Cartridges, the controller, journal, and responsive rack use matching live banded shading and silhouette outlines. Game artwork and the CRT player remain unfiltered. The hallway, workshop, attic, and basement use matching live ink/cel materials, warm practical lamps, and subtle painted masonry; see [illustrated house](docs/art-direction/house/README.md). See [illustrated den](docs/illustrated-den.md) for the source pipeline and rebuild commands.
+
 ## Rendering and physics
 
 The room is actual Blender mesh geometry in WebGL, with correct depth occlusion. The browsing camera sits 0.35 scene units lower than the original eye height. It slowly rises back while zooming into a game, with aspect-aware optical cropping centered on the TV. The projected CRT player and console target track their world-space anchors throughout the camera movement. A 5120 × 1600 Cycles lighting render covers expanded room geometry, with 2.3× the original horizontal coverage and 1.15× the vertical coverage. Its projection stays independent of the responsive viewing camera, so ultrawide screens reveal more room instead of repeating the edges of the old image. Texture coordinates are clamped and fade to darkness beyond the outer bake boundary. This is a view-dependent lighting bake, not a freely orbitable, UV-lightmapped room. The old flat backdrop is used only while loading.

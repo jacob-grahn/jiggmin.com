@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {SHELF_SLOTS,RestTimer,shuffled,zoomPoint} from '../web/library-behavior.js';
+import {SHELF_SLOTS,SHELF_FILL_ORDER,remapShelfAssignments,RestTimer,shuffled,zoomPoint} from '../web/library-behavior.js';
 import {CartridgePhysics} from '../web/physics.js';
 import {readFileSync} from 'node:fs';
 const pose=(x,y,z)=>({position:{x,y,z},quaternion:{x:0,y:0,z:0,w:1}});
@@ -40,4 +40,18 @@ test('TV, bookshelf and cartridge stacks remain valid resting places',()=>{
  }
  for(let i=0;i<120*8;i++)p.step(1/120);
  for(const id of ['tv','shelf','lower','upper'])assert.equal(p.items.get(id).supported,true,id);
+});
+
+test('Hidden lower-right shelf spaces stay empty at startup and after responsive reflow',()=>{
+ assert.deepEqual(SHELF_SLOTS.flatMap((s,i)=>s.blocked?[i]:[]),[5,6,7,8]);
+ assert.equal(SHELF_FILL_ORDER.length,23);
+ assert.equal(new Set(SHELF_FILL_ORDER).size,23);
+ assert.ok(SHELF_FILL_ORDER.every(i=>!SHELF_SLOTS[i].blocked));
+ const upperAssignments=new Map(Array.from({length:23},(_,i)=>['game'+i,i+4]));
+ const sideAssignments=remapShelfAssignments(upperAssignments,SHELF_SLOTS);
+ assert.equal(sideAssignments.size,23);assert.equal(new Set(sideAssignments.values()).size,23);
+ for(const [game,i] of sideAssignments){
+  assert.equal(SHELF_SLOTS[i].blocked,false);
+  const old=upperAssignments.get(game);if(!SHELF_SLOTS[old].blocked)assert.equal(i,old);
+ }
 });

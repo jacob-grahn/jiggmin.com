@@ -67,3 +67,12 @@
 .house-journal-only>.house-header,.house-journal-only>.house-viewport,.house-journal-only>.house-footer{display:none}
 @keyframes paper-unfold{from{opacity:0;transform:translate(var(--paper-x,0),var(--paper-y,20vh)) scale(.18) rotate(-12deg)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.house-paper{animation:none}}
+
+/* Ink-edged panels share the room's indigo shadows and warm paper palette. */
+.house-dialog{border:2px solid #100c19;border-radius:3px;background:#272333;box-shadow:8px 10px 0 #08060ecc,0 24px 60px #0008}
+.house-dialog-header{border-bottom:2px solid #110d1a}
+.house-overlay button:focus-visible{outline:2px solid #8cd1df;outline-offset:4px}
+.house-hotspot-label{background:#201b2cf2;border:1px solid #09060f;border-radius:2px;box-shadow:3px 3px 0 #08060c99;color:#eadbc0}
+.house-paper,.house-journal{color:#372b26;border:2px solid #1d1420;border-radius:3px;background:repeating-linear-gradient(0deg,transparent,transparent 29px,#82624512 30px),#e8d7b3;box-shadow:8px 10px 0 #100b16bb,0 24px 60px #0008}
+.house-journal{border-left:16px solid #443040}
+.house-paper .house-note button,.house-journal .house-note button{background:#67516a;border:2px solid #261b2b;border-radius:2px;box-shadow:2px 3px 0 #342336;color:#fff0d5}

@@ -1,7 +1,20 @@
 export const SHELF_SLOTS=Array.from({length:27},(_,i)=>({
+ // The table hides the four rightmost spaces on the bottom shelf.
+ blocked:i>=5&&i<=8,
  position:{x:-3.25+(i%9)*.13,y:.12+Math.floor(i/9)*.52,z:0},
  quaternion:{x:0,y:Math.SQRT1_2,z:0,w:Math.SQRT1_2}
 }));
+export const SHELF_FILL_ORDER=Array.from({length:27},(_,i)=>(i%3)*9+Math.floor(i/3)).filter(i=>!SHELF_SLOTS[i].blocked);
+export function remapShelfAssignments(assignments,slots){
+ const result=new Map([...assignments].filter(([,index])=>slots[index]&&!slots[index].blocked));
+ const occupied=new Set(result.values());
+ for(const [item] of assignments)if(!result.has(item)){
+  const index=slots.findIndex((slot,i)=>!slot.blocked&&!occupied.has(i));
+  if(index<0)throw new Error('Not enough visible shelf spaces');
+  result.set(item,index);occupied.add(index);
+ }
+ return result;
+}
 export function shuffled(items,random=Math.random){
  const result=[...items];for(let i=result.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;
 }
