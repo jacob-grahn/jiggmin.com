@@ -1,7 +1,6 @@
 import {createHouseRenderer} from './house-renderer.js?v=no-game-posters-1';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
-export const HOUSE_MEDIA_QUERY = '(min-width: 1000px) and (min-aspect-ratio: 69/50) and (pointer: fine)';
 const ROOMS = ['hallway', 'workshop', 'attic', 'basement'];
 const DOORS = { 'door-workshop': 'workshop', 'door-attic': 'attic', 'door-basement': 'basement' };
 const focusable = 'button:not(:disabled),a[href],input,[tabindex="0"],ruffle-player,iframe';
@@ -26,7 +25,6 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   let data, manifest, anchors, view, travelling = false, contentRequest, discovered = new Set(), storage, persistence = true;
   let modalReturn, modalKind, journalOnly=false, revealing=false;
   try { storage = window.localStorage; } catch { persistence = false; }
-  const media = window.matchMedia(HOUSE_MEDIA_QUERY);
   const root = el('section', 'house-overlay');
   root.hidden = true; root.inert = true; root.setAttribute('aria-label', 'Explore the house');
   const header = el('header', 'house-header');
@@ -60,7 +58,6 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
 
   function resize() {
     if (!open) return;
-    if (!media.matches && !journalOnly) { exit(); return; }
     const rect = viewport.getBoundingClientRect();
     // Match the den's viewport so returning does not change the image crop.
     scene.style.width = `${rect.width}px`;
@@ -169,7 +166,6 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   }
   async function enter(destination = 'hallway', doorId) {
     if (destroyed || travelling) return;
-    if (!media.matches) { if (open) exit(); else onExit(); return; }
     if (!ROOMS.includes(destination)) destination = 'hallway';
     closeModal();
     const wasOpen = open;
@@ -188,6 +184,8 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       await view.travel(destination, () => { loading.hidden = true; });
       if (!open || ticket !== roomTicket) return;
       room = destination;
+      back.classList.toggle('house-back-down', room !== 'hallway');
+      back.textContent = room === 'hallway' ? '‹' : '↓';
       back.setAttribute('aria-label', room === 'hallway' ? 'Return to den' : 'Return to hallway');
       const info = data.rooms.find(info => info.id === destination);
       title.textContent = info.title;

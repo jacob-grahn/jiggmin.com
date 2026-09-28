@@ -51,7 +51,7 @@ export function createWindowTrees(frame){
   const t=i/7,bough=new THREE.ConeGeometry(.08+.38*t,.38+.17*t,7);
   bough.rotateY(i*.7);bough.translate(.67+.05*t,1.02-i*.24,0);far.push(bough);
  }
- for(const [parts,depth,color] of [[near,.85,0x060b12],[far,2.8,0x101b28]]){
+ for(const [parts,depth,color] of [[near,.85,0x000000],[far,2.8,0x000000]]){
   const geometry=mergeGeometries(parts);parts.forEach(part=>part.dispose());
   geometry.scale(height*flip,height,height*.65);geometry.translate(0,0,depth);
   const tree=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({name:'Exterior ink tree',color,toneMapped:false,side:THREE.DoubleSide}));

@@ -25,11 +25,11 @@ export function groupHouseProps(model,scene){
   records.push({mesh,name,box,hotspot,fixed,owner});
  });
  const groups=[],assigned=new Set();
- function group(parts,key){
+ function group(parts,key,mode){
   const owners=new Set(parts.map(p=>p.owner));
   parts=records.filter(p=>parts.includes(p)||(!assigned.has(p)&&owners.has(p.owner)));
   const box=new THREE.Box3();for(const p of parts){assigned.add(p);box.union(p.box);}
-  const item={parts,box,key};groups.push(item);return item;
+  const item={parts,box,key,mode};groups.push(item);return item;
  }
  // Authored prop boundaries override proximity (for example stacked cartons).
  for(const r of records.filter(r=>r.owner.userData.prop_assembly)){
@@ -58,10 +58,34 @@ export function groupHouseProps(model,scene){
   const parts=records.filter(r=>(!r.fixed||/^(Small floor lamp|Small linen floor lamp shade)/.test(r.name))&&!assigned.has(r)&&family.test(r.name));
   if(parts.length)group(parts,parts.find(p=>p.hotspot)?.hotspot);
  }
- for(const seed of records.filter(r=>r.name==='Ordinary shoe'&&!assigned.has(r))){
+ // Assign each shoe detail to its nearest upper, so adjacent slippers cannot
+ // steal one another's soles or laces. Lock these assemblies against absorption.
+ const shoes=[...new Map(records.filter(r=>r.name==='Ordinary shoe'&&!assigned.has(r)).map(r=>[r.owner,r])).values()];
+ const shoeParts=new Map(shoes.map(r=>[r,[r]]));
+ for(const detail of records.filter(r=>!assigned.has(r)&&/^(Shoe sole|Boot ankle|Loose shoe lace)$/.test(r.name))){
+  const center=new THREE.Box3().setFromObject(detail.owner).getCenter(new THREE.Vector3());
+  const nearest=shoes.reduce((best,r)=>{
+   const distance=new THREE.Box3().setFromObject(r.owner).getCenter(new THREE.Vector3()).distanceToSquared(center);
+   return !best||distance<best.distance?{r,distance}:best;
+  },null);
+  if(nearest)shoeParts.get(nearest.r).push(detail);
+ }
+ for(const parts of shoeParts.values())group(parts,null,'throw');
+ for(const base of records.filter(r=>r.name==='Laundry basket base'&&!assigned.has(r))){
+  const capture=base.box.clone();capture.max.y+=.75;capture.expandByScalar(.05);
+  group(records.filter(r=>!assigned.has(r)&&/^(Laundry basket|Basket |Ordinary rumpled cloth)/.test(r.name)&&capture.intersectsBox(r.box)),null,'throw');
+ }
+ // Overlapping coils and their trailing ends form one flexible item.
+ for(const seed of records.filter(r=>/^(Coiled spare cable|Trailing cable)$/.test(r.name))){
   if(assigned.has(seed))continue;
-  const capture=seed.box.clone().expandByScalar(.12);
-  group([seed,...records.filter(r=>!assigned.has(r)&&/^(Shoe sole|Boot ankle|Loose shoe lace)$/.test(r.name)&&capture.intersectsBox(r.box))],null);
+  const parts=[seed],box=seed.box.clone();let changed=true;
+  while(changed){
+   changed=false;
+   for(const r of records)if(!assigned.has(r)&&!parts.includes(r)&&/^(Coiled spare cable|Trailing cable)$/.test(r.name)&&box.clone().expandByScalar(.05).intersectsBox(r.box)){
+    parts.push(r);box.union(r.box);changed=true;
+   }
+  }
+  group(parts,null,'wiggle');
  }
  const semantic=new Map();
  for(const r of records)if(!r.fixed&&r.hotspot&&!assigned.has(r)){
@@ -74,7 +98,7 @@ export function groupHouseProps(model,scene){
  for(const seed of [...groups,...seeds]){
   if(seed.mesh&&assigned.has(seed))continue;
   const g=seed.mesh?group([seed],seed.hotspot):seed;
-  if(g.parts.some(p=>p.owner.userData.prop_assembly))continue;
+  if(g.mode||g.parts.some(p=>p.owner.userData.prop_assembly))continue;
   const capture=g.box.clone().expandByScalar(.025);
   let changed=true;
   while(changed){
@@ -97,7 +121,7 @@ export function groupHouseProps(model,scene){
   const root=new THREE.Group();root.position.copy(g.box.getCenter(new THREE.Vector3()));scene.add(root);root.updateMatrixWorld(true);
   for(const {mesh} of g.parts)root.attach(mesh);
   const count=g.parts.reduce((n,p)=>n+triangles(p.mesh),0);
-  const mode=g.parts.some(p=>p.owner.userData.prop_mode==='throw')?'throw':count>12000||g.parts.length>40||maxSize(g.box)>1.8||g.parts.some(p=>/cloth|shirt|blanket|jacket|bag/i.test(p.name))?'wiggle':'throw';
+  const mode=g.mode??(g.parts.some(p=>p.owner.userData.prop_mode==='throw')?'throw':count>12000||g.parts.length>40||maxSize(g.box)>1.8||g.parts.some(p=>/cloth|shirt|blanket|jacket|bag/i.test(p.name))?'wiggle':'throw');
   const title=g.parts[0].name;
   const prop={id:`prop-${index}`,root,size:sizeOf(g.box),mode,title,shape:g.parts.some(p=>p.owner.userData.physics_shape==='sphere')?'sphere':'box',hotspot:g.key??g.parts.find(p=>p.hotspot)?.hotspot,
    rest:root.quaternion.clone(),spring:new PropSpring(12,3.5,.11),home:root.position.clone()};

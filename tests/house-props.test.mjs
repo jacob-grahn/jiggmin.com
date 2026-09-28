@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
 import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
 import {createHouseProps} from '../web/house-props.js';
+import {settleBasementCloth} from '../web/basement-details.js';
 if(!globalThis.ProgressEvent)globalThis.ProgressEvent=class {constructor(type,values){Object.assign(this,{type},values);}};
 async function roomProps(room,{baked=false,elevation=0,yaw=0}={}){
  const bytes=readFileSync(baked?`web/assets/house/${room}-baked.glb`:`scene/exports/house/${room}.glb`),length=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+length));
@@ -12,6 +13,7 @@ async function roomProps(room,{baked=false,elevation=0,yaw=0}={}){
  doc.materials=[];for(const mesh of doc.meshes)for(const p of mesh.primitives)delete p.material;
  delete doc.textures;delete doc.images;
  const gltf=await new GLTFLoader().parseAsync(JSON.stringify(doc),'');
+ if(room==='basement')settleBasementCloth(gltf.scene);
  const scene=new THREE.Scene();scene.add(gltf.scene);gltf.scene.position.y=elevation;gltf.scene.rotation.y=yaw;
  return createHouseProps(gltf.scene,scene);
 }
@@ -137,4 +139,28 @@ for(const baked of [false,true])test(`attic ${baked?'baked':'source'}: throws cl
   assert.ok(body.velocity.y<0,'object should fall back after striking roof');
   physics.world.removeBody(body);
  }
+});
+
+for(const baked of [false,true])test(`complete shoes, basket and flexible coils (${baked?'baked':'source'})`,async()=>{
+ const hallway=await roomProps('hallway',{baked});
+ const shoes=hallway.props.filter(p=>p.title==='Ordinary shoe');
+ assert.equal(shoes.length,6);
+ for(const shoe of shoes){
+  const owners=new Set(shoe.root.children.map(m=>m.name.split('__')[0]));
+  assert.equal([...owners].filter(n=>/^Shoe_sole/.test(n)).length,1);
+  assert.equal([...owners].filter(n=>/^Ordinary_shoe/.test(n)).length,1);
+  assert.equal([...owners].filter(n=>/^Loose_shoe_lace/.test(n)).length,3);
+ }
+ const basement=await roomProps('basement',{baked});
+ const floorCloth=basement.props.find(p=>Math.abs(p.home.x+.6)<.05&&Math.abs(p.home.z-2.02)<.05);
+ assert.ok(floorCloth);assert.ok(floorCloth.home.y<.1,'cloth from the removed table rests on the floor');
+ const basket=basement.props.find(p=>p.title==='Laundry basket base');
+ assert.ok(basket);assert.equal(basket.mode,'throw');
+ assert.ok(basket.root.children.some(m=>/^Basket_woven_rim/.test(m.name)));
+ assert.ok(basket.root.children.some(m=>/^Basket_upright_weave/.test(m.name)));
+ assert.equal(new Set(basket.root.children.filter(m=>/^Ordinary_rumpled_cloth/.test(m.name)).map(m=>m.name.split('__')[0])).size,4);
+ assert.ok(!basement.props.some(p=>p!==basket&&/^Basket /.test(p.title)));
+ const coils=basement.props.filter(p=>p.root.children.some(m=>/^Coiled_spare_cable/.test(m.name)));
+ assert.equal(coils.length,3);
+ for(const coil of coils){assert.equal(coil.mode,'wiggle');assert.ok(coil.root.children.some(m=>/^Trailing_cable/.test(m.name)));}
 });

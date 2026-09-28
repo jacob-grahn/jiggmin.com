@@ -25,7 +25,13 @@ test('Window glass is transparent, retains clipping, and has no exterior image s
  result.exterior.updateMatrixWorld(true);
  const trees=[];result.exterior.traverse(o=>{if(/bare branches|pine silhouette/.test(o.name))trees.push(o);});
  assert.equal(trees.length,2);
- for(const tree of trees){assert.ok(tree.geometry.attributes.position.count>30);assert.equal(tree.material.transparent,false);}
+ const frame=result.frames[0];
+ for(const depth of [-.12,.1,.65]){
+  const ray=new THREE.Raycaster(frame.center.clone().addScaledVector(frame.normal,depth),new THREE.Vector3(0,-1,0),0,1);
+  assert.ok(ray.intersectObject(result.exterior,true).some(hit=>hit.object.name==='Window opening reveal'),'bottom reveal must seal the full wall depth');
+ }
+
+ for(const tree of trees){assert.ok(tree.geometry.attributes.position.count>30);assert.equal(tree.material.transparent,false);assert.equal(tree.material.color.getHex(),0);}
 });
 
 test('Sky is a separate enclosing environment with no depth writes',()=>{

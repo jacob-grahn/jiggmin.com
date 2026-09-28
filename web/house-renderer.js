@@ -1,4 +1,4 @@
-import {addBasementDetails} from './basement-details.js?v=2';
+import {addBasementDetails,shadeBasementWindowSpills} from './basement-details.js?v=2';
 import {roomBoundaryPlanes} from './house-boundaries.js';
 import {prepareHallwayBake,prepareSurfaceBake,isHallwayConnection} from './hallway-bake.js?v=stairs-1';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
@@ -87,6 +87,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   if(spec.eyeHeight){const target=view.position.clone().add(view.getWorldDirection(new THREE.Vector3()).multiplyScalar(10));view.position.y=spec.position[1]+spec.eyeHeight;view.lookAt(target);}
   if(spec.viewPosition){view.position.fromArray(spec.viewPosition);view.lookAt(new THREE.Vector3(...spec.viewTarget));}
   const windows=createMoonlitWindows(gltf.scene,sky,view.position);world.add(windows.exterior);
+  if(id==='basement')shadeBasementWindowSpills(gltf.scene,windows.frames);
   resources.capture(gltf.scene);
   const props=createHouseProps(gltf.scene,world);
   const propMaterials=new Map();
@@ -215,7 +216,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   if(ticket!==revision)return;
   await Promise.all([...new Set(['hallway',id])].map(room=>ensureRoom(room,ticket)));
   if(ticket!==revision)return;
-  if(!current||current.id==='den'){refreshDen();current=rooms.get('den')??rooms.get('hallway');camera=current.view.clone();resize();}
+  if(!current||current.id==='den'){refreshDen();current=rooms.get('den')??rooms.get('hallway');camera=current.view.clone();camera.userData.explorationLens={fov:camera.fov,aspect:Math.max(1.6*camera.zoom,camera.aspect)};resize();}
   // Reveal the canvas only after all walls and the starting view are ready.
   render();onReady();
   const destination=rooms.get(id),from=current.id;

@@ -56,11 +56,11 @@ export function createMoonlitWindows(model,sky,eye){
   // just beyond the aperture, underneath the existing frame and sill.
   const reveal=new THREE.Group();reveal.position.copy(frame.center);
   reveal.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(frame.right,new THREE.Vector3(0,1,0),frame.normal));
-  const w=frame.size.x,h=frame.size.y,depth=.42,t=.04;
+  const w=frame.size.x,h=frame.size.y,depth=.96,t=.06;
   const material=new THREE.MeshBasicMaterial({name:'Window reveal wood',color:0x202b32,toneMapped:false});
   for(const [x,y,sx,sy] of [[-(w+t)/2,0,t,h+2*t],[(w+t)/2,0,t,h+2*t],[0,-(h+t)/2,w,t],[0,(h+t)/2,w,t]]){
    const part=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,depth),material);
-   part.position.set(x,y,depth/2);part.name='Window opening reveal';part.userData.houseOutlined=true;reveal.add(part);
+   part.position.set(x,y,depth/2-.16);part.name='Window opening reveal';part.userData.houseOutlined=true;reveal.add(part);
   }
   exterior.add(reveal);
  });

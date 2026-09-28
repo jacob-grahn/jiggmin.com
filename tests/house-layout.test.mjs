@@ -103,3 +103,16 @@ test('Basement stairs have a continuous pitched ceiling and unlit inset fittings
  assert.equal(rail.length,2);assert.ok(rail.every(p=>p.size[0]>6&&p.slope===ceiling[0].slope));
  assert.equal(layout.geometry.filter(p=>p.name==='Basement stair recessed opal off').length,2);
 });
+
+test('basement entrance sleeve seals the stair-wall seam without obstructing the doorway',()=>{
+ const {group}=buildConnections({...layout,geometry:layout.geometry.filter(p=>p.name.startsWith('Basement entrance'))});
+ group.updateMatrixWorld(true);
+ for(const mesh of group.children.filter(o=>o.isMesh))mesh.material.side=THREE.DoubleSide;
+ const solids=group.children.filter(o=>o.isMesh);
+ for(const x of [-1.35,-1.4,-1.6,-1.95])for(const y of [.2,1.2,2.4])for(const side of [-1,1]){
+  const ray=new THREE.Raycaster(new THREE.Vector3(x,y,-3.2),new THREE.Vector3(0,0,side),0,1);
+  assert.ok(ray.intersectObjects(solids,false).length>0,`stair seam leaks at ${x}, ${y}`);
+ }
+ const doorway=new THREE.Raycaster(new THREE.Vector3(0,1.7,-3.2),new THREE.Vector3(-1,0,0),0,2.5);
+ assert.equal(doorway.intersectObjects(solids,false).length,0);
+});

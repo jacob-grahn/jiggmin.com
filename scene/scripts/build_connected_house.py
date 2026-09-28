@@ -72,6 +72,14 @@ for j,t in enumerate([.34,.70]):
  box('Basement stair art charcoal line',[x,y-.29,z+.049],[.46,.025,.014],'dark')
  box('Basement stair art rust mark',[x-.13,y+.23,z+.05],[.18,.10,.014],'rust')
 front('Basement','basement',10,4,center=3.6)
+# Square entrance sleeve overlaps both the hall jamb and the pitched stairwell.
+# Keep this separate from the baked/clipped stair meshes so the cut at x=-1.4
+# cannot expose the exterior along the doorway seam.
+for side in [-1,1]:
+ box('Basement entrance return',[-1.66,1.10,-3.2+side*.72],[.72,3.80,.18])
+box('Basement entrance head',[-1.41,2.80,-3.2],[.22,.64,1.62])
+box('Basement entrance ceiling',[-1.66,2.98,-3.2],[.72,.14,1.62])
+box('Basement entrance threshold',[-1.40,-.08,-3.2],[.20,.16,1.30],'wood')
 # Ceiling opening in the hallway. Replace the original continuous ceiling.
 for x,w in [(-.965,.85),(.965,.85)]:box('Hall ceiling beside hatch',[x,3.08,.8],[w,.12,13.4])
 for z,d in [(-2.4875,6.825),(4.8875,5.225)]:box('Hall ceiling beyond hatch',[0,3.08,z],[1.08,.12,d])

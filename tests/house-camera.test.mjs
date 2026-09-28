@@ -28,3 +28,14 @@ test('ordinary house cameras retain their standard lens on resize',()=>{
  resizeHouseCamera(camera,2);
  assert.deepEqual(camera.projectionMatrix.elements,new THREE.PerspectiveCamera(42,2,.1,100).projectionMatrix.elements);
 });
+
+test('portrait exploration preserves the room horizontal field of view',()=>{
+ const camera=new THREE.PerspectiveCamera(42,1.6,.1,100);
+ camera.userData.explorationLens={fov:42,aspect:1.6};
+ const horizontal=camera.projectionMatrix.elements[0];
+ for(const aspect of [390/844,844/390,390/844,1.6]){
+  resizeHouseCamera(camera,aspect);
+  if(aspect<1.6)assert.ok(Math.abs(camera.projectionMatrix.elements[0]-horizontal)<1e-10);
+ }
+ assert.equal(camera.fov,42);
+});

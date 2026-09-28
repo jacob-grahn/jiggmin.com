@@ -75,5 +75,4 @@ body{display:block;overflow:hidden}main{position:relative;width:100%;height:100s
 .house-entrance button:hover,.house-entrance button:focus-visible{opacity:1;background:#18232be8}
 .house-entrance-left{left:18px}.house-entrance-right{right:18px}
 .house-entrance span{font:36px Georgia,serif;line-height:1}.house-entrance small{font:9px ui-monospace,monospace;letter-spacing:.04em}
-@media(max-width:999px),(max-aspect-ratio:1379/1000),(pointer:coarse){.house-entrance{display:none}}
 @media(prefers-reduced-motion:reduce){.house-entrance button{transition:none}}

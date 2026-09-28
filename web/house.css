@@ -80,3 +80,5 @@
 .house-found-cartridge{float:right;width:116px;box-sizing:border-box;padding:10px 9px 23px;margin:18px 0 14px 24px;background:#435450;border:3px solid #293735;border-radius:8px 8px 3px 3px;box-shadow:3px 5px 0 #17262240,inset 0 -9px #344540}
 .house-found-cartridge img{display:block;width:100%;border:2px solid #1d2926;box-sizing:border-box}
 .house-paper .house-discovery,.house-journal .house-discovery{clear:both;color:#68533a;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.025em;text-transform:none}
+
+.house-header .house-back-down{left:50%;top:auto;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);min-height:48px}

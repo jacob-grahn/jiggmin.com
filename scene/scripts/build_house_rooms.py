@@ -684,7 +684,7 @@ def ordinary_clutter(room):
   carton('Box under community table',-3.36,1.31,.025,.78,.69,.61);carton('Stored carton by left wall',-4.26,.44,.025,.88,.72,.66);carton('Stacked household carton',-4.25,.45,.70,.65,.63,.48)
   paper(-1.83,1.36,1.01,.39,.27);can(-1.76,1.11,1.00,.095,.18);rag(-3.72,1.09,1.00,.47,.32,'Dusty canvas')
   carton('Small floor box beside stool',-4.16,-1.55,.03,.64,.62,.43);rag(-3.57,-1.23,.646,.36,.26,'Dusty canvas')
-  paper(.94,-1.06,.802,.45,.36);ring('Ordinary tape roll',(-.83,-.98,.85),.080,.027,'paper');rag(-.60,-2.02,.80,.66,.41,'Worn cloth',.31)
+  paper(.94,-1.06,.802,.45,.36);ring('Ordinary tape roll',(-.83,-.98,.85),.080,.027,'paper');rag(-.60,-2.02,.055,.66,.41,'Worn cloth')
   for i in range(3):box('Unmarked cassette case',(2.74,-.12,1.015+i*.042),(.25,.17,.039),'blue',.008)
   jar(3.87,-.16,.995,.074,.20);coil(3.48,-.10,1.013,.15);carton('Recorder table storage box',3.21,-.46,.03,.61,.54,.43)
   coil(.85,.58,.055,.39);coil(1.01,.51,.068,.25);rag(-4.10,-.10,.08,.82,.71,'Dusty canvas')

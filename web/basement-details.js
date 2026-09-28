@@ -37,7 +37,22 @@ export function drawBasementFloor(ctx,width=2048){
  ctx.restore();ctx.restore();
 }
 
+// This cloth belonged to the removed low table. Set it on the floor beside
+// the pool table, retaining the original geometry and texture coordinates.
+export function settleBasementCloth(model){
+ model.updateMatrixWorld(true);
+ model.traverse(mesh=>{
+  if(!mesh.isMesh||!/^Ordinary[ _]rumpled[ _]cloth/.test(mesh.name))return;
+  const box=new THREE.Box3().setFromObject(mesh),center=box.getCenter(new THREE.Vector3());
+  if(Math.abs(center.x+.60)<.05&&Math.abs(center.z-2.02)<.05&&box.min.y>.1){
+   mesh.scale.y*=.15;mesh.updateMatrixWorld(true);
+   box.setFromObject(mesh);mesh.position.y+=.015-box.min.y;mesh.updateMatrixWorld(true);
+  }
+ });
+}
+
 export function addBasementDetails(model,{floorTexture}={}){
+ settleBasementCloth(model);
  if(!floorTexture){
   const canvas=document.createElement('canvas');canvas.width=2048;canvas.height=Math.round(canvas.width*1.38);
   drawBasementFloor(canvas.getContext('2d'),canvas.width);floorTexture=new THREE.CanvasTexture(canvas);
@@ -77,4 +92,38 @@ export function addBasementDetails(model,{floorTexture}={}){
   const bar=mesh(new THREE.BoxGeometry(.023,.016,length),metal,'grate');bar.position.set(x,.017,0);
  }
  return {slab,drain,floorTexture};
+}
+
+// The original bake put area lights inside the windows, leaving bright wedges
+// on the wall below the sills. Suppress that direct spill while retaining the
+// painted wall texture and the room's indirect lighting.
+export function shadeBasementWindowSpills(model,frames){
+ model.traverse(mesh=>{
+  if(!mesh.isMesh||!/Basement[ _]painted[ _]masonry/.test(mesh.name))return;
+  const shade=source=>{
+   const material=source.clone();
+   material.onBeforeCompile=shader=>{
+    shader.vertexShader='varying vec3 cellarWallPosition;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+     cellarWallPosition=(modelMatrix*vec4(position,1.0)).xyz;`);
+    const masks=frames.map((frame,i)=>{
+     shader.uniforms['cellarWindow'+i]={value:new THREE.Vector4(frame.center.x,frame.center.y-frame.size.y/2,frame.center.z,frame.size.x/2)};
+     shader.uniforms['cellarRight'+i]={value:frame.right};
+     shader.uniforms['cellarNormal'+i]={value:frame.normal};
+     return `{
+      vec3 delta=cellarWallPosition-cellarWindow${i}.xyz;
+      float below=-delta.y;
+      float mask=(1.0-smoothstep(cellarWindow${i}.w,cellarWindow${i}.w+.12,abs(dot(delta,cellarRight${i}))))
+       *step(0.0,below)*(1.0-smoothstep(.25,.55,below))
+       *(1.0-smoothstep(.15,.30,abs(dot(delta,cellarNormal${i}))));
+      diffuseColor.rgb=mix(diffuseColor.rgb,min(diffuseColor.rgb,vec3(.008,.015,.022)),mask);
+     }`;
+    }).join('\n');
+    shader.fragmentShader='varying vec3 cellarWallPosition;\n'+frames.map((_,i)=>`uniform vec4 cellarWindow${i}; uniform vec3 cellarRight${i}; uniform vec3 cellarNormal${i};`).join('\n')+'\n'+shader.fragmentShader;
+    shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n'+masks);
+   };
+   material.customProgramCacheKey=()=>`cellar-window-spill-${frames.length}`;
+   return material;
+  };
+  mesh.material=Array.isArray(mesh.material)?mesh.material.map(shade):shade(mesh.material);
+ });
 }
