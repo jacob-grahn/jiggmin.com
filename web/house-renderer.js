@@ -9,6 +9,7 @@ import {createHousePropInput} from './house-prop-input.js?v=bitey-1';
 import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=bitey-1';
 import {createHiddenScraps} from './house-scraps.js';
 import {createWindowParallax} from './house-window-parallax.js';
+import {resizeHouseCamera} from './house-camera.js';
 import * as THREE from 'three';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
 
@@ -42,7 +43,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   }
  }
  function render(){if(camera){for(const room of rooms.values())room.windowParallax?.update(camera);renderIsolatedRooms(renderer,world,camera,[...rooms.keys()]);updateTargets();}}
- function resize(){input.cancel();const {width,height}=host.getBoundingClientRect();renderer.setSize(width,height,false);if(camera){camera.aspect=width/height;camera.updateProjectionMatrix();render();}}
+ function resize(){input.cancel();const {width,height}=host.getBoundingClientRect();renderer.setSize(width,height,false);if(camera){resizeHouseCamera(camera,width/height);render();}}
  function setupDoors(model){
   const doors=new Map(),leaves=[];model.updateMatrixWorld(true);
   model.traverse(o=>{if(o.userData.hotspot?.startsWith('door-'))leaves.push(o);});
@@ -148,7 +149,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   addRoom(id,gltf);
  }
  function cancel(){
-  setActive(false);targets.clear();revision++;cancelAnimationFrame(frame);finish?.();finish=null;current=null;
+  setActive(false);targets.clear();revision++;cancelAnimationFrame(frame);finish?.();finish=null;current=null;camera=null;
   if(connections)setAtticAccess(connections.ladder,rooms.get('hallway')?.doors.get('door-attic'),0);
   for(const id of [...rooms.keys()])unloadRoom(id);
   renderer.clear();
@@ -195,13 +196,15 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    });
   }
  }
- async function travel(id){
+ async function travel(id,onReady=()=>{}){
   revealRevision++;
   setActive(false);targets.clear();const ticket=revision;await load();
   if(ticket!==revision)return;
   await Promise.all([...new Set(['hallway',id])].map(room=>ensureRoom(room,ticket)));
   if(ticket!==revision)return;
   if(!current||current.id==='den'){refreshDen();current=rooms.get('den')??rooms.get('hallway');camera=current.view.clone();resize();}
+  // Reveal the canvas only after all walls and the starting view are ready.
+  render();onReady();
   const destination=rooms.get(id),from=current.id;
   const branch=id==='hallway'?from:id;
   const path=layout.routes[branch]??[];

@@ -18,6 +18,7 @@ import {detailController} from './controller-detail.js';
 import {addSurfacePatina} from './surface-patina.js';
 import {illustrateObject} from './den-illustration.js?v=midnight-ink-target-1';
 import {createMobileController} from './mobile-controller.js?v=profiles-2';
+import {fitGameViewport} from './game-viewport.js';
 const $=id=>document.getElementById(id),room=$('room'),canvas=$('cartridges'),status=$('status'),screen=$('screen'),slot=$('slot'),tip=$('tooltip');
 const say=text=>status.textContent=text;
 let basementCartridges=[];
@@ -247,7 +248,7 @@ async function insert(root,{updateUrl=true}={}){
   if(game.playerType==='iframe'){
    player=document.createElement('iframe');player.title=game.title;player.src=game.embedUrl;
    player.allow='autoplay; fullscreen';player.allowFullscreen=true;
-   $('player').append(player);updateTouchSurface();
+   $('player').append(player);screenTransform();updateTouchSurface();
    say(`${game.title} — live HTML5 game; eject to return to the den.`);
    return;
   }
@@ -329,6 +330,10 @@ function screenTransform(){
  for(let i=0;i<4;i++){const [x,y]=src[i],[u,v]=points[i];a.push([x,y,1,0,0,0,-u*x,-u*y,u],[0,0,0,x,y,1,-v*x,-v*y,v]);}
  for(let i=0;i<8;i++){let k=i;for(let j=i+1;j<8;j++)if(Math.abs(a[j][i])>Math.abs(a[k][i]))k=j;[a[i],a[k]]=[a[k],a[i]];const t=a[i][i];for(let j=i;j<9;j++)a[i][j]/=t;for(let k=0;k<8;k++)if(k!==i){const t=a[k][i];for(let j=i;j<9;j++)a[k][j]-=t*a[i][j];}}
  const v=a.map(r=>r[8]);screen.style.width=`${width}px`;screen.style.height=`${height}px`;screen.style.transform=`matrix3d(${v[0]},${v[3]},0,${v[6]},${v[1]},${v[4]},0,${v[7]},0,0,1,0,${v[2]},${v[5]},0,1)`;
+ if(player?.tagName==='IFRAME'){
+  const game=currentGame(),fit=fitGameViewport(game.embedWidth,game.embedHeight,width,height);
+  Object.assign(player.style,{width:`${game.embedWidth}px`,height:`${game.embedHeight}px`,left:`${fit.left}px`,top:`${fit.top}px`,transform:`scale(${fit.scale})`});
+ }
 }
 async function init(){
  const loader=new GLTFLoader();

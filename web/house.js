@@ -62,7 +62,9 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     if (!open) return;
     if (!media.matches && !journalOnly) { exit(); return; }
     const rect = viewport.getBoundingClientRect();
-    scene.style.width = `${Math.min(rect.width, rect.height * 1.6)}px`;
+    // Match the den's viewport so returning does not change the image crop.
+    scene.style.width = `${rect.width}px`;
+    scene.style.height = `${rect.height}px`;
     view?.resize();
   }
   function updateJournal() { journal.textContent = `Journal · ${discovered.size}`; }
@@ -170,7 +172,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     if (!media.matches) { if (open) exit(); else onExit(); return; }
     if (!ROOMS.includes(destination)) destination = 'hallway';
     closeModal();
-    const wasOpen = open, previous = room;
+    const wasOpen = open;
     open = true; root.hidden = false; root.inert = false;
     if (!wasOpen) onOpen();
     const ticket = ++roomTicket;
@@ -183,8 +185,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       view ??= createHouseRenderer(scene,{onActivate:activate,getDen,collected:new Set(data.notes.filter(note=>data.notes.filter(n=>n.hotspot===note.hotspot).every(n=>discovered.has(n.id))).map(note=>note.hotspot))});
       await view.load(destination);
       if (!open || ticket !== roomTicket) return;
-      loading.hidden = true;
-      await view.travel(destination, doorId ? anchors[previous][doorId] : null, doorId, destination === 'hallway' ? anchors.hallway[`door-${wasOpen ? previous : 'den'}`] : null);
+      await view.travel(destination, () => { loading.hidden = true; });
       if (!open || ticket !== roomTicket) return;
       room = destination;
       back.setAttribute('aria-label', room === 'hallway' ? 'Return to den' : 'Return to hallway');
