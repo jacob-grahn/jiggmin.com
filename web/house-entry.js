@@ -23,7 +23,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBon
   if((!media.matches&&!journalRequest)||loading||active)return;origin=originElement;const ticket=++entryTicket;
   buttons.forEach(button=>{button.disabled=true;button.setAttribute('aria-busy','true');});
   loading=(async()=>{
-   if(!instance){const [module]=await Promise.all([import('./house.js?v=basement-stairs-1'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=no-game-posters-1'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
     onOpen(){active=true;update();onOpen?.();},
     onExit(){active=false;update();onExit?.();if(origin?.isConnected&&!origin.hidden)origin.focus();},
    });}

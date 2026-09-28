@@ -11,7 +11,7 @@ if room not in {'hallway','basement','attic','workshop'}:raise ValueError('Unsup
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=f'/tmp/{room}-bake-input.glb')
 S=bpy.context.scene;originals=list(S.objects)
-ceiling_lights_on=room!='hallway' or '--ceiling-lights-on' in sys.argv
+ceiling_lights_on='--ceiling-lights-on' in sys.argv
 # The browser removes the old ceiling and builds these connecting surfaces instead.
 for o in list(originals) if room=='hallway' else []:
  if 'Corridor ceiling' in o.name.replace('_',' ') or o.name.replace('_',' ') in {'Brass shade','Opal lamp','Lamp stem'}:
@@ -130,8 +130,8 @@ if room=='hallway':
  area('Far window spill',(1.1,2.55,1.92),(-1,3,.8),145,(.13,.34,1),1.5)
 elif room=='basement':
  area('Cellar left window spill',(-2.2,3.0,2.95),(-1,0,.8),180,(.24,.48,1),1.3)
- area('Cellar right window spill',(2.2,2.96,3.0),(1,0,.8),145,(.24,.48,1),1.3)
- area('Cellar side window spill',(-4.6,-1.1,2.85),(-1,-1,.8),150,(.24,.48,1),1.3)
+ area('Cellar right window spill',(2.2,3.0,2.95),(1,0,.8),145,(.24,.48,1),1.3)
+ area('Cellar side window spill',(-4.6,-1.1,2.95),(-1,-1,.8),150,(.24,.48,1),1.3)
  # Hallway moonlight enters from behind the descending viewer.
  spec=layout['rooms'][room];x,y,z=spec['position']
  inverse=(Matrix.Translation((x,-z,y))@Matrix.Rotation(spec['yaw'],4,'Z')).inverted()
@@ -139,10 +139,10 @@ elif room=='basement':
 elif room=='workshop':
  area('Bench window spill',(-.6,1.18,2.65),(-.3,-.8,1.0),155,(.24,.48,1),1.1)
  area('Side window spill',(-2.55,.2,2.05),(0,.1,1.0),190,(.24,.48,1),1.1)
- area('Warm task lamp',(-1.72,.72,1.81),(-.55,.45,.98),65,(1,.38,.12),.55)
+ if ceiling_lights_on:area('Warm task lamp',(-1.72,.72,1.81),(-.55,.45,.98),65,(1,.38,.12),.55)
 else:
  area('Gable moonlight spill',(0,4.04,2.02),(-.4,.3,.65),260,(.24,.48,1),1.0)
- area('Warm floor lamp',(.47,1.45,.90),(-.1,2,.25),12,(1,.53,.24),.28)
+ if ceiling_lights_on:area('Warm floor lamp',(.47,1.45,.90),(-.1,2,.25),12,(1,.53,.24),.28)
 for i,o in enumerate(fixtures if ceiling_lights_on and room in {'hallway','basement'} else []):
  center=o.matrix_world@(sum((Vector(v) for v in o.bound_box),Vector())/8)
  area('Warm ceiling practical '+str(i),tuple(center-Vector((0,0,.08))),tuple(center-Vector((0,0,2))),140,(1,.27,.055),.50)
@@ -153,7 +153,7 @@ for m in materials:
  if not m.use_nodes:continue
  node=m.node_tree.nodes.new('ShaderNodeTexImage');node.image=images[m in ceiling_materials];m.node_tree.nodes.active=node
 samples=64 if room in {'attic','workshop'} else 128
-exposure=.7 if room=='attic' else -1.3
+exposure=-.7 if room=='attic' else -1.3
 S.render.engine='CYCLES';S.cycles.samples=samples;S.cycles.use_denoising=True;S.cycles.max_bounces=8;S.cycles.diffuse_bounces=6
 S.render.bake.use_pass_direct=True;S.render.bake.use_pass_indirect=True;S.render.bake.use_pass_color=True;S.render.bake.margin=12
 output=R/'scene/renders'/(f'{room}-uv-bake' if ceiling_lights_on else f'{room}-uv-bake-lights-off');output.mkdir(parents=True,exist_ok=True)

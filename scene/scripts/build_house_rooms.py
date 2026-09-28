@@ -523,9 +523,14 @@ def basement():
  wall=box('Basement painted masonry rear wall',(0,3.40,2),(10,.25,4),'Cellar painted plaster',.002);wall['painted_wall']=True
  for side in [-1,1]:
   wall=box('Basement painted masonry side wall',(side*5,-3.25,2),(.25,13.7,4),'Cellar painted plaster',.002);wall['painted_wall']=True
- for x in [-4.6,-1,2.6]:pipe('Basement ceiling joist',[(x,-3,3.7),(x,3.5,3.7)],.09,'wood')
- pipe('Copper water pipe',[(-4.4,3.07,.15),(-4.4,3.07,3.3),(4.5,3.07,3.3)],.04,'brass');window(-2.2,3.22,2.95,1.8,.65)
- lamp(.8,1.0,2.7);area('Quiet warm cellar',(-3,-2,3),180,(1,.64,.36),3,(0,1,0))
+ for x in [-4.6,-1,2.6]:pipe('Basement ceiling joist',[(x,-3,3.78),(x,3.5,3.78)],.09,'wood')
+ pipe('Copper water pipe',[(-4.4,3.07,.15),(-4.4,3.07,3.58),(4.5,3.07,3.58)],.04,'brass');window(-2.2,3.29,2.95,1.8,.65)
+ lamp(.8,1.0,2.7)
+ # Extend the pendant's stem into its ceiling mount.
+ stem=bpy.data.objects.get('Lamp stem')
+ stem.data.splines[0].points[-1].co.z=3.84
+ cyl('Basement ceiling light canopy',(.8,1.0,3.805),.095,.045,'brass')
+ area('Quiet warm cellar',(-3,-2,3),180,(1,.64,.36),3,(0,1,0))
  # Long low archive shelves, sparse boxes and an empty place.
  for z in [.30,1.15,2.00]:box('Archive shelf',(2.65,2.30,z),(4.2,.9,.10),'wood')
  for x in [.65,4.65]:box('Shelf upright',(x,2.30,1.12),(.12,.85,2.3),'wood')
@@ -558,6 +563,35 @@ def basement():
   for y in [-.22,.29]:box('Chair leg',(x,y,.26),(.055,.055,.52),'wood')
  box('Folded wool blanket',(-1.2,.02,.62),(.61,.51,.06),'blue',.03)
 
+
+
+def rearrange_basement():
+ # Clear the central table and move its papers onto a shelf on the rear wall.
+ for ob in list(bpy.context.scene.objects):
+  x,y,z=ob.location
+  if -1.2<x<1.8 and -2.3<y<-.7:
+   if ob.name.startswith(('Work surface','Table leg')):
+    bpy.data.objects.remove(ob,do_unlink=True)
+   elif .76<z<1.1:
+    ob.location.x-=2.7;ob.location.y+=4.25;ob.location.z+=1.18
+ box('Archive shelf for unfinished stories',(-2.4,2.75,1.90),(2.85,1.0,.12),'wood')
+ # A compact pool table leaves the center and the stair approach open.
+ mat('Pool felt',(.025,.19,.13),.98)
+ x,y=-1.8,-2.3
+ box('Pool table cabinet',(x,y,.79),(1.90,3.30,.30),'wood',.055)
+ box('Pool table felt',(x,y,.96),(1.65,3.05,.055),'Pool felt',.012)
+ for dx in [-.89,.89]:box('Pool table cushion',(x+dx,y,1.01),(.13,3.25,.13),'green',.035)
+ for dy in [-1.59,1.59]:box('Pool table cushion',(x,y+dy,1.01),(1.80,.13,.13),'green',.035)
+ for dx in [-.69,.69]:
+  for dy in [-1.28,1.28]:box('Pool table leg',(x+dx,y+dy,.37),(.22,.22,.74),'wood',.025)
+ for dx in [-.79,.79]:
+  for dy in [-1.48,0,1.48]:cyl('Pool table pocket',(x+dx,y+dy,1.074),.105,.012,'ink')
+ colors=[('Cue',(.92,.90,.78)),('One',(.9,.57,.025)),('Two',(.025,.10,.65)),('Three',(.64,.025,.018)),('Eight',(.012,.012,.018))]
+ for i,(name,color) in enumerate(colors):
+  material='Billiard '+name;mat(material,color,.28)
+  dx,dy=[(.16,-.85),(-.22,.45),(.05,.59),(.30,.42),(-.25,-.15)][i]
+  ob=sphere('Pool ball '+name,(x+dx,y+dy,1.057),(.07,.07,.07),material)
+  ob['prop_assembly']=True;ob['prop_mode']='throw';ob['physics_shape']='sphere'
 
 def ordinary_clutter(room):
  # Mundane modeled belongings compete visually with discoveries. No new anchors/text.
@@ -749,19 +783,17 @@ def printed_tshirt(path):
  ob=bpy.data.objects.new('PR2 cartridge screenprint on T-shirt chest',me);bpy.context.collection.objects.link(ob);me.materials.append(M[printed_material(path)])
 
 def house_art(room):
- # Reused cartridge screenprints and original odd prints are ordinary, noninteractive belongings.
+ # Original odd prints are ordinary belongings; game-label posters are omitted.
  art_dir=R/'scene/house-textures/art'
  weird=sorted(p for p in art_dir.glob('*') if p.suffix.lower() in ('.webp','.png','.jpg','.jpeg'))
  if len(weird)<3:raise RuntimeError('Original odd art textures are not ready')
  def odd(i):return str(weird[i%len(weird)].relative_to(R))
- label=lambda n:'web/assets/labels/'+n+'-screenprint.webp'
  if room=='hallway':
   displayed_print('Odd entrance picture',odd(0),(1.575,1.65,1.85),.62,.70,True,-math.pi/2,frame_mat='pale')
   before=set(bpy.data.objects)
   displayed_print('Bitey painting','scene/house-textures/bitey/bitey.jpeg',(-1.575,1.55,1.65),.72,.72,True,math.pi/2,frame_mat='wood',credit='Adam Phillips')
   anchor('bitey',*[ob for ob in bpy.data.objects if ob not in before])
  elif room=='workshop':
-  displayed_print('Red Earth garage poster',label('red-earth'),(1.75,1.43,2.03),.57,.46)
   displayed_print('Odd picture among bench tools',odd(2),(-1.30,1.31,1.29),.25,.27,True,lean=-.10,frame_mat='blue',standing=True)
   from mathutils import Matrix
   before=set(bpy.data.objects);printed_tshirt('web/assets/labels/platform-racing-2-screenprint-v3.webp');bpy.context.view_layer.update()
@@ -771,19 +803,17 @@ def house_art(room):
  elif room=='attic':
   print_plane('Stored odd paper study',odd(1),(-.67,2.921,.67),.44,.54)
   print_plane('Odd stored packing-board print',odd(2),(1.66,1.925,.67),.35,.49)
-  displayed_print('Cooties unframed stored print',label('cooties'),(-.94,.55,.64),.69,.552,lean=.13)
   box('Plain carton supporting stored cartridge art',(-.94,.82,.40),(.61,.38,.54),'clay',.01)
  elif room=='basement':
-  displayed_print('Moon garden basement picture','scene/house-textures/basement-art/moon-garden.png',(-1.00,3.255,2.12),1.10,.825,True,frame_mat='pale')
-  displayed_print('Fish boots basement picture','scene/house-textures/art/fish-boots.png',(-3.82,3.255,2.05),.65,.81,True,frame_mat='wood')
+  displayed_print('Moon garden basement picture','scene/house-textures/basement-art/moon-garden.png',(-.20,3.255,2.12),1.10,.825,True,frame_mat='pale')
+  displayed_print('Fish boots basement picture','scene/house-textures/art/fish-boots.png',(-3.95,3.255,2.70),.65,.81,True,frame_mat='wood')
   displayed_print('Odd cellar wall picture',odd(2),(-4.855,.35,1.83),.77,.87,True,math.pi/2,frame_mat='wood')
   displayed_print('Small shelf picture',odd(0),(1.77,1.813,1.45),.35,.40,True,lean=-.08,frame_mat='pale',standing=True)
-  displayed_print('Neverending Light leaning print',label('neverending-light'),(.03,2.965,.55),.97,.777,lean=.15)
 
 def tighten_attic_view():
- # Crawl halfway into the attic and look slightly left, keeping discoveries in view.
+ # Stand behind the foreground brace and look slightly left toward the discoveries.
  from mathutils import Matrix
- S.camera.location=(.10,-.30,1.48)
+ S.camera.location=(.10,-1.15,1.48)
  S.camera.rotation_euler=(Vector((-.65,3.8,.70))-S.camera.location).to_track_quat('-Z','Y').to_euler()
  groups=[
   (('Tricycle','Cream wheel hub','Steel axle','Rear tricycle axle','Pedal crank','Handlebar grip'),(.45,1.3,0)),
@@ -791,7 +821,7 @@ def tighten_attic_view():
   (('The one leftover plywood sheet','Plywood old screw','Worn questions notebook','Questions notebook pages','Loose graphite pencil','Folded private story letter','Plain red letter seal'),(0,3.2,0)),
   (('Unframed Derron character draft','Drawn character head','Character pencil','Paper draft support carton'),(-1.75,1.05,0)),
   (('Rough farm model carton','Cardboard farm dream model','Model potato row','Rough model farm robot','Tiny robot solar panel','Model robot wheel'),(-1,2.2,0)),
-  (('Cooties unframed stored print','Plain carton supporting stored cartridge art'),(-.30,2.3,0)),
+  (('Plain carton supporting stored cartridge art',),(-.30,2.3,0)),
  ]
  bpy.context.view_layer.update()
  for ob in bpy.data.objects:
@@ -859,13 +889,16 @@ def window_lighting(room):
   pipe('Small floor lamp stem',[(.47,1.45,.30),(.47,1.45,.99)],.012,'metal')
   bpy.ops.mesh.primitive_cone_add(vertices=48,radius1=.18,radius2=.10,depth=.22,location=(.47,1.45,1.02))
   bpy.context.object.name='Small linen floor lamp shade';bpy.context.object.data.materials.append(M['cream'])
-  area('Small floor lamp',(.47,1.45,.90),3,(1,.78,.53),.28,(-.1,2,.25))
+  # The floor lamp is switched off; only the gable lights this room.
  elif room=='basement':
-  window(2.2,3.19,3.0,1.8,.62)
-  side_window((-4.84,-1.1,2.85),2.0,.75,math.pi/2)
+  window(2.2,3.29,2.95,1.8,.65)
+  side_window((-4.90,-1.1,2.95),1.8,.65,math.pi/2)
+  # Keep the sky a hair inside the inner wall face to avoid coplanar flicker.
+  for ob in bpy.data.objects:
+   if ob.name.startswith('Garden beyond window') and ob.location.x<-4.8:ob.location.x+=.01
   area('Cellar left window',(-2.2,3.0,2.95),230,(.59,.75,1),1.7,(-2,0,.5))
-  area('Cellar right window',(2.2,2.96,3),180,(.59,.75,1),1.7,(2,0,.6))
-  area('Cellar side window',(-4.6,-1.1,2.85),190,(.59,.75,1),1.8,(0,-1,.4))
+  area('Cellar right window',(2.2,3.0,2.95),180,(.59,.75,1),1.7,(2,0,.6))
+  area('Cellar side window',(-4.6,-1.1,2.95),190,(.59,.75,1),1.8,(0,-1,.4))
  # window() creates a default light; retain only the authored lighting above.
  for ob in list(bpy.data.objects):
   if ob.type=='LIGHT' and ob.name.startswith('Night window'):bpy.data.objects.remove(ob,do_unlink=True)
@@ -921,6 +954,7 @@ for room in args:
    if abs(center.x)>.60:ob.location.x+=-.30 if center.x>0 else .30
    if ob.name.startswith(('Coat hook rail','Brass coat hook','Hanging ordinary jacket','Jacket loose sleeve','Jacket folded collar')):ob.location.y+=2.70
  window_lighting(room)
+ if room=='basement':rearrange_basement()
  if anchors_only:project(room)
  elif preview:
   S.render.resolution_percentage=40;S.cycles.samples=4;S.render.filepath=str(R/'scene/renders/house'/(room+'-preview.png'));bpy.ops.render.render(write_still=True)

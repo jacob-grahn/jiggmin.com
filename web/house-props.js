@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import {CartridgePhysics} from './physics.js';
+import {CartridgePhysics} from './physics.js?v=pool-1';
 import {PropSpring} from './prop-reactions.js';
 
-const structural=/floorboard|plank|skirting|corridor wall|cornice|ceiling|door|threshold|window|sill|rain drop|runner|sheathing|stud\b|joist|rafter|roof|insulation|masonry|concrete|slab|conduit|outlet|socket|workbench|work surface|table leg|shelf upright|archive shelf|wall shelf|shelf brass bracket|lamp stem|opal lamp|brass shade|attic hatch|coat hook|future lock|copper water pipe|duct|furnace|pegboard|peg hole|collar tie|purlin|ridge beam|support post|knee brace|hanging wire|red wire|junction/i;
+const structural=/basement floor drain|pool table|floorboard|plank|skirting|corridor wall|cornice|ceiling|door|threshold|window|sill|rain drop|runner|sheathing|stud\b|joist|rafter|roof|insulation|masonry|concrete|slab|conduit|outlet|socket|workbench|work surface|table leg|shelf upright|archive shelf|wall shelf|shelf brass bracket|lamp stem|opal lamp|brass shade|attic hatch|coat hook|future lock|copper water pipe|duct|furnace|pegboard|peg hole|collar tie|purlin|ridge beam|support post|knee brace|hanging wire|red wire|junction/i;
 const nameOf=o=>o.name.replaceAll('_',' ').replace(/\.?\d{3}$/,'');
 const triangles=o=>(o.geometry.index?.count??o.geometry.attributes.position.count)/3;
 const sizeOf=box=>box.getSize(new THREE.Vector3());
@@ -99,12 +99,31 @@ export function groupHouseProps(model,scene){
   const count=g.parts.reduce((n,p)=>n+triangles(p.mesh),0);
   const mode=g.parts.some(p=>p.owner.userData.prop_mode==='throw')?'throw':count>12000||g.parts.length>40||maxSize(g.box)>1.8||g.parts.some(p=>/cloth|shirt|blanket|jacket|bag/i.test(p.name))?'wiggle':'throw';
   const title=g.parts[0].name;
-  const prop={id:`prop-${index}`,root,size:sizeOf(g.box),mode,title,hotspot:g.key??g.parts.find(p=>p.hotspot)?.hotspot,
+  const prop={id:`prop-${index}`,root,size:sizeOf(g.box),mode,title,shape:g.parts.some(p=>p.owner.userData.physics_shape==='sphere')?'sphere':'box',hotspot:g.key??g.parts.find(p=>p.hotspot)?.hotspot,
    rest:root.quaternion.clone(),spring:new PropSpring(12,3.5,.11),home:root.position.clone()};
   for(const {mesh} of g.parts)mesh.userData.houseProp=prop;
   return prop;
  });
  return {props,staticMeshes:records.filter(r=>!assigned.has(r)).map(r=>r.mesh)};
+}
+
+function roofCollider(mesh){
+ // These panels have their pitch baked into the vertices. An axis-aligned
+ // geometry box fills the attic beneath them; fit a thin slab in their plane.
+ const geometry=mesh.geometry,positions=geometry.attributes.position;
+ const points=Array.from({length:positions.count},(_,i)=>new THREE.Vector3().fromBufferAttribute(positions,i).applyMatrix4(mesh.matrixWorld));
+ const indices=geometry.index;
+ const [a,b,c]=[0,1,2].map(i=>points[indices?indices.getX(i):i]);
+ const normal=new THREE.Vector3().subVectors(b,a).cross(new THREE.Vector3().subVectors(c,a)).normalize();
+ const ridge=new THREE.Vector3(0,0,1).transformDirection(mesh.matrixWorld);
+ const across=new THREE.Vector3().crossVectors(ridge,normal).normalize();
+ ridge.crossVectors(normal,across).normalize();
+ const basis=new THREE.Matrix4().makeBasis(across,ridge,normal);
+ const inverse=basis.clone().transpose();
+ const box=new THREE.Box3().setFromPoints(points.map(p=>p.clone().applyMatrix4(inverse)));
+ return {name:mesh.name,center:box.getCenter(new THREE.Vector3()).applyMatrix4(basis).toArray(),
+  halfExtents:box.getSize(new THREE.Vector3()).toArray().map(n=>Math.max(.008,n/2)),
+  quaternion:new THREE.Quaternion().setFromRotationMatrix(basis).toArray()};
 }
 
 export function createHouseProps(model,scene){
@@ -114,6 +133,7 @@ export function createHouseProps(model,scene){
  const colliders=[];
  for(const mesh of staticMeshes){
   if(/rain|garden|beyond|cord|fringe|window|cornice|skirting|threshold|jamb|casing/i.test(nameOf(mesh)))continue;
+  if(/Pitched unfinished roof/i.test(nameOf(mesh))){colliders.push(roofCollider(mesh));continue;}
   mesh.geometry.computeBoundingBox();const box=mesh.geometry.boundingBox;
   const position=new THREE.Vector3(),rotation=new THREE.Quaternion(),scale=new THREE.Vector3();mesh.matrixWorld.decompose(position,rotation,scale);
   const center=box.getCenter(new THREE.Vector3()).applyMatrix4(mesh.matrixWorld),size=sizeOf(box).multiply(scale).toArray().map(v=>Math.max(.008,Math.abs(v)/2));
@@ -126,7 +146,7 @@ export function createHouseProps(model,scene){
  // Decorative objects remain attached until grabbed or hit by a loose object, including wall art.
  for(const p of props){
   if(p.mode==='wiggle')continue;
-  physics.add(p.id,{position:p.root.position,quaternion:p.root.quaternion},{size:p.size.toArray().map(n=>Math.max(n,.025)),center:{x:0,y:0,z:0},mass:Math.max(.08,Math.min(2,p.size.x*p.size.y*p.size.z*25))});
+  physics.add(p.id,{position:p.root.position,quaternion:p.root.quaternion},{shape:p.shape,size:p.size.toArray().map(n=>Math.max(n,.025)),center:{x:0,y:0,z:0},mass:Math.max(.08,Math.min(2,p.size.x*p.size.y*p.size.z*25))});
   physics.pin(p.id,{position:p.root.position,quaternion:p.root.quaternion},{releaseOnContact:true});
  }
  let dirty=false;

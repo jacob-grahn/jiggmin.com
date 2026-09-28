@@ -9,7 +9,7 @@
   "ceilingResolution": 2048,
   "ceilingPaint": "original timber",
   "ceilingLightsOn": false,
-  "practicalLightsOn": true,
-  "lighting": "blue windows and warm practicals",
+  "practicalLightsOn": false,
+  "lighting": "blue windows only",
   "excludedMovableShadows": true
 }

@@ -54,7 +54,7 @@ Click or tap the mug, pothos, or reading lamp for a small, damped wobble. Repeat
 
 ## Illustrated den
 
-The den now uses baked black contours, toon materials, violet shadow fill, and stronger amber practical lighting. Cartridges, the controller, journal, and responsive rack use matching live banded shading and silhouette outlines. Game artwork and the CRT player remain unfiltered. The hallway, workshop, attic, and basement use matching live ink/cel materials, warm practical lamps, and subtle painted masonry; see [illustrated house](docs/art-direction/house/README.md). See [illustrated den](docs/illustrated-den.md) for the source pipeline and rebuild commands.
+The den now uses baked black contours, toon materials, violet shadow fill, and stronger amber practical lighting. Cartridges, the controller, journal, and responsive rack use matching live banded shading and silhouette outlines. Game artwork and the CRT player remain unfiltered. The hallway, workshop, attic, and basement use matching live ink/cel materials, window-only moonlight, switched-off practical lamps, and subtle painted masonry; see [illustrated house](docs/art-direction/house/README.md). See [illustrated den](docs/illustrated-den.md) for the source pipeline and rebuild commands.
 
 ## Rendering and physics
 

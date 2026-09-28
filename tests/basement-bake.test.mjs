@@ -8,7 +8,7 @@ import {roomMatrix} from '../web/house-layout.js';
 import {prepareSurfaceBake} from '../web/hallway-bake.js';
 if(!globalThis.ProgressEvent)globalThis.ProgressEvent=class{constructor(type,values){Object.assign(this,{type},values);}};
 function asset(){const bytes=readFileSync('web/assets/house/basement-baked.glb'),length=bytes.readUInt32LE(12);return {bytes,length,doc:JSON.parse(bytes.subarray(20,20+length))};}
-test('Basement retains its camera, live lamp, and baked fixed surfaces',()=>{
+test('Basement retains its camera, switched-off lamp, and baked fixed surfaces',()=>{
  const {bytes,doc}=asset();assert.ok(bytes.length<15*1024*1024);assert.equal(doc.cameras.length,1);
  const baked=doc.nodes.filter(n=>n.extras?.basement_baked);assert.ok(baked.length>40);
  const fixtures=doc.nodes.filter(n=>n.extras?.ceiling_fixture);assert.equal(fixtures.length,1);

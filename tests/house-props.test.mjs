@@ -5,14 +5,14 @@ import * as THREE from 'three';
 import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
 import {createHouseProps} from '../web/house-props.js';
 if(!globalThis.ProgressEvent)globalThis.ProgressEvent=class {constructor(type,values){Object.assign(this,{type},values);}};
-async function roomProps(room){
- const bytes=readFileSync(`scene/exports/house/${room}.glb`),length=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+length));
+async function roomProps(room,{baked=false,elevation=0,yaw=0}={}){
+ const bytes=readFileSync(baked?`web/assets/house/${room}-baked.glb`:`scene/exports/house/${room}.glb`),length=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+length));
  doc.buffers[0].uri=`data:application/octet-stream;base64,${bytes.subarray(28+length).toString('base64')}`;
  // Physics/grouping tests need geometry; textures are exercised in the browser.
  doc.materials=[];for(const mesh of doc.meshes)for(const p of mesh.primitives)delete p.material;
  delete doc.textures;delete doc.images;
  const gltf=await new GLTFLoader().parseAsync(JSON.stringify(doc),'');
- const scene=new THREE.Scene();scene.add(gltf.scene);
+ const scene=new THREE.Scene();scene.add(gltf.scene);gltf.scene.position.y=elevation;gltf.scene.rotation.y=yaw;
  return createHouseProps(gltf.scene,scene);
 }
 for(const room of ['hallway','workshop','attic','basement'])test(`${room}: small objects and complete framed art are interactive`,async()=>{
@@ -115,4 +115,26 @@ test('workshop has intact computer and woodworking props with a flat printed key
  const bytes=readFileSync('scene/exports/house/workshop.glb'),doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
  const printed=doc.materials.find(m=>m.name==='Print keyboard-top');assert.ok(printed?.pbrMetallicRoughness.baseColorTexture);
  const camera=doc.nodes.find(n=>n.camera!==undefined);assert.ok(camera.translation[2]>2.9,'camera should stand farther back from bench');
+});
+
+for(const baked of [false,true])test(`attic ${baked?'baked':'source'}: throws clear the open space and collide with the pitched roof`,async()=>{
+ const elevation=3.2,yaw=.35,{physics}=await roomProps('attic',{baked,elevation,yaw});
+ const rotation=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),yaw);
+ const roofs=physics.world.bodies.filter(b=>/Pitched.unfinished.roof/.test(b.name??''));
+ assert.equal(roofs.length,2);
+ for(const roof of roofs)assert.ok(Math.min(...roof.shapes[0].halfExtents.toArray())<.01,'roof collider must be a thin sloped panel');
+ for(const side of [-1,1]){
+  const position=new THREE.Vector3(side*.7,1.5,-.9).applyQuaternion(rotation);position.y+=elevation;
+  const body=physics.add(`roof-probe-${side}`,{position,quaternion:rotation},{size:[.1,.1,.1],center:{x:0,y:0,z:0}});
+  const hits=[];body.addEventListener('collide',e=>hits.push(e.body.name));body.velocity.set(0,6,0);body.wakeUp();
+  let peak=body.position.y;
+  for(let i=0;i<65;i++){
+   physics.step(1/120);peak=Math.max(peak,body.position.y);
+   if(i===19){assert.ok(body.position.y>elevation+2.25,`throw height ${body.position.y-elevation}, hits ${hits}`);assert.deepEqual(hits,[]);}
+  }
+  assert.ok(hits.some(name=>/Pitched.unfinished.roof/.test(name??'')),'visible roof must still stop the throw');
+  assert.ok(peak>elevation+2.6&&peak<elevation+2.78,`unexpected roof impact height: ${peak-elevation}`);
+  assert.ok(body.velocity.y<0,'object should fall back after striking roof');
+  physics.world.removeBody(body);
+ }
 });

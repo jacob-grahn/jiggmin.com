@@ -1,5 +1,5 @@
 {
-  "staticMeshes": 125,
+  "staticMeshes": 137,
   "connections": [
     "Basement stair tread",
     "Basement stair nosing",
@@ -82,8 +82,8 @@
   "resolution": 4096,
   "ceilingResolution": 2048,
   "ceilingPaint": "original concrete",
-  "ceilingLightsOn": true,
-  "practicalLightsOn": true,
-  "lighting": "blue windows and warm practicals",
+  "ceilingLightsOn": false,
+  "practicalLightsOn": false,
+  "lighting": "blue windows only",
   "excludedMovableShadows": true
 }

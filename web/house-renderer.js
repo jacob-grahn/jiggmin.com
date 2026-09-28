@@ -1,3 +1,5 @@
+import {addBasementDetails} from './basement-details.js?v=2';
+import {roomBoundaryPlanes} from './house-boundaries.js';
 import {prepareHallwayBake,prepareSurfaceBake,isHallwayConnection} from './hallway-bake.js?v=stairs-1';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
 import {createBasementCartridges} from './cartridge-storage.js';
@@ -5,7 +7,7 @@ import {illustrateHouse} from './house-illustration.js?v=3';
 import {repairDenProjection} from './den-projection.js';
 import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
 import {createRoomResources} from './house-resources.js';
-import {createHouseProps} from './house-props.js?v=stairs-1';
+import {createHouseProps} from './house-props.js?v=no-game-posters-1';
 import {createHousePropInput} from './house-prop-input.js?v=bitey-1';
 import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=stairs-1';
 import {createHiddenScraps} from './house-scraps.js';
@@ -68,14 +70,15 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   const resources=createRoomResources();resources.capture(gltf.scene);
   if(id==='hallway')prepareHallwayBake(gltf.scene);
   if(id!=='hallway')prepareSurfaceBake(gltf.scene,id);
+  if(id==='basement')addBasementDetails(gltf.scene);
   const spec=layout.rooms[id],matrix=roomMatrix(spec);gltf.scene.applyMatrix4(matrix);world.add(gltf.scene);gltf.scene.updateMatrixWorld(true);
-  const ceiling=[];
+  const ceiling=[],boundaries=roomBoundaryPlanes(id);
   const clipping=spec.front===undefined?null:new THREE.Plane(new THREE.Vector3(0,0,-1),spec.front).applyMatrix4(matrix);
   gltf.scene.traverse(o=>{
    if(o.isLight)o.intensity*=.012;
    if(o.isMesh)for(const mat of Array.isArray(o.material)?o.material:[o.material])for(const key of ['map','normalMap','roughnessMap','metalnessMap'])if(mat[key])mat[key].anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
    if(id==='hallway'&&/Corridor_ceiling/.test(o.name))ceiling.push(o);
-   if(o.isMesh&&clipping&&!o.userData.bake_connection){for(const mat of Array.isArray(o.material)?o.material:[o.material])mat.clippingPlanes=[clipping];}
+   if(o.isMesh){for(const mat of Array.isArray(o.material)?o.material:[o.material])mat.clippingPlanes=[...boundaries,...(clipping&&!o.userData.bake_connection?[clipping]:[])];}
   });
   ceiling.forEach(o=>o.removeFromParent());
   const doors=id==='hallway'?setupDoors(gltf.scene):new Map();
@@ -87,7 +90,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   resources.capture(gltf.scene);
   const props=createHouseProps(gltf.scene,world);
   const propMaterials=new Map();
-  for(const prop of props.props)prop.root.traverse(o=>{if(!o.isMesh||!clipping)return;const unclipped=m=>{if(!propMaterials.has(m)){const copy=m.clone();copy.clippingPlanes=null;propMaterials.set(m,copy);}return propMaterials.get(m);};o.material=Array.isArray(o.material)?o.material.map(unclipped):unclipped(o.material);});
+  for(const prop of props.props)prop.root.traverse(o=>{if(!o.isMesh||!clipping)return;const unclipped=m=>{if(!propMaterials.has(m)){const copy=m.clone();copy.clippingPlanes=boundaries;propMaterials.set(m,copy);}return propMaterials.get(m);};o.material=Array.isArray(o.material)?o.material.map(unclipped):unclipped(o.material);});
   const scraps=createHiddenScraps(props.props,view,world,collected);
   const roots=[gltf.scene,windows.exterior,...props.props.map(p=>p.root),...Array.from(doors.values(),d=>d.pivot),...Array.from(scraps.values(),s=>s.mesh)];
   illustrateHouse(roots);
@@ -151,7 +154,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  async function ensureRoom(id,ticket){
   if(rooms.has(id))return;
   if(id==='den'){refreshDen();return;}
-  const gltf=await loader.loadAsync(`/web/assets/house/${id}-baked.glb?v=${id==='hallway'?'uv-bake-7':id==='attic'||id==='basement'?'uv-bake-2':'uv-bake-1'}`);
+  const gltf=await loader.loadAsync(`/web/assets/house/${id}-baked.glb?v=${id==='hallway'?'uv-bake-7':'no-game-posters-1'}`);
   if(ticket!==revision){const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();return;}
   let sky;
   try{sky=await new THREE.TextureLoader().loadAsync(MOONLIT_SKY_URL);}catch(error){const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();throw error;}

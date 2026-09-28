@@ -60,8 +60,8 @@ export class CartridgePhysics {
       this.world.addBody(body);return body;
     });
   }
-  add(id, pose, {mass=.32, size=CARTRIDGE_SIZE, center=CENTER}={}) {
-    const body = new CANNON.Body({mass, shape: new CANNON.Box(new CANNON.Vec3(...size.map(size => size / 2))), linearDamping: .12, angularDamping: .3, allowSleep: true, sleepSpeedLimit: .09, sleepTimeLimit: .8});
+  add(id, pose, {mass=.32, size=CARTRIDGE_SIZE, center=CENTER, shape='box'}={}) {
+    const body = new CANNON.Body({mass, shape: shape==='sphere'?new CANNON.Sphere(Math.max(...size)/2):new CANNON.Box(new CANNON.Vec3(...size.map(size => size / 2))), linearDamping: .12, angularDamping: .3, allowSleep: true, sleepSpeedLimit: .09, sleepTimeLimit: .8});
     body.gameId = id;
     this.items.set(id, {body, mass, center:vec(center), home: {position:{x:pose.position.x,y:pose.position.y,z:pose.position.z},quaternion:{x:pose.quaternion.x,y:pose.quaternion.y,z:pose.quaternion.z,w:pose.quaternion.w}}});
     this.world.addBody(body);

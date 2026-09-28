@@ -10,7 +10,7 @@ function asset(){const bytes=readFileSync(`web/assets/house/${room}-baked.glb`),
 test(`${room} retains its camera, lights, windows, and baked fixed surfaces`,()=>{
  const {bytes,doc}=asset();assert.ok(bytes.length<15*1024*1024);assert.equal(doc.cameras.length,1);
  const baked=doc.nodes.filter(n=>n.extras?.[room+'_baked']);assert.ok(baked.length>40);
- assert.equal(doc.extensions.KHR_lights_punctual.lights.length,2);
+ assert.equal(doc.extensions.KHR_lights_punctual.lights.length,room==='attic'?1:2);
  const windows=doc.nodes.filter(n=>/Garden.beyond.window/.test(n.name));assert.equal(windows.length,room==='attic'?1:2);
  assert.ok(windows.every(n=>!n.extras?.[room+'_baked']));
  for(const node of baked)for(const primitive of doc.meshes[node.mesh].primitives)assert.ok(primitive.attributes.TEXCOORD_0!==undefined);
