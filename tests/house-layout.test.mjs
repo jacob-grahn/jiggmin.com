@@ -95,3 +95,11 @@ test('den sweep is one reversible curve crossing only the open doorway',async()=
   }
  }
 });
+
+test('Basement stairs have a continuous pitched ceiling and unlit inset fittings',()=>{
+ const ceiling=layout.geometry.filter(p=>p.name==='Basement stairwell ceiling');
+ assert.equal(ceiling.length,1);assert.ok(Math.abs(ceiling[0].slope-Math.atan2(4,6))<1e-8);
+ const rail=layout.geometry.filter(p=>p.name==='Basement stair handrail');
+ assert.equal(rail.length,2);assert.ok(rail.every(p=>p.size[0]>6&&p.slope===ceiling[0].slope));
+ assert.equal(layout.geometry.filter(p=>p.name==='Basement stair recessed opal off').length,2);
+});

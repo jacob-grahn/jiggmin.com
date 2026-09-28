@@ -21,7 +21,7 @@ export function groupHouseProps(model,scene){
   for(let parent=mesh.parent;parent&&parent!==model;parent=parent.parent)if(parent.userData.prop_assembly){owner=parent;break;}
   if(owner!==mesh)mesh.name=`${owner.name}__${mesh.name}`;
   const name=nameOf(owner),box=new THREE.Box3().setFromObject(mesh),hotspot=mesh.userData.hotspot??owner.userData.hotspot;
-  const fixed=structural.test(name)||hotspot?.includes('door')||maxSize(box)>1.8;
+  const fixed=mesh.userData.bake_connection===true||structural.test(name)||hotspot?.includes('door')||maxSize(box)>1.8;
   records.push({mesh,name,box,hotspot,fixed,owner});
  });
  const groups=[],assigned=new Set();

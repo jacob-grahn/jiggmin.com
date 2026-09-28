@@ -1,0 +1,15 @@
+{
+  "staticMeshes": 190,
+  "connections": [],
+  "samples": 64,
+  "denoised": true,
+  "exposure": 0.7,
+  "saturation": 1.2,
+  "resolution": 4096,
+  "ceilingResolution": 2048,
+  "ceilingPaint": "original timber",
+  "ceilingLightsOn": false,
+  "practicalLightsOn": true,
+  "lighting": "blue windows and warm practicals",
+  "excludedMovableShadows": true
+}

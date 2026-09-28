@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
 import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
 import {groupHouseProps} from '../web/house-props.js';
+import {roomMatrix} from '../web/house-layout.js';
 import {prepareSurfaceBake} from '../web/hallway-bake.js';
 if(!globalThis.ProgressEvent)globalThis.ProgressEvent=class{constructor(type,values){Object.assign(this,{type},values);}};
 function asset(){const bytes=readFileSync('web/assets/house/basement-baked.glb'),length=bytes.readUInt32LE(12);return {bytes,length,doc:JSON.parse(bytes.subarray(20,20+length))};}
@@ -52,3 +53,27 @@ test('Baked lighting is displayed once and remains attached to surfaces during c
  assert.deepEqual(Array.from(mesh.geometry.attributes.uv.array),uv);assert.equal(mesh.material.uniforms,undefined);
 });
 
+
+test('Stairwell surfaces are included in the basement asset',()=>{
+ const {doc}=asset(),layout=JSON.parse(readFileSync('web/assets/house/layout.json'));
+ const stairs=doc.nodes.filter(n=>n.extras?.bake_connection);
+ assert.equal(stairs.length,layout.geometry.filter(p=>p.name.startsWith('Basement stair')).length);
+ assert.ok(stairs.every(n=>n.extras.basement_baked));
+ const transform=roomMatrix(layout.rooms.basement);
+ for(const stair of stairs){
+  const name=stair.name.replace(/ UV(?:\.\d+)?$/,''),world=new THREE.Vector3(...stair.translation).applyMatrix4(transform);
+  assert.ok(layout.geometry.some(p=>p.name===name&&world.distanceTo(new THREE.Vector3(...p.position))<.001),`${stair.name} must align with the hallway flight`);
+ }
+ assert.equal(stairs.filter(n=>n.name.startsWith('Basement stairwell ceiling')).length,1);
+ assert.equal(stairs.filter(n=>n.name.startsWith('Basement stair recessed opal off')).length,2);
+ assert.equal(stairs.filter(n=>n.name.startsWith('Basement stair art frame')).length,2);
+});
+test('Stairwell materials can remain unclipped beyond the basement doorway',()=>{
+ const map=new THREE.Texture(),source=new THREE.MeshStandardMaterial({emissiveMap:map}),root=new THREE.Group();
+ const room=new THREE.Mesh(new THREE.BoxGeometry(),source),stairs=room.clone();
+ room.userData.basement_baked=true;stairs.userData={basement_baked:true,bake_connection:true};root.add(room,stairs);
+ prepareSurfaceBake(root,'basement');
+ room.material.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,0,-1),9.6)];
+ assert.notEqual(room.material,stairs.material);assert.equal(stairs.material.clippingPlanes,null);
+ assert.equal(stairs.material.map,room.material.map);
+});

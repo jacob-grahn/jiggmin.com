@@ -3,32 +3,40 @@ Use the room-specific preparation and bake entry points. Original assets are unt
 """
 import bpy,json,math,sys
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector,Matrix
 R=Path(__file__).resolve().parents[2]
 room=globals().get('ROOM','hallway')
-if room not in {'hallway','basement'}:raise ValueError('Unsupported bake room')
+if room not in {'hallway','basement','attic','workshop'}:raise ValueError('Unsupported bake room')
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=f'/tmp/{room}-bake-input.glb')
 S=bpy.context.scene;originals=list(S.objects)
-ceiling_lights_on=room=='basement' or '--ceiling-lights-on' in sys.argv
+ceiling_lights_on=room!='hallway' or '--ceiling-lights-on' in sys.argv
 # The browser removes the old ceiling and builds these connecting surfaces instead.
 for o in list(originals) if room=='hallway' else []:
  if 'Corridor ceiling' in o.name.replace('_',' ') or o.name.replace('_',' ') in {'Brass shade','Opal lamp','Lamp stem'}:
   originals.remove(o);bpy.data.objects.remove(o,do_unlink=True)
 layout=json.loads((R/'web/assets/house/layout.json').read_text())
 connection_names=[]
-for i,part in enumerate(layout['geometry'] if room=='hallway' else []):
+for i,part in enumerate(layout['geometry'] if room in {'hallway','basement'} else []):
  name=part['name']
- if not name.startswith(('Hall ceiling','Hall landing','Den shared wall extension')):continue
+ if room=='hallway' and not name.startswith(('Hall ceiling','Hall landing','Den shared wall extension')):continue
+ if room=='basement' and not name.startswith('Basement stair'):continue
  bpy.ops.mesh.primitive_cube_add(size=1)
- o=bpy.context.object;o.name=name+' UV';x,y,z=part['position'];sx,sy,sz=part['size'];o.location=(x,-z,y);o.dimensions=(sx,sz,sy);o.rotation_euler.z=part.get('rotation',0)
+ o=bpy.context.object;o.name=name+' UV';x,y,z=part['position'];sx,sy,sz=part['size'];o.location=(x,-z,y);o.dimensions=(sx,sz,sy);o.rotation_euler.z=part.get('rotation',0);o.rotation_euler.y=-part.get('slope',0)
  bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
  mat=bpy.data.materials.new(name);mat.use_nodes=True
- color={'plaster':(.061,.1,.093,1),'wood':(.067,.029,.013,1),'rail':(.22,.20,.13,1)}[part['material']]
+ color={'plaster':(.061,.1,.093,1),'wood':(.067,.029,.013,1),'rail':(.22,.20,.13,1),'dark':(.018,.022,.025,1),'cream':(.75,.68,.53,1),'ochre':(.54,.27,.04,1),'blue':(.035,.15,.27,1),'rust':(.38,.075,.035,1)}[part['material']]
  if 'ceiling' in name.lower():color=(.82,.76,.63,1)
  mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value=color
  mat.node_tree.nodes.get('Principled BSDF').inputs['Roughness'].default_value=.95
- o.data.materials.append(mat);o['bake_static']=True;o['bake_connection']=True;originals.append(o);connection_names.append(name)
+ o.data.materials.append(mat)
+ if room=='basement':
+  spec=layout['rooms'][room];x,y,z=spec['position']
+  transform=Matrix.Translation((x,-z,y))@Matrix.Rotation(spec['yaw'],4,'Z')
+  bpy.context.view_layer.update();o.matrix_world=transform.inverted()@o.matrix_world
+  bevel=o.modifiers.new('Soft finished edges','BEVEL');bevel.width=.008;bevel.segments=2
+  bpy.context.view_layer.objects.active=o;bpy.ops.object.modifier_apply(modifier=bevel.name)
+ o['bake_static']=True;o['bake_connection']=True;originals.append(o);connection_names.append(name)
 # Respect the runtime classification even for glTF multi-material child meshes.
 def fixed(o):
  p=o
@@ -55,11 +63,15 @@ for o in fixtures:
   bsdf=off.node_tree.nodes.get('Principled BSDF');bsdf.inputs['Base Color'].default_value=(.65,.62,.56,1);bsdf.inputs['Roughness'].default_value=.65
   o.data.materials.clear();o.data.materials.append(off)
   for poly in o.data.polygons:poly.material_index=0
+# Sloped attic roof surfaces need their own atlas just as flat ceilings do.
+def ceiling_surface(o):
+ name=o.name.lower().replace('_',' ')
+ return 'ceiling' in name or (room=='attic' and ('pitched unfinished roof' in name or 'exposed roof rafter' in name))
 # Preserve the source UV coordinates used by base colors and normal maps.
 bake_materials={}
 for o in static:
  for i,m in enumerate(o.data.materials):
-  key=(m,'ceiling' in o.name.lower())
+  key=(m,ceiling_surface(o))
   if key not in bake_materials:bake_materials[key]=m.copy()
   o.data.materials[i]=bake_materials[key]
  if not o.data.uv_layers:o.data.uv_layers.new(name='Source UV')
@@ -93,7 +105,7 @@ atlas_uv=mesh.uv_layers.new(name='Lighting UV');mesh.uv_layers.active_index=1;at
 helper=bpy.data.objects.new('Temporary bake mesh',mesh);S.collection.objects.link(helper)
 bpy.ops.object.select_all(action='DESELECT');helper.select_set(True);bpy.context.view_layer.objects.active=helper
 # Give the ceiling its own atlas rather than sharing texels with hundreds of props.
-ceiling_materials={m for o in static if 'ceiling' in o.name.lower() for m in o.data.materials}
+ceiling_materials={m for o in static if ceiling_surface(o) for m in o.data.materials}
 ceiling_indices={i for i,m in enumerate(materials) if m in ceiling_materials}
 for ceiling in [False,True]:
  bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_mode(type='FACE');bpy.ops.mesh.select_all(action='DESELECT');bpy.ops.object.mode_set(mode='OBJECT')
@@ -115,11 +127,22 @@ def area(name,location,target,power,color,size):
 if room=='hallway':
  area('Near window spill',(1.12,-3.7,1.9),(-1,-1.5,.8),180,(.13,.34,1),1.5)
  area('Far window spill',(1.1,2.55,1.92),(-1,3,.8),145,(.13,.34,1),1.5)
-else:
+elif room=='basement':
  area('Cellar left window spill',(-2.2,3.0,2.95),(-1,0,.8),180,(.24,.48,1),1.3)
  area('Cellar right window spill',(2.2,2.96,3.0),(1,0,.8),145,(.24,.48,1),1.3)
  area('Cellar side window spill',(-4.6,-1.1,2.85),(-1,-1,.8),150,(.24,.48,1),1.3)
-for i,o in enumerate(fixtures if ceiling_lights_on else []):
+ # Hallway moonlight enters from behind the descending viewer.
+ spec=layout['rooms'][room];x,y,z=spec['position']
+ inverse=(Matrix.Translation((x,-z,y))@Matrix.Rotation(spec['yaw'],4,'Z')).inverted()
+ area('Hallway blue stair spill',inverse@Vector((-1.50,3.2,2.15)),inverse@Vector((-5.2,3.2,-1.3)),320,(.14,.36,1),1.0)
+elif room=='workshop':
+ area('Bench window spill',(-.6,1.18,2.65),(-.3,-.8,1.0),155,(.24,.48,1),1.1)
+ area('Side window spill',(-2.55,.2,2.05),(0,.1,1.0),190,(.24,.48,1),1.1)
+ area('Warm task lamp',(-1.72,.72,1.81),(-.55,.45,.98),65,(1,.38,.12),.55)
+else:
+ area('Gable moonlight spill',(0,4.04,2.02),(-.4,.3,.65),260,(.24,.48,1),1.0)
+ area('Warm floor lamp',(.47,1.45,.90),(-.1,2,.25),12,(1,.53,.24),.28)
+for i,o in enumerate(fixtures if ceiling_lights_on and room in {'hallway','basement'} else []):
  center=o.matrix_world@(sum((Vector(v) for v in o.bound_box),Vector())/8)
  area('Warm ceiling practical '+str(i),tuple(center-Vector((0,0,.08))),tuple(center-Vector((0,0,2))),140,(1,.27,.055),.50)
  # Modest upward spill gives the ceiling some bounced warmth too.
@@ -128,7 +151,9 @@ images={False:bpy.data.images.new('Room UV baked diffuse',4096,4096,alpha=False,
 for m in materials:
  if not m.use_nodes:continue
  node=m.node_tree.nodes.new('ShaderNodeTexImage');node.image=images[m in ceiling_materials];m.node_tree.nodes.active=node
-S.render.engine='CYCLES';S.cycles.samples=128;S.cycles.use_denoising=True;S.cycles.max_bounces=8;S.cycles.diffuse_bounces=6
+samples=64 if room in {'attic','workshop'} else 128
+exposure=.7 if room=='attic' else -1.3
+S.render.engine='CYCLES';S.cycles.samples=samples;S.cycles.use_denoising=True;S.cycles.max_bounces=8;S.cycles.diffuse_bounces=6
 S.render.bake.use_pass_direct=True;S.render.bake.use_pass_indirect=True;S.render.bake.use_pass_color=True;S.render.bake.margin=12
 output=R/'scene/renders'/(f'{room}-uv-bake' if ceiling_lights_on else f'{room}-uv-bake-lights-off');output.mkdir(parents=True,exist_ok=True)
 if '--reuse-lighting' not in sys.argv:
@@ -145,7 +170,7 @@ if '--reuse-lighting' not in sys.argv or '--denoise-lighting' in sys.argv:
  source=nodes.new('CompositorNodeImage');denoise=nodes.new('CompositorNodeDenoise');sink=nodes.new('CompositorNodeComposite')
  grade=nodes.new('CompositorNodeHueSat');grade.inputs['Saturation'].default_value=1.2
  clean.node_tree.links.new(source.outputs['Image'],denoise.inputs['Image']);clean.node_tree.links.new(denoise.outputs['Image'],grade.inputs['Image']);clean.node_tree.links.new(grade.outputs['Image'],sink.inputs['Image'])
- clean.view_settings.view_transform='AgX';clean.view_settings.exposure=-1.3;clean.render.image_settings.file_format='PNG';clean.render.image_settings.color_mode='RGB'
+ clean.view_settings.view_transform='AgX';clean.view_settings.exposure=exposure;clean.render.image_settings.file_format='PNG';clean.render.image_settings.color_mode='RGB'
  for ceiling in [False,True]:
   name='ceiling' if ceiling else 'diffuse';source.image=bpy.data.images.load(str(output/(name+'.exr')))
   source.image.colorspace_settings.name=images[ceiling].colorspace_settings.name
@@ -164,7 +189,7 @@ for o in static:
  for uv in list(o.data.uv_layers):o.data.uv_layers.remove(uv)
  uv=o.data.uv_layers.new(name='Lighting UV')
  for loop,value in zip(uv.data,atlas_uv.data[lo:hi]):loop.uv=value.uv
- o.data.materials.clear();o.data.materials.append(baked_materials['ceiling' in o.name.lower()])
+ o.data.materials.clear();o.data.materials.append(baked_materials[ceiling_surface(o)])
  for poly in o.data.polygons:poly.material_index=0
  o[room+'_baked']=True
 bpy.data.objects.remove(helper,do_unlink=True)
@@ -172,5 +197,5 @@ bpy.data.objects.remove(helper,do_unlink=True)
 bpy.ops.object.select_all(action='DESELECT')
 for o in originals:o.hide_render=False;o.select_set(True)
 bpy.ops.export_scene.gltf(filepath=str(R/f'web/assets/house/{room}-baked.glb'),use_selection=True,export_format='GLB',export_cameras=True,export_lights=True,export_extras=True,export_image_format='JPEG',export_jpeg_quality=96)
-(R/f'web/assets/house/{room}-bake.json').write_text(json.dumps({'staticMeshes':len(static),'connections':connection_names,'samples':128,'denoised':True,'exposure':-1.3,'saturation':1.2,'resolution':4096,'ceilingResolution':2048,'ceilingPaint':'light cream' if room=='hallway' else 'original concrete','ceilingLightsOn':ceiling_lights_on,'lighting':'blue windows and orange practicals' if ceiling_lights_on else 'blue windows only','excludedMovableShadows':True},indent=2)+'\n')
+(R/f'web/assets/house/{room}-bake.json').write_text(json.dumps({'staticMeshes':len(static),'connections':connection_names,'samples':samples,'denoised':True,'exposure':exposure,'saturation':1.2,'resolution':4096,'ceilingResolution':2048,'ceilingPaint':'light cream' if room=='hallway' else 'original concrete' if room=='basement' else 'original timber','ceilingLightsOn':ceiling_lights_on and room in {'hallway','basement'},'practicalLightsOn':ceiling_lights_on,'lighting':'blue windows and warm practicals' if ceiling_lights_on else 'blue windows only','excludedMovableShadows':True},indent=2)+'\n')
 print(room.upper()+'_BAKE_COMPLETE',flush=True)

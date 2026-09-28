@@ -1,13 +1,13 @@
-import {prepareHallwayBake,prepareSurfaceBake,isHallwayConnection} from './hallway-bake.js?v=basement-1';
+import {prepareHallwayBake,prepareSurfaceBake,isHallwayConnection} from './hallway-bake.js?v=stairs-1';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
 import {createBasementCartridges} from './cartridge-storage.js';
 import {illustrateHouse} from './house-illustration.js?v=3';
 import {repairDenProjection} from './den-projection.js';
 import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
 import {createRoomResources} from './house-resources.js';
-import {createHouseProps} from './house-props.js';
+import {createHouseProps} from './house-props.js?v=stairs-1';
 import {createHousePropInput} from './house-prop-input.js?v=bitey-1';
-import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=bitey-1';
+import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=stairs-1';
 import {createHiddenScraps} from './house-scraps.js';
 import {createMoonlitWindows,MOONLIT_SKY_URL} from './house-window-sky.js';
 import {resizeHouseCamera} from './house-camera.js';
@@ -67,7 +67,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   if(id==='basement')for(const cartridge of createBasementCartridges(getDen?.()?.basementCartridges??[]))gltf.scene.add(cartridge);
   const resources=createRoomResources();resources.capture(gltf.scene);
   if(id==='hallway')prepareHallwayBake(gltf.scene);
-  if(id==='basement')prepareSurfaceBake(gltf.scene,'basement');
+  if(id!=='hallway')prepareSurfaceBake(gltf.scene,id);
   const spec=layout.rooms[id],matrix=roomMatrix(spec);gltf.scene.applyMatrix4(matrix);world.add(gltf.scene);gltf.scene.updateMatrixWorld(true);
   const ceiling=[];
   const clipping=spec.front===undefined?null:new THREE.Plane(new THREE.Vector3(0,0,-1),spec.front).applyMatrix4(matrix);
@@ -75,7 +75,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    if(o.isLight)o.intensity*=.012;
    if(o.isMesh)for(const mat of Array.isArray(o.material)?o.material:[o.material])for(const key of ['map','normalMap','roughnessMap','metalnessMap'])if(mat[key])mat[key].anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
    if(id==='hallway'&&/Corridor_ceiling/.test(o.name))ceiling.push(o);
-   if(o.isMesh&&clipping){for(const mat of Array.isArray(o.material)?o.material:[o.material])mat.clippingPlanes=[clipping];}
+   if(o.isMesh&&clipping&&!o.userData.bake_connection){for(const mat of Array.isArray(o.material)?o.material:[o.material])mat.clippingPlanes=[clipping];}
   });
   ceiling.forEach(o=>o.removeFromParent());
   createMoonlitWindows(gltf.scene,sky);
@@ -136,9 +136,9 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  }
  async function load(){
   if(!loading)loading=(async()=>{
-   const response=await fetch('/web/assets/house/layout.json?v=bitey-1');if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
+   const response=await fetch('/web/assets/house/layout.json?v=stairs-1');if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
    // The baked hallway asset includes its ceiling and landing surfaces.
-   connections=buildConnections({...layout,geometry:layout.geometry.filter(part=>!isHallwayConnection(part.name))});
+   connections=buildConnections({...layout,geometry:layout.geometry.filter(part=>!isHallwayConnection(part.name)&&!part.name.startsWith('Basement stair'))});
    // The replacement ceiling belongs to the hallway, including its lighting.
    assignRoomLighting(connections.group.children.filter(o=>o.name.startsWith('Hall ceiling')||o.name.startsWith('Hall landing')||o.name==='Den shared wall extension'),'hallway');
    connections.resources=createRoomResources();connections.resources.capture(connections.group);
@@ -149,7 +149,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  async function ensureRoom(id,ticket){
   if(rooms.has(id))return;
   if(id==='den'){refreshDen();return;}
-  const gltf=await loader.loadAsync(`/web/assets/house/${id==='hallway'||id==='basement'?id+'-baked':id}.glb${id==='attic'?'?v=tricycle-2':id==='hallway'?'?v=uv-bake-7':id==='basement'?'?v=uv-bake-1':id==='workshop'?'?v=desk-in-progress-1':''}`);
+  const gltf=await loader.loadAsync(`/web/assets/house/${id}-baked.glb?v=${id==='hallway'?'uv-bake-7':id==='attic'||id==='basement'?'uv-bake-2':'uv-bake-1'}`);
   if(ticket!==revision){const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();return;}
   let sky;
   try{sky=await new THREE.TextureLoader().loadAsync(MOONLIT_SKY_URL);}catch(error){const resources=createRoomResources();resources.capture(gltf.scene);resources.dispose();throw error;}

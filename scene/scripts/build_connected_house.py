@@ -41,14 +41,36 @@ def front(name,room,width,height,floor=0,center=0,opening=1.3):
  box(name+' lintel',p,[opening,.6,.12],rotation=yaw)
 corridor_x('Workshop passage',1.38,2.75,1.8)
 front('Workshop','workshop',6,3.3)
-# Basement: twenty treads descending four metres, with enclosed side walls.
+# Basement stairwell: continuous enclosure with finished treads and wall details.
+slope=math.atan2(4,6);run=math.hypot(6,4)
 for i in range(20):
  x=-1.4-(i+.5)*.30;top=-(i+1)*.20
  box('Basement stair tread',[x,top-.10,-3.2],[.30,.20,1.3],'wood')
- for side in [-1,1]:box('Basement stairwell wall',[x,top+1.45,-3.2+side*.7],[.30,3.1,.12])
- box('Basement stairwell ceiling',[x,top+3,-3.2],[.31,.12,1.5])
- # Handrails follow the stair slope; simple segments are sufficient in transit.
- for side in [-1,1]:box('Basement handrail',[x,top+1,-3.2+side*.61],[.37,.045,.045],'rail')
+ box('Basement stair nosing',[x+.14,top+.006,-3.2],[.045,.035,1.3],'rail')
+# Sloped slabs have vertical depth sufficient to enclose the flight.
+for side in [-1,1]:
+ box('Basement stairwell wall',[-4.4,-.55,-3.2+side*.72],[run,3.50,.14],slope=slope)
+ box('Basement stair skirt',[-4.4,-1.92,-3.2+side*.635],[run,.19,.045],'wood',slope=slope)
+ box('Basement stair handrail',[-4.4,-1.05,-3.2+side*.57],[run-.25,.065,.065],'wood',slope=slope)
+ for t in [.10,.36,.64,.90]:
+  x=-1.4-6*t;y=-4*t+.95
+  box('Basement stair rail bracket',[x,y-.07,-3.2+side*.625],[.055,.13,.12],'rail')
+box('Basement stairwell ceiling',[-4.4,.9,-3.2],[run+.1,.14,1.58],slope=slope)
+# Dark inset housings and opal faces: deliberately non-emissive, switched off.
+for t in [.28,.72]:
+ x=-1.4-6*t;y=2.9-4*t
+ box('Basement stair recessed trim',[x,y-.085,-3.2],[.30,.03,.30],'rail',slope=slope)
+ box('Basement stair recessed shadow',[x,y-.105,-3.2],[.235,.035,.235],'dark',slope=slope)
+ box('Basement stair recessed opal off',[x,y-.11,-3.2],[.17,.018,.17],'cream',slope=slope)
+# Small paired compositions, positioned at eye level along the right wall.
+for j,t in enumerate([.34,.70]):
+ x=-1.4-6*t;y=-4*t+1.65;z=-3.2-.637
+ box('Basement stair art frame',[x,y,z],[.70,.86,.055],'wood')
+ box('Basement stair art paper',[x,y,z+.034],[.63,.79,.012],'cream')
+ box('Basement stair art ochre block',[x-.12,y-.13,z+.045],[.23,.36,.012],'ochre')
+ box('Basement stair art blue block',[x+.13,y+.13,z+.047],[.21,.37,.013],'blue')
+ box('Basement stair art charcoal line',[x,y-.29,z+.049],[.46,.025,.014],'dark')
+ box('Basement stair art rust mark',[x-.13,y+.23,z+.05],[.18,.10,.014],'rust')
 front('Basement','basement',10,4,center=3.6)
 # Ceiling opening in the hallway. Replace the original continuous ceiling.
 for x,w in [(-.965,.85),(.965,.85)]:box('Hall ceiling beside hatch',[x,3.08,.8],[w,.12,13.4])
@@ -76,7 +98,7 @@ except ImportError:raise SystemExit(0)
 from mathutils import Matrix,Vector
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 materials={}
-for name,color in {'plaster':(.09,.14,.15,1),'wood':(.10,.055,.025,1),'rail':(.20,.18,.13,1)}.items():
+for name,color in {'plaster':(.09,.14,.15,1),'wood':(.10,.055,.025,1),'rail':(.20,.18,.13,1),'dark':(.018,.022,.025,1),'cream':(.75,.68,.53,1),'ochre':(.54,.27,.04,1),'blue':(.035,.15,.27,1),'rust':(.38,.075,.035,1)}.items():
  m=bpy.data.materials.new(name);m.diffuse_color=color;materials[name]=m
 for name,r in rooms.items():
  path=ROOT/('web/assets/room.glb' if name=='den' else f'web/assets/house/{name}.glb')
@@ -104,6 +126,6 @@ for name,r in rooms.items():
    bm.to_mesh(o.data);bm.free()
 for p in parts:
  bpy.ops.mesh.primitive_cube_add(size=1,location=(p['position'][0],-p['position'][2],p['position'][1]))
- o=bpy.context.object;o.name=p['name'];o.dimensions=(p['size'][0],p['size'][2],p['size'][1]);o.rotation_euler.z=p.get('rotation',0);o.data.materials.append(materials[p['material']]);o['connector']=True
+ o=bpy.context.object;o.name=p['name'];o.dimensions=(p['size'][0],p['size'][2],p['size'][1]);o.rotation_euler.z=p.get('rotation',0);o.rotation_euler.y=-p.get('slope',0);o.data.materials.append(materials[p['material']]);o['connector']=True
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'scene/house-connected.blend'),compress=True)
 print('Saved connected house master.',flush=True)

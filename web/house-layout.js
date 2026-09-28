@@ -12,13 +12,13 @@ export function setAtticAccess(ladder,door,openness){
 }
 export function buildConnections(layout){
  const group=new THREE.Group(),ladder=new THREE.Group();group.add(ladder);
- const materials={plaster:new THREE.MeshStandardMaterial({color:0x465956,roughness:1}),wood:new THREE.MeshStandardMaterial({color:0x49301e,roughness:.85}),rail:new THREE.MeshStandardMaterial({color:0x827c65,roughness:.65})};
+ const materials={plaster:new THREE.MeshStandardMaterial({color:0x465956,roughness:1}),wood:new THREE.MeshStandardMaterial({color:0x49301e,roughness:.85}),rail:new THREE.MeshStandardMaterial({color:0x827c65,roughness:.65}),...Object.fromEntries(Object.entries({dark:0x23282c,cream:0xe0d4bd,ochre:0xc18c39,blue:0x345e81,rust:0xa34d34}).map(([key,color])=>[key,new THREE.MeshStandardMaterial({color,roughness:.9})]))};
  for(const part of layout.geometry){
-  const mesh=new THREE.Mesh(new THREE.BoxGeometry(...part.size),materials[part.material]);mesh.name=part.name;mesh.position.fromArray(part.position);mesh.rotation.y=part.rotation??0;
+  const mesh=new THREE.Mesh(new THREE.BoxGeometry(...part.size),materials[part.material]);mesh.name=part.name;mesh.position.fromArray(part.position);mesh.rotation.y=part.rotation??0;mesh.rotation.z=part.slope??0;
   (part.ladder?ladder:group).add(mesh);
  }
  ladder.visible=false;
- for(const position of [[-2,2.5,7],[-5,2.5,12],[-4.4,.2,-3.2],[0,5.2,-1]]){
+ for(const position of [[-2,2.5,7],[-5,2.5,12],[0,5.2,-1]]){
   const light=new THREE.PointLight(0x9db2bc,2.5,7,2);light.position.fromArray(position);group.add(light);
  }
  return {group,ladder};
