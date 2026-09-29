@@ -2,8 +2,27 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
-import {roomMatrix,buildConnections,sampleRoute,travelEase,setAtticAccess} from '../web/house-layout.js';
+import {roomMatrix,buildConnections,sampleRoute,travelEase,setAtticAccess,createDenRoute} from '../web/house-layout.js';
 const layout=JSON.parse(readFileSync('web/assets/house/layout.json'));
+test('den travel clears the authored right wall in both directions',()=>{
+ const colliders=JSON.parse(readFileSync('web/assets/colliders.json'));
+ const walls=colliders.filter(c=>c.name.startsWith('Right wall'));
+ assert.equal(walls.length,3);
+ const transform=roomMatrix(layout.rooms.den),inverse=transform.clone().invert();
+ const start=new THREE.Vector3(.12,2.8,7.9).applyMatrix4(transform);
+ const end=new THREE.Vector3(...layout.rooms.hallway.viewPosition);
+ for(const reverse of [false,true]){
+  const route=createDenRoute(start,end,layout.denCurve,reverse);
+  for(let i=0;i<=500;i++){
+   const point=route.getPointAt(i/500).applyMatrix4(inverse);
+   for(const wall of walls){
+    const local=point.clone().sub(new THREE.Vector3(...wall.center));
+    local.applyQuaternion(new THREE.Quaternion(...wall.quaternion).invert());
+    assert.ok(local.toArray().some((v,axis)=>Math.abs(v)>wall.halfExtents[axis]+.05),`camera intersects ${wall.name}`);
+   }
+  }
+ }
+});
 test('den shares a single hallway doorway without an intervening corridor',()=>{
  const {den,workshop}=layout.rooms;
  const anchors=JSON.parse(readFileSync('web/assets/house/anchors.json'));

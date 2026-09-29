@@ -1,3 +1,11 @@
+// Use the live den lens as the resize baseline. A minimum authored aspect
+// would widen the first travel frame after the den has already framed itself.
+export function createHouseTravelCamera(view){
+ const camera=view.clone();
+ camera.userData.explorationLens={fov:camera.fov,aspect:camera.aspect};
+ return camera;
+}
+
 // The den composes its view with an extra projection shift. Preserve that
 // framing when resizing the exploration camera so both renderers agree.
 export function resizeHouseCamera(camera,aspect){

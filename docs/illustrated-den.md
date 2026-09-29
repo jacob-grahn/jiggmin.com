@@ -30,6 +30,12 @@ their original material paths.
 
 The original `.blend` is not overwritten. The illustrated source is saved as
 `scene/midnight-den-illustrated.blend` (local and ignored like the other sources).
+Before the material pass, `complete_den.py` finishes the upholstered chair with
+both arms, a cushion, piping, a base and four walnut feet. It also closes the
+right rear corner and adds the right wall, baseboards and a framed paneled door.
+The opening is centered at Blender `(4.5, -4)` to match the shared hallway
+doorway. The closed leaf is exported separately as `den_door`; the travel clone
+hides it while the hallway's animated leaf controls the same opening.
 Run from the repository root:
 
 ```sh

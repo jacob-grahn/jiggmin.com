@@ -7,6 +7,7 @@ import bpy, sys, runpy
 from pathlib import Path
 R=Path(__file__).resolve().parents[2]
 S=bpy.context.scene
+runpy.run_path(str(R/'scene/scripts/complete_den.py'))['complete']()
 S['illustrated_den']=True
 S['art_direction_reference']='docs/art-direction/den/midnight-ink-target.png'
 runpy.run_path(str(R/'scene/scripts/den_ink_materials.py'))['decorate']()

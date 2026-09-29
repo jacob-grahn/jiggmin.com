@@ -12,7 +12,7 @@ import {createHousePropInput} from './house-prop-input.js?v=bitey-1';
 import {roomMatrix,buildConnections,createRoute,createDenRoute,travelEase,setAtticAccess} from './house-layout.js?v=stairs-1';
 import {createHiddenScraps} from './house-scraps.js';
 import {createMoonlitWindows,createMoonlitSky,MOONLIT_SKY_URL,WINDOW_GLASS_LAYER} from './house-window-sky.js';
-import {resizeHouseCamera} from './house-camera.js';
+import {createHouseTravelCamera,resizeHouseCamera} from './house-camera.js?v=den-handoff-2';
 import * as THREE from 'three';
 import {GLTFLoader} from './model-loader.js';
 
@@ -106,6 +106,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   denClone=source.scene.clone(true);const matrix=roomMatrix(den),inverse=matrix.clone().invert(),materials=new Map(),geometries=new Map(),textures=new Map();
   const ownTexture=texture=>{if(!textures.has(texture))textures.set(texture,texture.clone());return textures.get(texture);};
   denClone.traverse(o=>{
+   // The hallway owns the moving leaf at this shared opening during travel.
+   if(o.userData.role==='den_door')o.visible=false;
    if(!o.isMesh)return;
    if(!geometries.has(o.geometry))geometries.set(o.geometry,o.geometry.clone());o.geometry=geometries.get(o.geometry);
    function cloneMaterial(original){
@@ -216,7 +218,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   if(ticket!==revision)return;
   await Promise.all([...new Set(['hallway',id])].map(room=>ensureRoom(room,ticket)));
   if(ticket!==revision)return;
-  if(!current||current.id==='den'){refreshDen();current=rooms.get('den')??rooms.get('hallway');camera=current.view.clone();camera.userData.explorationLens={fov:camera.fov,aspect:Math.max(1.6*camera.zoom,camera.aspect)};resize();}
+  if(!current||current.id==='den'){refreshDen();current=rooms.get('den')??rooms.get('hallway');camera=createHouseTravelCamera(current.view);resize();}
   // Reveal the canvas only after all walls and the starting view are ready.
   render();onReady();
   const destination=rooms.get(id),from=current.id;
