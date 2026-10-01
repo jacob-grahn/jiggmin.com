@@ -19,6 +19,11 @@ The game archive is included in Git so a fresh clone can play games and build th
 
 Run `npm ci` (including development dependencies), then `npm start` from this directory, then open <http://127.0.0.1:8000>. Serve over HTTP; opening `index.html` as a file does not support the required module, WebAssembly, and game requests. Runtime files are vendored, so the built site needs no npm installation or CDN connection. `npm start` builds and serves the compressed `dist/` output; use `npm run start:source` for original exports and test fixtures. A static host must serve `.wasm` as `application/wasm`.
 
+For Blender lighting bakes, an optional [Runpod cloud runner](docs/runpod-baking.md)
+can use an NVIDIA GPU, download verified results into `.runpod/`, and delete the
+temporary instance afterward. It requires local scene sources and a Runpod key;
+it does not publish or replace the site's current assets.
+
 ## Explore the house
 
 On desktop landscape screens, the right-edge arrow opens a hallway, garage workshop, unfinished attic, and basement. Tap or throw objects to reveal hidden paper scraps, then reread collected papers in the den’s journal. Discoveries are saved in this browser. In the workshop, the handsaw reveals Inkclipse and the framed crow picture reveals A Murder in Crowland. Each discovery floats a physical cartridge up with its paper. On the next return to the den, it comes from the viewer and drops onto the table; insert it in the console to play. Collected cartridges survive refreshes, while the journal retains their notes.

@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "cloud:status": "python3 scripts/runpod_bake.py status",
+    "cloud:quote": "python3 scripts/runpod_bake.py quote",
+    "cloud:bake": "python3 scripts/runpod_bake.py benchmark",
+    "cloud:test": "python3 -m unittest discover -s tests -p 'test_runpod_bake.py'",
     "start": "npm run build && python3 scripts/serve.py",
     "start:source": "python3 scripts/serve.py --source",
     "test": "npm run build && node --test tests/*.test.mjs",
