@@ -1,4 +1,5 @@
 import {assertUniqueTrim} from './filter-house-trim.mjs';
+import {includeFixedFixtures} from './house-fixed-fixtures.mjs';
 // Preserve approved placement while reusing the original room shading and UVs.
 import * as THREE from 'three';
 import {refitBasementModel} from './refit-basement-model.mjs';
@@ -12,7 +13,7 @@ import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import {copyToDocument,prune,unpartition,dedup} from '@gltf-transform/functions';
 import {readFileSync,writeFileSync,rmSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),out='web/assets/house/release';
+const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),out=process.env.HOUSE_REFERENCE_OUT??'web/assets/house/release';
 const family=s=>s.replace(/\.\d{3}$/,'').replaceAll('_',' ').toLowerCase();
 function shape(mesh){
  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
@@ -176,5 +177,5 @@ for(const room of ['structure','hallway','workshop','basement','attic']){
 rmSync(`${out}/den.glb`,{force:true});
 layout.assets.den=null; // The actual live den is cloned at the start of travel.
 layout.routes.den=[layout.views.hub.position,[5.55,1.65,7.55],[5.55,1.65,layout.views.den.position[2]],layout.views.den.position];
-writeFileSync(`${out}/layout.json`,JSON.stringify(layout,null,2)+'\n');
+writeFileSync(`${out}/layout.json`,JSON.stringify(includeFixedFixtures(layout),null,2)+'\n');
 writeFileSync('docs/house-plan/style-restoration.json',JSON.stringify(report,null,2)+'\n');console.log(report);

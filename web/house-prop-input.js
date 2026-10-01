@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 export function createHousePropInput(host,{getRoom,getCamera,onActivate,wake,reduced}){
  const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),point=new THREE.Vector3();
+ ray.firstHitOnly=true;
  ray.layers.enableAll(); // Picking is scoped by room roots, independent of lighting passes.
  let enabled=false,gesture,suppressClick=false;
  function pick(event){

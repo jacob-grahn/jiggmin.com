@@ -24,7 +24,7 @@ scene.updateMatrixWorld(true);const gltf={scene};
 const shells=[],contents=[],mechanisms=[];gltf.scene.traverse(o=>{if(!o.isMesh)return;for(const m of Array.isArray(o.material)?o.material:[o.material])m.side=THREE.DoubleSide;if(['shell','floor','ceiling','roof','stair'].includes(o.userData.preview_kind))shells.push(o);if(o.userData.preview_kind==='contents')contents.push(o);if(['door','ladder'].includes(o.userData.preview_kind)){o.updateMatrix();o.userData.restMatrix=o.matrix.clone();o.matrixAutoUpdate=false;mechanisms.push(o);}});accelerateRaycasts([...shells,...contents,...mechanisms]);
 const report={export:meta.export,routes:{},viewport_targets:{}};let failures=0;
 for(const [id,points]of Object.entries(meta.routes))for(const reverse of [false,true]){
- const route=createRoute(points.map(p=>new THREE.Vector3(...p))),hits=new Set(),propHits=new Set(),accessHits=new Set(),clearanceHits=new Set();let previous=route.getPoint(reverse?1:0);
+ const route=createRoute(points.map(p=>new THREE.Vector3(...p)),{arrivalRadius:id==='basement'?1.2:.45}),hits=new Set(),propHits=new Set(),accessHits=new Set(),clearanceHits=new Set();let previous=route.getPoint(reverse?1:0);
  for(let i=1;i<=800;i++){
   const progress=reverse?1-i/800:i/800,opened=({workshop:['mudroom','garage'],basement:['stairs'],attic:['attic'],den:['den'],'private-hall':[]}[id]);
   for(const o of mechanisms){o.matrix.copy(o.userData.preview_kind==='door'?doorMotion(o.userData.door_id,opened.includes(o.userData.door_id)?progress:0):ladderMotion(o.userData.ladder_section??2,progress)).multiply(o.userData.restMatrix);o.updateMatrixWorld(true);}

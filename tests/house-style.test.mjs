@@ -14,7 +14,8 @@ test('restored room textures come from the original artwork and lighting atlases
   const originals=new Set(original.getRoot().listTextures().map(t=>hash(t.getImage())));
   const paintedLighting=new Set();
   for(const node of restored.getRoot().listNodes().filter(n=>n.getExtras().house_window_bake)){
-   assert.equal(room,'basement');assert.ok(node.getExtras().ceiling_paint==='light cream'||node.getExtras().house_window_receiver||node.getExtras().house_fixed_receiver);
+   assert.ok(['basement','attic'].includes(room));assert.ok(node.getExtras().ceiling_paint==='light cream'||node.getExtras().house_window_receiver||node.getExtras().house_fixed_receiver);
+   if(room==='attic')assert.ok(node.getExtras().review_fixed_fixture,'only the reviewed fixed attic fixtures may get new lighting');
    for(const p of node.getMesh().listPrimitives())paintedLighting.add(hash(p.getMaterial().getEmissiveTexture().getImage()));
   }
   for(const texture of restored.getRoot().listTextures())assert.ok(originals.has(hash(texture.getImage()))||paintedLighting.has(hash(texture.getImage())),`${room}: newly substituted artwork texture`);
@@ -117,7 +118,7 @@ test('basement is fitted as geometry while every furnishing retains its original
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),original=await io.read('web/assets/house/basement-baked.glb'),placed=await io.read('web/assets/house/release/basement.glb');
  const originals=new Map(original.getRoot().listNodes().filter(n=>n.getMesh()).map(n=>[n.getName(),n]));
  const assembly=placed.getRoot().listNodes().find(n=>n.getName()==='Refitted basement assembly');assert.deepEqual(assembly.getScale(),[1,1,1]);
- for(const node of placed.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().refit_assembly!=='envelope'&&!n.getExtras().house_fixed_detail)){
+ for(const node of placed.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().refit_assembly!=='envelope'&&!n.getExtras().house_fixed_detail&&!n.getExtras().review_fixed_fixture)){
   const source=originals.get(node.getExtras().source_object);assert.ok(source,node.getName());
   const a=node.getWorldMatrix(),b=source.getWorldMatrix();
   for(const i of [0,1,2,4,5,6,8,9,10])assert.ok(Math.abs(a[i]-b[i])<1e-6,`${node.getName()} stretched`);
@@ -140,7 +141,7 @@ test('all other furniture keeps original size and orientation after removing roo
   const source=await io.read(`web/assets/house/${room}-baked.glb`),doc=await io.read(`web/assets/house/release/${room}.glb`);
   const originals=new Map(source.getRoot().listNodes().filter(n=>n.getMesh()).map(n=>[n.getName(),n]));
   const rotation=new THREE.Matrix4().makeRotationY(room==='hallway'?Math.PI/2:0);
-  for(const node of doc.getRoot().listNodes().filter(n=>n.getMesh())){
+  for(const node of doc.getRoot().listNodes().filter(n=>n.getMesh()&&!n.getExtras().review_fixed_fixture)){
    assert.equal(node.getExtras().model_refit,room,node.getName());
    const expected=rotation.clone().multiply(new THREE.Matrix4().fromArray(originals.get(node.getExtras().style_source).getWorldMatrix())),actual=node.getWorldMatrix();
    for(const i of [0,1,2,4,5,6,8,9,10])assert.ok(Math.abs(actual[i]-expected.elements[i])<1e-6,`${room}/${node.getName()} retains fitting scale`);

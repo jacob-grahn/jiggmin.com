@@ -10,7 +10,7 @@ export function createHiddenScraps(props,camera,scene,collected){
   const vertices=geometry.attributes.position;
   for(let i=0;i<vertices.count;i++)vertices.setZ(i,Math.sin(vertices.getX(i)*30)*.008);
   geometry.computeVertexNormals();
-  const mesh=new THREE.Mesh(geometry,paper);mesh.name=`Hidden paper: ${prop.hotspot}`;
+  const mesh=new THREE.Mesh(geometry,paper);mesh.name=`Hidden paper: ${prop.hotspot}`;mesh.visible=false; // Only show the note during its discovery animation.
   mesh.position.copy(prop.home).addScaledVector(behind,depth+.006);mesh.quaternion.copy(camera.quaternion);scene.add(mesh);
   scraps.set(prop.hotspot,{mesh,prop});
  }

@@ -1,4 +1,4 @@
-import {createHouseRenderer} from './house-release-renderer.js?v=house-reference-30';
+import {createHouseRenderer} from './house-release-renderer.js?v=house-reference-46';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 const ROOMS = ['hallway', 'workshop', 'attic', 'basement', 'private-hall'];

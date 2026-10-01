@@ -20,7 +20,7 @@
     "release:house:publish": "python3 scripts/house_release.py publish",
     "release:house:check": "node --test tests/house-release.test.mjs && node scripts/check-house-release.mjs",
     "release:house:prepare": "python3 scripts/house_release.py prepare",
-    "release:house:test": "python3 scripts/house_release.py test",
+    "release:house:test": "python3 scripts/house_release.py test --review",
     "release:house:bake": "python3 scripts/house_release.py release",
     "release:house:style": "node scripts/restore-house-style.mjs"
   },

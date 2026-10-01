@@ -17,19 +17,22 @@ def blender(source,script,*args):
   if process.wait():raise SystemExit(f'Blender failed. See {log}')
 def check(quality):
  env={**os.environ,'HOUSE_RELEASE_DIR':f'scene/exports/house-release/{quality}'}
- run(['node','--test','tests/house-release.test.mjs','tests/house-bake.test.mjs'],env=env)
+ run(['node','--test','tests/house-release.test.mjs','tests/house-bake.test.mjs','tests/house-fixture-refinements.test.mjs'],env=env)
  run(['node','scripts/check-house-release.mjs'],env=env)
 def source_key():
- paths=['scene/house-release.blend','scene/exports/house-release/bake-input/structure.glb','scene/exports/house-release/bake-input/basement.glb','scene/scripts/bake_house_release.py','scene/scripts/house_bake_lighting.py']
+ paths=['scene/house-release.blend','scene/exports/house-release/bake-input/structure.glb','scene/exports/house-release/bake-input/basement.glb','scene/exports/house-release/bake-input/attic.glb','scene/scripts/bake_house_release.py','scene/scripts/house_bake_lighting.py']
  return hashlib.sha256(b''.join((ROOT/path).read_bytes() for path in paths)).hexdigest()
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('step',choices=['prepare','test','release','publish']);args=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('step',choices=['prepare','test','release','publish']);p.add_argument('--review',action='store_true',help='Stage the reviewed fixture shapes before the small bake');args=p.parse_args()
 if args.step=='prepare':
  blender('scene/house-plan-preview.blend','scene/scripts/prepare_house_release.py')
  blender('scene/house-release.blend','scene/scripts/restore_house_style.py')
  run(['node','scripts/classify-house-release.mjs'])
 elif args.step in ['test','release']:
  if args.step=='test':
-  run(['node','scripts/restore-house-style.mjs']);run(['node','scripts/prepare-house-bake-input.mjs'])
+  if args.review:
+   out='scene/exports/house-release/review-reference';(ROOT/out).mkdir(parents=True,exist_ok=True);env={**os.environ,'HOUSE_REFERENCE_OUT':out}
+   run(['node','scripts/restore-house-style.mjs'],env=env);run(['node','scripts/stage-house-review.mjs']);run(['node','scripts/prepare-house-bake-input.mjs'],env=env)
+  else:run(['node','scripts/restore-house-style.mjs']);run(['node','scripts/prepare-house-bake-input.mjs'])
  else:
   report=json.loads((ROOT/'scene/exports/house-release/test/bake-report.json').read_text())
   if report.get('sourceKey')!=source_key():raise SystemExit('Run release:house:test for the current geometry and lighting before the expensive release bake.')

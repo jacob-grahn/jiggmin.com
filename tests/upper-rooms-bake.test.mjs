@@ -38,7 +38,16 @@ test(`${room} movable props stay out of the bake`,async()=>{
  const {bytes,length,doc}=asset();doc.buffers[0].uri=`data:application/octet-stream;base64,${bytes.subarray(28+length).toString('base64')}`;
  doc.materials=[];for(const mesh of doc.meshes)for(const p of mesh.primitives)delete p.material;delete doc.images;delete doc.textures;
  const gltf=await new GLTFLoader().parseAsync(JSON.stringify(doc),'');const scene=new THREE.Scene();scene.add(gltf.scene);
- const {props}=groupHouseProps(gltf.scene,scene);assert.ok(props.length>=(room==='attic'?90:45));
+ const sourceMeshes=[];gltf.scene.traverse(o=>{if(o.isMesh)sourceMeshes.push(o);});
+ const {props,staticMeshes}=groupHouseProps(gltf.scene,scene);
+ // Six robot components now share one body, reducing the old minimum by five.
+ assert.ok(props.length>=(room==='attic'?85:45));
+ const retained=new Set(staticMeshes);for(const prop of props)prop.root.traverse(o=>{if(o.isMesh)retained.add(o);});
+ assert.equal(retained.size,sourceMeshes.length);for(const mesh of sourceMeshes)assert.ok(retained.has(mesh),mesh.name);
+ if(room==='attic'){
+  const robot=sourceMeshes.filter(o=>/^(Rough_model_farm_robot|Tiny_robot_solar_panel|Model_robot_wheel)/.test(o.name));
+  assert.equal(robot.length,6);assert.equal(props.filter(p=>robot.some(m=>m.parent===p.root)).length,1);
+ }
  for(const prop of props)prop.root.traverse(o=>assert.ok(!o.userData[room+'_baked'],`${o.name} incorrectly baked`));
 });
 }

@@ -1,0 +1,11 @@
+{
+  "tool": "Built-in image_gen",
+  "input": "web/assets/house/windows/moonlit-sky.webp",
+  "output": "web/assets/house/windows/night-forest.webp",
+  "prompt": "Edit target: provided 2:1 panoramic nighttime forest game background. Remove ONLY the visible circular moon in the upper right sky, filling it seamlessly with matching dark blue sky and cloud wisps. Preserve nighttime illumination, forest, cloud composition, palette and illustrated style. Render at the highest available resolution, preferably 3840 pixels wide, with clean sharp natural forest detail. Keep 2:1 aspect ratio. No visible moon, no text, no watermark.",
+  "output_dimensions": [
+    1774,
+    887
+  ],
+  "window_mapping": "3 repetitions horizontally, matching vertical scale for greater detail per window"
+}

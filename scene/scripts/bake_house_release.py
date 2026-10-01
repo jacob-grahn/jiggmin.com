@@ -27,18 +27,25 @@ basement_by_name={canonical(o.get('source_object',o.name)):o for o in basement_s
 for o in basement_sources:
  o.hide_render=not(o.type=='MESH' and o.get('refit_assembly')=='envelope' and not o.get('source_object','').startswith('Basement ceiling'))
 objects=[];static={}
-for room in ['structure','basement']:
+review=json.loads((INPUT/'layout.json').read_text()).get('reviewPreparation',{})
+removed={canonical(n) for names in review.get('removed',{}).values() for n in names}
+for o in native:
+ if o.type=='MESH' and (canonical(o.name) in removed or canonical(o.get('source_object',o.name)) in removed):o.hide_render=True
+for room in ['structure','basement','attic']:
  loaded=sorted(import_source(INPUT/f'{room}.glb'),key=lambda o:o.get('house_bake_id',o.name));bpy.context.view_layer.update()
  for o in loaded:
   if o.type!='MESH':continue
   objects.append(o);name=o.get('house_bake_source',o.name);o['release_room']=room
   window_receiver=bool(o.get('house_window_receiver')) or (room=='basement' and bool(re.match(r'^(Window (jamb|rail|cross|transom)|Deep sill)',name)))
   if window_receiver:o['house_window_receiver']=True
-  fixed=(room=='structure' and not o.get('release_dynamic') and o.get('preview_kind') not in ['door','ladder'] and (o.get('preview_kind')!='window' or window_receiver)) or (room=='basement' and (bool(o.get('ceiling_paint')) or window_receiver or bool(o.get('house_fixed_receiver'))))
+  fixed=(room=='structure' and not o.get('release_dynamic') and o.get('preview_kind') not in ['door','ladder'] and (o.get('preview_kind')!='window' or window_receiver)) or (room=='basement' and (bool(o.get('ceiling_paint')) or window_receiver or bool(o.get('house_fixed_receiver')))) or (room=='attic' and bool(o.get('review_fixed_fixture')))
   if not fixed:
    o.hide_render=True;continue
   o.data=o.data.copy()
   original=(basement_by_name.get(canonical('Deep sill' if o.get('house_window_reveal') else name)) if room=='basement' else native_by_name.get(canonical(name)))
+  if o.get('review_fixed_fixture'):
+   for previous in [original,native_by_name.get(canonical(name)),basement_by_name.get(canonical(name))]:
+    if previous:previous.hide_render=True
   # Use original reflectance, never feed an already lit atlas into another bake.
   for i,material in enumerate(list(o.data.materials)):
    if o.get('house_authored_reflectance'):replacement=material
@@ -62,16 +69,16 @@ for room in ['structure','basement']:
   # updates. Use its owned vertices so each room gets its own texel budget.
   points=[o.matrix_world@v.co for v in o.data.vertices]
   center=Vector(tuple((min(p[i] for p in points)+max(p[i] for p in points))/2 for i in range(3)))
-  group=('basement-windows' if window_receiver else 'basement-details' if o.get('house_fixed_receiver') else 'basement-ceiling') if room=='basement' else 'structure-'+('exterior' if o.get('preview_kind')=='site' else 'attic' if center.z>2.75 else 'stairs' if center.z<-.2 else 'garage' if center.x>=12 else 'den' if center.x<4.8 and center.y< -6.5 else 'hall')
+  group='attic-fixtures' if room=='attic' else ('basement-windows' if window_receiver else 'basement-details' if o.get('house_fixed_receiver') else 'basement-ceiling') if room=='basement' else 'structure-'+('exterior' if o.get('preview_kind')=='site' else 'attic' if center.z>2.75 else 'stairs' if center.z<-.2 else 'garage' if center.x>=12 else 'den' if center.x<4.8 and center.y< -6.5 else 'hall')
   static.setdefault(group,[]).append(o)
 lighting=configure(S);S.cycles.samples=8 if test else 64;S.cycles.use_denoising=True
 S.render.bake.use_pass_direct=True;S.render.bake.use_pass_indirect=True;S.render.bake.use_pass_color=True;S.render.bake.margin=4 if test else 12
 S.view_settings.view_transform='AgX';S.view_settings.exposure=-1.3
-source_key=hashlib.sha256((ROOT/'scene/house-release.blend').read_bytes()+b''.join((INPUT/f'{r}.glb').read_bytes() for r in ['structure','basement'])+Path(__file__).read_bytes()+(Path(__file__).parent/'house_bake_lighting.py').read_bytes()).hexdigest()
+source_key=hashlib.sha256((ROOT/'scene/house-release.blend').read_bytes()+b''.join((INPUT/f'{r}.glb').read_bytes() for r in ['structure','basement','attic'])+Path(__file__).read_bytes()+(Path(__file__).parent/'house_bake_lighting.py').read_bytes()).hexdigest()
 cache_key=hashlib.sha256((source_key+str(test)).encode()).hexdigest()
 cache_path=OUT/'atlas-cache.json';cache=json.loads(cache_path.read_text()) if cache_path.exists() else {}
 if cache.get('key')!=cache_key:cache={'key':cache_key,'complete':[]}
-report={'quality':'test' if test else 'release','samples':S.cycles.samples,'atlases':{},'movableShadowsExcluded':True,'denoised':True,'lighting':lighting,'preservedOriginalRooms':['den','hallway','workshop','basement furnishings','attic'],'sourceKey':source_key,'inputKey':cache_key}
+report={'quality':'test' if test else 'release','samples':S.cycles.samples,'atlases':{},'movableShadowsExcluded':True,'denoised':True,'lighting':lighting,'preservedOriginalRooms':['den','hallway','workshop','basement furnishings','attic furnishings'],'sourceKey':source_key,'inputKey':cache_key,'reviewPreparation':review}
 for group,parts in static.items():
  print('BAKE_GROUP',group,len(parts),flush=True)
  vertices=[];faces=[];uvs=[];slots=[];smooth=[];materials=[];offsets={}
@@ -133,7 +140,7 @@ for o in objects:
  for uv in list(o.data.uv_layers):
   if uv.name!='Lighting UV':o.data.uv_layers.remove(uv)
  o.hide_render=False;o.hide_set(False)
-for room in ['structure','basement']:
+for room in ['structure','basement','attic']:
  bpy.ops.object.select_all(action='DESELECT')
  for o in objects:
   if o['release_room']==room and o.get('release_baked') in static:o.select_set(True)

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {travelEase} from './house-layout.js';
+import {travelEase} from './house-layout.js?v=house-reference-38';
 export const MAX_TRAVEL_SPEED=1.8; // metres per second, including easing's peak
 export const MAX_TURN_SPEED=THREE.MathUtils.degToRad(55);
 const tracks=new WeakMap(),motions=new WeakMap();
@@ -12,10 +12,17 @@ function viewAngles(v){return angles(new THREE.Vector3(...v.target).sub(new THRE
 function headingTrack(route,hub,destination,id,reverse){
  let cache=tracks.get(route);if(!cache){cache=new Map();tracks.set(route,cache);}
  const key=JSON.stringify([id,reverse,hub,destination]);if(cache.has(key))return cache.get(key);
+ const firstFlight=route.curves.find(c=>c.isLineCurve3&&c.getTangent(.5).y<-.2);
  const length=route.getLength(),count=Math.max(80,Math.ceil(length/.04)),start=viewAngles(hub),end=viewAngles(destination),raw=[];
  for(let i=0;i<=count;i++){
   const distance=i/count*length,t=distance/length,position=route.getPoint(t);
   let look=angles(route.getTangent(t).multiplyScalar(reverse?-1:1));
+  // Look steadily into the first stair flight instead of following the
+  // doorway's short lateral jog and then turning back again.
+  if(id==='basement'&&!reverse&&position.y>.5){
+   const firstFlightYaw=start.yaw+angleDelta(start.yaw,angles(firstFlight?.getTangent(.5)??new THREE.Vector3(0,0,1)).yaw),relative=start.yaw+angleDelta(start.yaw,look.yaw);
+   look.yaw=clamp(relative,Math.min(firstFlightYaw,start.yaw),Math.max(firstFlightYaw,start.yaw));
+  }
   look.pitch=clamp(look.pitch,id==='attic'?-.35:-.48,id==='attic'?.75:.35);
   if(!reverse&&id==='basement')look.pitch=THREE.MathUtils.lerp(look.pitch,Math.min(look.pitch,-.62),smooth((1.65-position.y)/.5)*(1-smooth((t-.72)/.11)));
   if(id==='attic')look=blend(look,angles(new THREE.Vector3(...destination.target).sub(position)),smooth((position.y-2.55)/.75));

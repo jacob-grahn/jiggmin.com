@@ -39,12 +39,13 @@ class PassageBend extends THREE.Curve {
   return target.copy(p[0]).normalize();
  }
 }
-export function createRoute(points){
+export function createRoute(points,{arrivalRadius=.45}={}){
  const route=new THREE.CurvePath();let previous=points[0];
  for(let i=1;i<points.length-1;i++){
   const corner=points[i],before=points[i-1],after=points[i+1];
   // Stay within the already checked passage rather than overshooting doors.
-  const radius=Math.min(.45,corner.distanceTo(before)*.3,corner.distanceTo(after)*.3);
+  const arrival=i===points.length-2,fraction=arrival&&arrivalRadius>.45?.45:.3;
+  const radius=Math.min(arrival?arrivalRadius:.45,corner.distanceTo(before)*fraction,corner.distanceTo(after)*fraction);
   const incoming=corner.clone().sub(before).normalize(),outgoing=after.clone().sub(corner).normalize();
   const enter=corner.clone().addScaledVector(incoming,-radius),leave=corner.clone().addScaledVector(outgoing,radius);
   route.add(new THREE.LineCurve3(previous.clone(),enter));

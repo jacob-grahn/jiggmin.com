@@ -4,31 +4,61 @@
       "structural_crossings": [],
       "contents_crossings": [],
       "animated_access_crossings": [],
-      "body_clearance_warnings": []
+      "body_clearance_warnings": [],
+      "return": {
+        "structural_crossings": [],
+        "contents_crossings": [],
+        "animated_access_crossings": [],
+        "body_clearance_warnings": []
+      }
     },
     "basement": {
       "structural_crossings": [],
       "contents_crossings": [],
       "animated_access_crossings": [],
-      "body_clearance_warnings": []
+      "body_clearance_warnings": [],
+      "return": {
+        "structural_crossings": [],
+        "contents_crossings": [],
+        "animated_access_crossings": [],
+        "body_clearance_warnings": []
+      }
     },
     "attic": {
       "structural_crossings": [],
       "contents_crossings": [],
       "animated_access_crossings": [],
-      "body_clearance_warnings": []
+      "body_clearance_warnings": [],
+      "return": {
+        "structural_crossings": [],
+        "contents_crossings": [],
+        "animated_access_crossings": [],
+        "body_clearance_warnings": []
+      }
     },
     "den": {
       "structural_crossings": [],
       "contents_crossings": [],
       "animated_access_crossings": [],
-      "body_clearance_warnings": []
+      "body_clearance_warnings": [],
+      "return": {
+        "structural_crossings": [],
+        "contents_crossings": [],
+        "animated_access_crossings": [],
+        "body_clearance_warnings": []
+      }
     },
     "private-hall": {
       "structural_crossings": [],
       "contents_crossings": [],
       "animated_access_crossings": [],
-      "body_clearance_warnings": []
+      "body_clearance_warnings": [],
+      "return": {
+        "structural_crossings": [],
+        "contents_crossings": [],
+        "animated_access_crossings": [],
+        "body_clearance_warnings": []
+      }
     }
   },
   "viewport_targets": {

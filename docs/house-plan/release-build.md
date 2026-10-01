@@ -19,7 +19,7 @@ spotlight setup. Existing approved room bakes are reused rather than regenerated
 Movable props and animated doors/ladders are excluded from static shadow baking.
 Clear glazing is also excluded. The exterior uses the existing illustrated panorama,
 framed higher to show moonlit clouds and graded dark with restrained backlit details.
-The hall window shows a moon. Foreground trees are near-black, with baked moon backlight. No volumetric rays or per-frame lighting updates are needed.
+The panorama has no painted moon disc; the shader glow and baked exterior backlight remain. Foreground trees use irregular silhouettes, and the panorama repeats three times using one shared texture. No volumetric rays or per-frame lighting updates are needed.
 The below-grade cellar windows have wider exterior light wells, leaving a sky
 sightline through their upper panes from the seated camera. Baked wooden recesses
 match the masonry depth rather than extending a metre into those views.
@@ -31,9 +31,9 @@ existing scene editing helpers. Only regenerate production preparation when need
 
 ```sh
 npm run release:house:prepare
-npm run release:house:test
+python3 scripts/house_release.py test --review
 # Inspect the small test bake before the expensive run:
-node scripts/publish-house-release.mjs --bake test
+# Open /tests/fixtures/house-release.html?test&clean
 npm run release:house:bake
 npm run release:house:publish
 npm test
@@ -46,6 +46,16 @@ reviewed geometry and bake scripts match. The bake never overwrites an editable
 `.blend`. Lighting is overlaid on the snapshot, preserving object ownership,
 interaction IDs, placement and triangles. Reports and EXR/PNG atlases are saved in
 `scene/exports/house-release/test/` and `final/`.
+
+The `--review` stage applies the shared fixture refinements to a separate raw
+reference before snapshotting. It removes the hall mouldings, attaches the cellar
+pipe and adds its ceiling bend and brackets, attaches the attic junction and bulb
+cord/socket, moves the two attic cartons forward, and gives the garage and mudroom
+fittings unlit reflectance. Those fixtures receive their own baked lighting, and
+the baked scene flag prevents the browser from rebuilding them. Other room
+furnishings retain their original textures; movable-clutter cleanup and grouping
+still use the shared runtime helpers. Static smoke detectors retain their separate
+shared production atlas.
 
 Publication defaults to the completed original-window final bake when present.
 `node scripts/publish-house-release.mjs --reference` or
@@ -196,3 +206,74 @@ All 192 tests pass. Before/after hallway captures are in
 and the normal preview is open at the hallway. New complete bakes automatically
 use the expanded face filter after assembly; duplicate trim continues to be
 rejected upstream rather than removed by export code.
+
+
+## Reviewed fixture production bake — October 1, 2026
+
+The reviewed geometry was staged before the new production bake, including the
+wall-mounted basement pipe and ceiling bend, brackets, attic bulb and roof cord,
+junction fittings, forward cartons, unlit garage/mudroom fittings, and removal of
+the hall ceiling mouldings. The shared smoke-detector atlas was freshly baked
+against the same input geometry. Runtime cleanup retains the earlier loose-paper,
+cloth, rope, robot grouping, panorama, ground, tree and cream-ceiling refinements.
+
+The 8-sample 512 px test bake passed geometry, fixture and route checks. The full
+64-sample production bake completed in 2,949.5 seconds (about 49.2 minutes),
+covering 785 fixed meshes in 10 atlases: 4096 px for the hall, 2048 px for the
+other groups. Three static detectors share a separate 1024 px atlas at 64 samples.
+The source fingerprint is `5ce9c63d81e3e82f33bbf330e007fc0931fb27315d19bff2bcab65ef257ecc69`.
+
+Assembly preserves nearly black lighting maps instead of allowing texture pruning
+to approximate them as constant colors. Tests compare the basement and attic
+fixture atlas bytes with the generated PNGs, preserve every reviewed triangle,
+and retain the original textures on untouched attic furnishings. The normal
+`release:house:test` command now stages the reviewed fixtures before snapshotting.
+
+The complete release is published locally. The production build and all 208 tests
+pass. All five walking routes are clear in both directions, including the wider
+basement arrival curve, and room targets pass all four tested viewport shapes.
+Production review captures are in `review-release-captures/`.
+
+## Ceiling and hatch lighting in the production site — October 1, 2026
+
+Removed the flat cream runtime overrides so the hallway ceiling retains its
+painted finish and baked window illumination. Hall ceiling mouldings remain
+hidden when loading an older export.
+
+The moving attic hatch now uses a separate 512 px, 64-sample closed-position
+lightmap with painted-wood UVs. Its geometry, hinge, door metadata and animation
+remain intact; its reference lighting moves with the rigid hatch and adds no live
+lights. The bake shares the full release's source fingerprint. Reproduce it with
+`node scripts/bake-attic-hatch.mjs`; subsequent publication preserves the
+supplemental asset through `includeFixedFixtures`.
+
+The actual production site is served from `dist` at `http://127.0.0.1:8000/`,
+using normal house navigation without the fixture test controls.
+The rebuilt production site and all 210 tests pass, including retained hatch
+geometry, hinge transforms, baked shading and atlas provenance checks.
+
+## Shared hallway wall collision — October 1, 2026
+
+Room prop physics now includes nearby wall sections from the shared house
+structure. Previously the visible right hallway wall lived outside the room's
+physics model, allowing thrown props to pass through it. Wall colliders are
+captured before render batching, preserving individual door/window openings,
+then filtered by each room's bounds and elevation. Regression probes against
+both actual hallway walls verify impact and prevent crossing the visible faces.
+The production rebuild and all 211 tests pass.
+
+## Hallway resource lifetime — October 1, 2026
+
+The hallway contents now unload after arriving in another room. Travel loads
+the origin, destination and connecting hallway, then removes every room except
+the destination and disposes its owned textures, geometry and materials. A return
+trip reloads the hallway before animation starts. Re-entering the current room
+does not load the hallway unnecessarily. `data-house-loaded-rooms` on the house
+host exposes the current room set for preview verification.
+The production rebuild and all 211 tests pass. Production browser checks show
+only `workshop`, `basement` or `attic` loaded after their respective arrivals;
+return trips reload the hallway and remove the departing room.
+
+The 360-degree outside panorama now uses two thirds of its previous shader
+brightness. The adjustment reuses the existing image and preserves the separate
+atmospheric halo and baked room lighting.

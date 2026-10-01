@@ -1,0 +1,7 @@
+[
+ {"room":"hallway","viewport":[1335,1282],"props":17,"bodies":46,"idleRenders":0,"drawCalls":838,"triangles":210394,"submitMedianMs":15.8,"submitP95Ms":19.2,"completedMedianMs":15},
+ {"room":"workshop","viewport":[1335,1282],"props":46,"bodies":111,"idleRenders":0,"drawCalls":407,"triangles":360595,"submitMedianMs":17.4,"submitP95Ms":23.4,"completedMedianMs":18.6},
+ {"room":"basement","viewport":[1335,1282],"props":100,"bodies":153,"idleRenders":0,"drawCalls":1219,"triangles":585806,"submitMedianMs":21.9,"submitP95Ms":25.9,"completedMedianMs":23.9},
+ {"room":"attic","viewport":[1335,1282],"props":92,"bodies":118,"idleRenders":0,"drawCalls":803,"triangles":459682,"submitMedianMs":20.8,"submitP95Ms":24.5,"completedMedianMs":19.6},
+ {"room":"private-hall","viewport":[1335,1282],"props":0,"bodies":0,"idleRenders":0,"drawCalls":431,"triangles":377494,"submitMedianMs":12.1,"submitP95Ms":17.9,"completedMedianMs":11.7}
+]

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync,readFileSync} from 'node:fs';
 import {NodeIO} from '@gltf-transform/core';
+import {createHash} from 'node:crypto';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import * as THREE from 'three';
 import {windowExteriorFrame} from '../web/house-window-exterior.js';
@@ -19,7 +20,7 @@ function triangles(node){
 }
 test('window bake changes only fixed surface lighting, retaining every reviewed triangle',{skip:!layout.lightingBake},async()=>{
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
- for(const room of ['structure','basement']){
+ for(const room of ['structure','basement','attic']){
   const input=await io.read(`scene/exports/house-release/bake-input/${room}.glb`),output=await io.read(`${dir}/${room}.glb`);
   const sources=new Map(input.getRoot().listNodes().filter(n=>n.getMesh()).map(n=>[n.getExtras().house_bake_id,n]));
   for(const node of output.getRoot().listNodes().filter(n=>n.getMesh())){
@@ -30,13 +31,37 @@ test('window bake changes only fixed surface lighting, retaining every reviewed 
     for(const p of node.getMesh().listPrimitives()){
      assert.ok(p.getMaterial().getEmissiveTexture());assert.ok(!p.getMaterial().getExtras().ceiling_paint,'preview ceiling grade was applied twice');
     }
+   }else if(room==='attic'){
+    const before=original.getMesh().listPrimitives(),after=node.getMesh().listPrimitives();
+    assert.equal(after.length,before.length,node.getName());
+    for(let i=0;i<after.length;i++){
+     const a=after[i].getMaterial(),b=before[i].getMaterial();
+     assert.deepEqual(a.getBaseColorFactor(),b.getBaseColorFactor(),node.getName());
+     assert.deepEqual(a.getEmissiveFactor(),b.getEmissiveFactor(),node.getName());
+     for(const slot of ['BaseColor','Emissive','Normal','Occlusion','MetallicRoughness']){
+      assert.deepEqual(a[`get${slot}Texture`]()?.getImage(),b[`get${slot}Texture`]()?.getImage(),`${node.getName()} ${slot} texture changed`);
+     }
+    }
    }
   }
  }
 });
 test('window bake retains the original room assets byte for byte',{skip:!layout.lightingBake},()=>{
- for(const room of ['hallway','workshop','attic'])assert.deepEqual(readFileSync(`${dir}/${room}.glb`),readFileSync(`scene/exports/house-release/bake-input/${room}.glb`));
+ for(const room of ['hallway','workshop'])assert.deepEqual(readFileSync(`${dir}/${room}.glb`),readFileSync(`scene/exports/house-release/bake-input/${room}.glb`));
  assert.equal(layout.assets.den,null);assert.deepEqual(layout.lights,[]);
+});
+test('basement and attic fixture lightmaps retain the exact generated pixels',{skip:!layout.reviewPreparation},async()=>{
+ const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
+ const hash=b=>createHash('sha256').update(b).digest('hex');
+ for(const room of ['basement','attic']){
+  const doc=await io.read(`${dir}/${room}.glb`),nodes=doc.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().house_window_bake);
+  for(const n of nodes)for(const p of n.getMesh().listPrimitives()){
+   assert.ok(p.getAttribute('TEXCOORD_0'));
+   const atlas=readFileSync(`scene/exports/house-release/${layout.lightingBake.quality}/${n.getExtras().release_baked}.png`);
+   assert.equal(hash(p.getMaterial().getEmissiveTexture().getImage()),hash(atlas),n.getName());
+   assert.deepEqual(p.getMaterial().getEmissiveFactor(),[1,1,1]);
+  }
+ }
 });
 test('fixed window frames and cellar recesses receive baked light while glass stays transparent',{skip:!(layout.lightingBake?.report?.lighting?.windowRevision>=2)},async()=>{
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);

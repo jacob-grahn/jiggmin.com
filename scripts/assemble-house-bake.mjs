@@ -18,7 +18,7 @@ const uv=reference.createAccessor().setType('VEC2').setArray(new Float32Array([0
 const primitive=reference.createPrimitive().setAttribute('POSITION',position).setAttribute('TEXCOORD_0',uv).setMaterial(referenceMaterial);
 reference.createScene().addChild(reference.createNode('Original wood reference').setMesh(reference.createMesh().addPrimitive(primitive)));
 await reference.transform(unpartition());await io.write(`${dir}/den-floor-reference.glb`,reference);
-for(const room of ['structure','basement']){
+for(const room of ['structure','basement','attic']){
  const doc=await io.read(`${input}/${room}.glb`),baked=await io.read(`${dir}/${room}-lighting.glb`);
  const patches=new Map(baked.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().house_bake_id).map(n=>[n.getExtras().house_bake_id,n]));let count=0;
  for(const node of doc.getRoot().listNodes()){
@@ -30,9 +30,10 @@ for(const room of ['structure','basement']){
   node.setExtras({...node.getExtras(),release_baked:patch.getExtras().release_baked,house_window_bake:true,...(patch.getExtras().house_window_receiver?{house_window_receiver:true}:{} )});count++;
  }
  if(count!==patches.size)throw Error(`Unmatched ${room} bake meshes: ${count}/${patches.size}`);
- await doc.transform(dedup(),prune(),unpartition());await io.write(`${dir}/${room}.glb`,doc);console.log('LIGHTING_OVERLAY',room,count);
+ // Retain near-black baked maps: pruning can approximate them as one color.
+ await doc.transform(dedup(),prune({keepSolidTextures:true}),unpartition());await io.write(`${dir}/${room}.glb`,doc);console.log('LIGHTING_OVERLAY',room,count);
 }
-for(const room of ['hallway','workshop','attic'])copyFileSync(`${input}/${room}.glb`,`${dir}/${room}.glb`);
+for(const room of ['hallway','workshop'])copyFileSync(`${input}/${room}.glb`,`${dir}/${room}.glb`);
 const layout=JSON.parse(readFileSync(`${input}/layout.json`));layout.lightingBake={quality,report,source:'original-window-rig'};
 layout.denFloorReference=`/${dir}/den-floor-reference.glb`;
 for(const room of ['structure','hallway','workshop','basement','attic']){const hash=createHash('sha256').update(readFileSync(`${dir}/${room}.glb`)).digest('hex').slice(0,12);layout.assets[room]=`/${dir}/${room}.glb?v=${hash}`;}

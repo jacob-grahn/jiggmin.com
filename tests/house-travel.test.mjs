@@ -5,7 +5,7 @@ import * as T from 'three';
 import {createRoute} from '../web/house-layout.js';
 import {travelPose,travelDuration,MAX_TRAVEL_SPEED,MAX_TURN_SPEED} from '../web/house-travel.js';
 const layout=JSON.parse(fs.readFileSync(new URL('../web/assets/house/release/layout.json',import.meta.url)));
-const routeFor=id=>createRoute(layout.routes[id].map(p=>new T.Vector3(...p)));
+const routeFor=id=>createRoute(layout.routes[id].map(p=>new T.Vector3(...p)),{arrivalRadius:id==='basement'?1.2:.45});
 test('all travel directions respect peak translation and steering speed, with gentle starts and stops',()=>{
  for(const id of Object.keys(layout.routes))for(const reverse of [false,true]){
   const route=routeFor(id),duration=travelDuration(route,layout.views.hub,layout.views[id],id,reverse)/1000;
@@ -66,4 +66,21 @@ test('den steering stays smooth with a normal rigid camera',async()=>{
   }
  }
  den.resources.dispose();
+});
+
+test('basement entry turns steadily into the flight without overshooting and correcting',()=>{
+ const route=routeFor('basement');let previous=-Math.PI/2,total=0;
+ for(let i=0;i<=1500;i++){
+  const pose=travelPose(route,i/1500,layout.views.hub,layout.views.basement,'basement');if(pose.position.y<.65)break;
+  const direction=new T.Vector3(0,0,-1).applyQuaternion(pose.quaternion),yaw=Math.atan2(-direction.x,-direction.z),unwrapped=previous+Math.atan2(Math.sin(yaw-previous),Math.cos(yaw-previous));
+  assert.ok(unwrapped>=-Math.PI-1e-5,'camera turns past the first flight');assert.ok(unwrapped<=previous+1e-4,'camera corrects back to the left');total+=Math.abs(unwrapped-previous);previous=unwrapped;
+ }
+ assert.ok(total<=Math.PI/2+.001);
+});
+test('basement bottom blend is wider than the narrow doorway bends',()=>{
+ const wide=routeFor('basement'),narrow=createRoute(layout.routes.basement.map(p=>new T.Vector3(...p)));
+ const lastBend=route=>route.curves.filter(c=>!c.isLineCurve3).at(-1);
+ assert.ok(lastBend(wide).getLength()>lastBend(narrow).getLength()*1.8);
+ let maxTurn=0;for(let i=1;i<3000;i++){const t=i/3000;if(wide.getPoint(t).y< -1.2)maxTurn=Math.max(maxTurn,wide.getTangent(t).angleTo(wide.getTangent(t-1/3000)));}
+ assert.ok(maxTurn<.035,`lower flight steering changes too sharply: ${maxTurn}`);
 });

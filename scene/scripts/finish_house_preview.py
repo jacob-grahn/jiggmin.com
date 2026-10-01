@@ -57,7 +57,7 @@ def trims(names):
   if p['name'] not in names:continue
   c=p['center'];sx,sy,sz=p['size'];bottom=c[1]-sy/2;top=c[1]+sy/2
   if abs(bottom)<.01:box('skirting',[c[0],.075,c[2]],[sx if sx>sz else .19,.15,sz if sz>sx else .19],'cream')
-  if abs(top-2.6)<.01:box('ceiling moulding',[c[0],2.56,c[2]],[sx if sx>sz else .19,.07,sz if sz>sx else .19],'cream')
+  # Plain wall-to-ceiling joins; this house has no crown moulding.
 if stage==2:
  trims(trim_walls_for_stage(stage))
  for d in plan['doors']:

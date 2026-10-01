@@ -42,6 +42,7 @@ export function groupHouseProps(model,scene){
  // Authored assemblies that sit close together on the desk must stay separate.
  const families=[
   /^(Keyboard|Keycap)$/,
+  /^(Rough model farm robot|Tiny robot solar panel|Model robot wheel)$/,
   /^(Old graphics tablet|Tablet active surface|Tablet cable)$/,
   /^(Printed worn T-shirt|PR2 cartridge screenprint|T-shirt collar)/,
   /^(Kindergarten plate|Ceramic plate back)$/,
@@ -124,7 +125,7 @@ export function groupHouseProps(model,scene){
   const mode=g.mode??(g.parts.some(p=>p.owner.userData.prop_mode==='throw')?'throw':count>12000||g.parts.length>40||maxSize(g.box)>1.8||g.parts.some(p=>/cloth|shirt|blanket|jacket|bag/i.test(p.name))?'wiggle':'throw');
   const title=g.parts[0].name;
   const prop={id:`prop-${index}`,root,size:sizeOf(g.box),mode,title,shape:g.parts.some(p=>p.owner.userData.physics_shape==='sphere')?'sphere':'box',hotspot:g.key??g.parts.find(p=>p.hotspot)?.hotspot,
-   rest:root.quaternion.clone(),spring:new PropSpring(12,3.5,.11),home:root.position.clone()};
+   localBounds:g.box.clone().translate(root.position.clone().negate()),rest:root.quaternion.clone(),spring:new PropSpring(12,3.5,.11),home:root.position.clone()};
   for(const {mesh} of g.parts)mesh.userData.houseProp=prop;
   return prop;
  });
@@ -150,7 +151,26 @@ function roofCollider(mesh){
   quaternion:new THREE.Quaternion().setFromRotationMatrix(basis).toArray()};
 }
 
-export function createHouseProps(model,scene,{floorY,roomBounds}={}){
+function boxCollider(mesh){
+ mesh.geometry.computeBoundingBox();const box=mesh.geometry.boundingBox;
+ const position=new THREE.Vector3(),rotation=new THREE.Quaternion(),scale=new THREE.Vector3();mesh.matrixWorld.decompose(position,rotation,scale);
+ const center=box.getCenter(new THREE.Vector3()).applyMatrix4(mesh.matrixWorld),size=sizeOf(box).multiply(scale).toArray().map(v=>Math.max(.008,Math.abs(v)/2));
+ return {name:mesh.name,center:center.toArray(),halfExtents:size,quaternion:rotation.toArray()};
+}
+
+// Capture individual wall sections before rendering merges them into batches.
+// Keep authored door/window openings instead of filling a batch's bounding box.
+export function collectHouseWallColliders(root){
+ root.updateMatrixWorld(true);const colliders=[];
+ root.traverse(mesh=>{
+  const name=mesh.userData.house_bake_source??nameOf(mesh);
+  if(!mesh.isMesh||!mesh.visible||mesh.userData.release_dynamic||!/^Proposed wall\b/.test(name))return;
+  colliders.push({...boxCollider(mesh),name,bounds:new THREE.Box3().setFromObject(mesh)});
+ });
+ return colliders;
+}
+
+export function createHouseProps(model,scene,{floorY,roomBounds,structureColliders=[]}={}){
  model.updateMatrixWorld(true);
  const bounds=new THREE.Box3().setFromObject(model);
  const {props,staticMeshes}=groupHouseProps(model,scene);
@@ -158,13 +178,12 @@ export function createHouseProps(model,scene,{floorY,roomBounds}={}){
  for(const mesh of staticMeshes){
   if(/rain|garden|beyond|cord|fringe|window|cornice|skirting|threshold|jamb|casing/i.test(nameOf(mesh)))continue;
   if(/Pitched unfinished roof/i.test(nameOf(mesh))){colliders.push(roofCollider(mesh));continue;}
-  mesh.geometry.computeBoundingBox();const box=mesh.geometry.boundingBox;
-  const position=new THREE.Vector3(),rotation=new THREE.Quaternion(),scale=new THREE.Vector3();mesh.matrixWorld.decompose(position,rotation,scale);
-  const center=box.getCenter(new THREE.Vector3()).applyMatrix4(mesh.matrixWorld),size=sizeOf(box).multiply(scale).toArray().map(v=>Math.max(.008,Math.abs(v)/2));
-  colliders.push({name:mesh.name,center:center.toArray(),halfExtents:size,quaternion:rotation.toArray()});
+  colliders.push(boxCollider(mesh));
  }
  for(const p of props.filter(p=>p.mode==='wiggle'))colliders.push({name:p.title,center:p.home.toArray(),halfExtents:p.size.toArray().map(n=>Math.max(.01,n/2)),quaternion:p.rest.toArray()});
  const [x0,z0,x1,z1]=roomBounds??[bounds.min.x-.25,bounds.min.z-.25,bounds.max.x+.25,bounds.max.z+.25];
+ const roomBox=new THREE.Box3(new THREE.Vector3(x0,floorY??bounds.min.y,z0),new THREE.Vector3(x1,(floorY??bounds.min.y)+3,z1)).expandByScalar(.15);
+ colliders.push(...structureColliders.filter(c=>c.bounds.intersectsBox(roomBox)));
  const walls=[[x0,(z0+z1)/2,.1,(z1-z0)/2],[x1,(z0+z1)/2,.1,(z1-z0)/2],[(x0+x1)/2,z0,(x1-x0)/2,.1],[(x0+x1)/2,z1,(x1-x0)/2,.1]];
  const physics=new CartridgePhysics(colliders,()=>{},{bounds:walls,floorY:floorY??bounds.min.y});
  // Decorative objects remain attached until grabbed or hit by a loose object, including wall art.

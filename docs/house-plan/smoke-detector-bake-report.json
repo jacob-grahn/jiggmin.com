@@ -1,0 +1,52 @@
+{
+  "samples": 64,
+  "resolution": 1024,
+  "lighting": {
+    "source": "scene/scripts/bake_room.py",
+    "worldStrength": 0.1,
+    "viewTransform": "AgX",
+    "exposure": -1.3,
+    "atticExposure": -0.7,
+    "saturation": 1.2,
+    "lighting": "blue windows and exterior moon backlight",
+    "windowRevision": 3,
+    "apertureEmitters": "outside, rectangular, lowered hall sources",
+    "liveWindowLights": false,
+    "fixtureBounceFill": {
+      "room": "basement",
+      "watts": 4,
+      "bakedOnly": true
+    }
+  },
+  "placements": [
+    [
+      "hallway",
+      [
+        10.3,
+        2.6,
+        7.55
+      ]
+    ],
+    [
+      "garage",
+      [
+        14.8,
+        2.6,
+        1.5
+      ]
+    ],
+    [
+      "basement",
+      [
+        3.36,
+        -0.2,
+        2.4
+      ]
+    ]
+  ],
+  "seconds": 218.32,
+  "houseSourceKey": "5ce9c63d81e3e82f33bbf330e007fc0931fb27315d19bff2bcab65ef257ecc69",
+  "recipeHash": "2587e566f9dc8034220213bd894c49bd60448c5a594246c5b291a488c831d813",
+  "sourceGLBHash": "1ad80e9e074c7f9cb914ca3f5886073ada07e6243207b9f91bad5b361f04d3f6",
+  "bakedGLBHash": "ba8e80290785cf1056ba602ff31219730af8f2fe5fc3f67a67f5985869495fe9"
+}

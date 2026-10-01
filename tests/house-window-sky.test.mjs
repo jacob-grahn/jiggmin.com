@@ -23,7 +23,7 @@ test('Window glass is transparent, retains clipping, and has no exterior image s
  assert.ok(window.material.opacity<.1);assert.equal(window.material.map,null);assert.equal(window.material.clippingPlanes[0],plane);
  assert.equal(other.material,source);assert.equal(result.frames[0].normal.z,-1);
  result.exterior.updateMatrixWorld(true);
- const trees=[];result.exterior.traverse(o=>{if(/bare branches|pine silhouette/.test(o.name))trees.push(o);});
+ const trees=[];result.exterior.traverse(o=>{if(/bare branches|leafy tree/.test(o.name))trees.push(o);});
  assert.equal(trees.length,2);
  const frame=result.frames[0];
  for(const depth of [-.12,.1,.65]){

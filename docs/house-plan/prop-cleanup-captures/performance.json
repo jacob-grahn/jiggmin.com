@@ -1,0 +1,102 @@
+[
+  {
+    "room": "hallway",
+    "viewport": [
+      1335,
+      1282
+    ],
+    "props": 13,
+    "bodies": 42,
+    "awake": 0,
+    "idleRenders": 0,
+    "drawCalls": 168,
+    "triangles": 211908,
+    "submitMedianMs": 4.5,
+    "submitP95Ms": 9.4,
+    "throwPhysicsMedianMs": 0.2,
+    "throwPhysicsP95Ms": 0.8,
+    "updateMedianMs": 0,
+    "frameMedianMs": 49.6,
+    "completedMedianMs": 6.8
+  },
+  {
+    "room": "workshop",
+    "viewport": [
+      1335,
+      1282
+    ],
+    "props": 46,
+    "bodies": 111,
+    "awake": 0,
+    "idleRenders": 0,
+    "drawCalls": 169,
+    "triangles": 366591,
+    "submitMedianMs": 4.8,
+    "submitP95Ms": 7.9,
+    "throwPhysicsMedianMs": 1.5,
+    "throwPhysicsP95Ms": 3,
+    "updateMedianMs": 0.1,
+    "frameMedianMs": 33.7,
+    "completedMedianMs": 10.2
+  },
+  {
+    "room": "basement",
+    "viewport": [
+      1335,
+      1282
+    ],
+    "props": 74,
+    "bodies": 127,
+    "awake": 0,
+    "idleRenders": 0,
+    "drawCalls": 377,
+    "triangles": 584550,
+    "submitMedianMs": 11.7,
+    "submitP95Ms": 14.7,
+    "throwPhysicsMedianMs": 0.5,
+    "throwPhysicsP95Ms": 0.9,
+    "updateMedianMs": 0.1,
+    "frameMedianMs": 33.5,
+    "completedMedianMs": 11.9
+  },
+  {
+    "room": "attic",
+    "viewport": [
+      1335,
+      1282
+    ],
+    "props": 65,
+    "bodies": 91,
+    "awake": 0,
+    "idleRenders": 0,
+    "drawCalls": 248,
+    "triangles": 458286,
+    "submitMedianMs": 8.4,
+    "submitP95Ms": 11.4,
+    "throwPhysicsMedianMs": 0.7,
+    "throwPhysicsP95Ms": 1.9,
+    "updateMedianMs": 0.1,
+    "frameMedianMs": 33.6,
+    "completedMedianMs": 8.5
+  },
+  {
+    "room": "private-hall",
+    "viewport": [
+      1335,
+      1282
+    ],
+    "props": 0,
+    "bodies": 0,
+    "awake": 0,
+    "idleRenders": 0,
+    "drawCalls": 117,
+    "triangles": 378266,
+    "submitMedianMs": 5.6,
+    "submitP95Ms": 10,
+    "throwPhysicsMedianMs": 0,
+    "throwPhysicsP95Ms": 0,
+    "updateMedianMs": 0,
+    "frameMedianMs": 50,
+    "completedMedianMs": 5.8
+  }
+]

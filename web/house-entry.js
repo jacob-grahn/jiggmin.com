@@ -3,15 +3,15 @@
 export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBonus}){
  const nav=document.createElement('nav');
  nav.className='house-entrance';nav.setAttribute('aria-label','Explore the house');
- const buttons=['right'].map(side=>{
+ const buttons=['bottom'].map(side=>{
   const button=document.createElement('button');button.className=`house-entrance-${side}`;
   button.type='button';button.setAttribute('aria-label','Explore the hallway');
-  const arrow=document.createElement('span');arrow.textContent=side==='left'?'‹':'›';arrow.setAttribute('aria-hidden','true');
+  const arrow=document.createElement('span');arrow.textContent='↓';arrow.setAttribute('aria-hidden','true');
   button.append(arrow);nav.append(button);return button;
  });
  host.append(nav);
- let instance,loading,stylesheet,active=false,ready=false,origin,entryTicket=0;
- const update=()=>{nav.hidden=active||!ready;};
+ let instance,loading,stylesheet,active=false,ready=false,playing=false,origin,entryTicket=0;
+ const update=()=>{nav.hidden=active||!ready||playing;};
  function styles(){
   return stylesheet??=new Promise((resolve,reject)=>{
    const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=house-reference-30';
@@ -22,7 +22,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBon
   if(loading||active)return;origin=originElement;const ticket=++entryTicket;
   buttons.forEach(button=>{button.disabled=true;button.setAttribute('aria-busy','true');});
   loading=(async()=>{
-   if(!instance){const [module]=await Promise.all([import('./house.js?v=house-reference-30'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=house-reference-46'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
     onOpen(){active=true;update();onOpen?.();},
     onExit(){active=false;update();onExit?.();if(origin?.isConnected&&!origin.hidden)origin.focus();},
    });}
@@ -33,5 +33,5 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBon
  }
  for(const button of buttons)button.addEventListener('click',event=>open(event.currentTarget));
  update();
- return {setReady(){ready=true;update();},openJournal(){if(ready)return open(null,true);},exit(){entryTicket++;instance?.exit();}};
+ return {setPlaying(value){playing=value;update();},setReady(){ready=true;update();},openJournal(){if(ready)return open(null,true);},exit(){entryTicket++;instance?.exit();}};
 }

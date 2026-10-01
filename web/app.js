@@ -2,7 +2,7 @@ import {createBonusCollection,getBonusGame} from './bonus-collection.js';
 import {createBonusCartridge,bonusDeliveryPoses} from './bonus-cartridge-model.js';
 import {cartridgeRoom} from './cartridge-storage.js';
 import * as THREE from 'three';
-import {createHouseEntry} from './house-entry.js?v=house-reference-30';
+import {createHouseEntry} from './house-entry.js?v=den-door-41';
 import {createDenJournal} from './den-journal.js';
 import {GLTFLoader} from './model-loader.js';
 import {inSlot,slotTarget,playbackFile} from './interaction.js?v=aligned-slot-1';
@@ -194,9 +194,12 @@ function updateZoom(dt,immediate=false){
  camera.zoom+=(target.zoom-camera.zoom)*blend;focusY+=(target.focusY-focusY)*blend;cameraDrop+=(target.cameraDrop-cameraDrop)*blend;updateProjection();
 }
 function updateTouchSurface(){
+ houseEntry.setPlaying(!screen.hidden);
  const enabled=touchLayout.matches;
- touchSurface.style.pointerEvents=enabled?'auto':'none';canvas.style.pointerEvents=enabled?'none':'auto';
- if(enabled&&!screen.hidden&&!drag){
+ // Keep the rendered canvas out of hit testing. The input surface has a
+ // persistent CRT opening, including during camera animation and first clicks.
+ touchSurface.style.pointerEvents='auto';canvas.style.pointerEvents='none';
+ if(!screen.hidden&&!drag){
   const p=meta.screen.map(([x,y])=>`${x*100}% ${y*100}%`);
   touchSurface.style.clipPath=`polygon(evenodd,0% 0%,100% 0%,100% 100%,0% 100%,0% 0%,${p[0]},${p[3]},${p[2]},${p[1]},${p[0]})`;
  }else touchSurface.style.clipPath='none';
@@ -261,7 +264,7 @@ async function insert(root,{updateUrl=true}={}){
 }
 function finishDrag(e,cancel=false,interrupted=false){
  if(!drag||e.pointerId!==drag.id)return;
- const d=drag;drag=null;room.classList.remove('dragging','over-slot');tip.hidden=true;canvas.style.cursor='grab';
+ const d=drag;drag=null;room.classList.remove('dragging','over-slot');tip.hidden=true;touchSurface.style.cursor='grab';
  if(d.surface.hasPointerCapture(d.id))d.surface.releasePointerCapture(d.id);
  updateTouchSurface();
  if(cancel){physics.cancel();syncObjects();if(d.wasInserted)insert(d.root,{updateUrl:false});else say(`${d.root.userData.title} returned to where you picked it up.`);return;}
@@ -285,7 +288,7 @@ for(const surface of [canvas,touchSurface])surface.addEventListener('pointerdown
  const normal=camera.getWorldDirection(new THREE.Vector3());
  const gripPlane=new THREE.Plane().setFromNormalAndCoplanarPoint(normal,new THREE.Vector3(point.x,point.y,Math.max(point.z,1.65)));
  drag={root,surface,id:e.pointerId,wasInserted,plane:gripPlane,normal,velocity:new THREE.Vector3(),lastPoint:point.clone(),lastMove:performance.now()};
- surface.setPointerCapture(e.pointerId);updateTouchSurface();room.classList.add('dragging');canvas.style.cursor='grabbing';tip.hidden=true;
+ surface.setPointerCapture(e.pointerId);updateTouchSurface();room.classList.add('dragging');touchSurface.style.cursor='grabbing';tip.hidden=true;
  moveGrip(e,true);say(`Holding ${root.userData.title}. Flick to throw; scroll to move closer or farther.`);
 });
 function moveGrip(e,first=false){
@@ -302,15 +305,12 @@ function moveGrip(e,first=false){
 room.addEventListener('pointermove',e=>{
  if(!physics)return;
  if(drag){if(e.pointerId===drag.id)moveGrip(e);return;}
- const hit=pick(e),prop=!hit?pickProp(e):null;canvas.style.cursor=hit?'grab':prop?'pointer':'default';tip.hidden=!hit;
- // Let ordinary mouse input reach Ruffle through the transparent CRT aperture.
- const onGlass=!screen.hidden&&!hit&&!prop&&ray.intersectObject(environment.glass,false).length>0;
- if(!touchLayout.matches)canvas.style.pointerEvents=onGlass?'none':'auto';
+ const hit=pick(e),prop=!hit?pickProp(e):null;touchSurface.style.cursor=hit?'grab':prop?'pointer':'default';tip.hidden=!hit;
  if(hit){tip.textContent=hit.root.userData.title;const [x,y]=coords(e);tip.style.left=`${Math.min(x*100,75)}%`;tip.style.top=`${Math.max(2,y*100-8)}%`;}
 },{capture:true});
 room.addEventListener('wheel',e=>{if(!drag)return;e.preventDefault();drag.plane.translate(drag.normal.clone().multiplyScalar(THREE.MathUtils.clamp(e.deltaY*.002,-.25,.25)));moveGrip(e,true);},{passive:false});
 for(const surface of [canvas,touchSurface]){surface.addEventListener('pointerup',e=>finishDrag(e));surface.addEventListener('pointercancel',e=>finishDrag(e,false,true));surface.addEventListener('lostpointercapture',e=>{if(drag)finishDrag(e,false,true);});}
-room.addEventListener('pointerleave',()=>{tip.hidden=true;if(!drag&&!touchLayout.matches)canvas.style.pointerEvents='auto';});
+room.addEventListener('pointerleave',()=>{tip.hidden=true;});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&drag)finishDrag({pointerId:drag.id},true);});
 window.addEventListener('blur',()=>{if(drag)finishDrag({pointerId:drag.id},false,true);});
 document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden&&drag)finishDrag({pointerId:drag.id},false,true);});
