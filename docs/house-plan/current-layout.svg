@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1320" viewBox="0 0 1400 1320"><defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#203e57" stroke-width=".5"/></pattern><pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M0 9L9 0" stroke="#eead76" stroke-width="1"/></pattern></defs><rect width="1400" height="1320" fill="#10283d"/><style>text{font-family:Arial,sans-serif;fill:#e0edf4;font-size:18px} .small{font-size:15px;fill:#b1c8d7}.title{font-size:32px;font-weight:bold}.heading{font-size:23px}.wall{stroke:#d6e7f1;stroke-width:4;fill:none}.window{stroke:#73d5ee;stroke-width:3;fill:none}.edge{stroke:#a8bdcb;stroke-width:2;stroke-dasharray:7 5;fill:none}.ghost{stroke:#5d7d94;stroke-width:1.4;stroke-dasharray:5 5;fill:none}.route{stroke:#a3b59a;stroke-width:2;fill:none}.issue{stroke:#eead76;stroke-width:2;fill:none}</style>
+<text x="40" y="49" class="title" text-anchor="start">THE HOUSE SO FAR</text>
+<text x="40" y="80" class="small" text-anchor="start">Current 3D layout • 29 September 2026 • top-down survey, before redesign</text>
+<text x="40" y="108" class="small" text-anchor="start">1 grid square = 1 scene metre. Up = far end of hallway (−Z); geographic north is not defined.</text>
+<text x="40" y="153" class="heading" text-anchor="start">01 / MAIN FLOOR  ·  y = 0</text>
+<rect x="35" y="172" width="810" height="655" class="" fill="url(#grid)"/>
+<rect x="65.92000000000002" y="393.76" width="393.59999999999997" height="400.64" class="edge" fill="none"/>
+<path d="M65.92000000000002 396.0L459.52 396.0" class="wall"/>
+<path d="M65.92000000000002 393.76L65.92000000000002 663.2" class="wall"/>
+<path d="M65.92000000000002 794.4L459.52 794.4" class="wall"/>
+<path d="M459.52 208.79999999999998L459.52 276.32" class="wall"/>
+<path d="M459.52 314.08L459.52 567.52" class="wall"/>
+<path d="M459.52 605.28L459.52 794.4" class="wall"/>
+<path d="M548.48 208.79999999999998L548.48 288.8" class="wall"/>
+<path d="M548.48 343.2L548.48 436.32" class="wall"/>
+<path d="M548.48 474.08L548.48 487.03999999999996" class="wall"/>
+<path d="M548.48 544.96L548.48 730.4" class="wall"/>
+<path d="M459.52 208.79999999999998L485.12 208.79999999999998" class="wall"/>
+<path d="M522.88 208.79999999999998L548.48 208.79999999999998" class="wall"/>
+<path d="M485.12 208.79999999999998L522.88 208.79999999999998" class="issue"/>
+<path d="M459.52 730.4L548.48 730.4" class="edge"/>
+<path d="M459.52 278.56L476.16 278.56" class="route"/>
+<path d="M459.52 569.76L476.16 569.76" class="route"/>
+<path d="M548.48 438.56L565.12 438.56" class="route"/>
+<path d="M548.48 487.03999999999996L548.48 544.96" class="window"/>
+<path d="M551.6800000000001 487.03999999999996L551.6800000000001 544.96" class="window"/>
+<path d="M548.48 288.8L548.48 343.2" class="window"/>
+<path d="M551.6800000000001 288.8L551.6800000000001 343.2" class="window"/>
+<path d="M208.16000000000003 396.0L264.15999999999997 396.0" class="window"/>
+<path d="M208.16000000000003 399.2L264.15999999999997 399.2" class="window"/>
+<rect x="592.0" y="343.2" width="200.0" height="224.0" class="ghost" fill="none"/>
+<path d="M592.0 359.2L749.76 359.2" class="wall"/>
+<path d="M749.76 359.2L749.76 551.2" class="wall"/>
+<path d="M592.0 359.2L592.0 434.4" class="wall"/>
+<path d="M592.0 476.0L592.0 551.2" class="wall"/>
+<path d="M592.0 551.2L749.76 551.2" class="edge"/>
+<path d="M548.48 434.4L592.0 434.4" class="wall"/>
+<path d="M548.48 476.0L592.0 476.0" class="wall"/>
+<path d="M676.16 359.2L728.96 359.2" class="window"/>
+<path d="M676.16 362.4L728.96 362.4" class="window"/>
+<path d="M749.76 414.88L749.76 457.12" class="window"/>
+<path d="M752.96 414.88L752.96 457.12" class="window"/>
+<rect x="551.36" y="487.2" width="38.72" height="57.599999999999994" class="issue" fill="url(#hatch)"/>
+<circle cx="569.6" cy="516.0" r="13" fill="#eead76"/>
+<text x="569.6" y="522.0" text-anchor="middle" style="fill:#10283d;font-weight:bold">A</text>
+<rect x="267.2" y="274.4" width="192.0" height="41.60000000000001" class="edge" fill="none"/>
+<path d="M459.2 274.4L459.2 316.0" class="ghost"/>
+<path d="M449.6 274.4L449.6 316.0" class="ghost"/>
+<path d="M440.0 274.4L440.0 316.0" class="ghost"/>
+<path d="M430.4 274.4L430.4 316.0" class="ghost"/>
+<path d="M420.8 274.4L420.8 316.0" class="ghost"/>
+<path d="M411.2 274.4L411.2 316.0" class="ghost"/>
+<path d="M401.6 274.4L401.6 316.0" class="ghost"/>
+<path d="M392.0 274.4L392.0 316.0" class="ghost"/>
+<path d="M382.4 274.4L382.4 316.0" class="ghost"/>
+<path d="M372.8 274.4L372.8 316.0" class="ghost"/>
+<path d="M363.2 274.4L363.2 316.0" class="ghost"/>
+<path d="M353.6 274.4L353.6 316.0" class="ghost"/>
+<path d="M344.0 274.4L344.0 316.0" class="ghost"/>
+<path d="M334.4 274.4L334.4 316.0" class="ghost"/>
+<path d="M324.8 274.4L324.8 316.0" class="ghost"/>
+<path d="M315.2 274.4L315.2 316.0" class="ghost"/>
+<path d="M305.6 274.4L305.6 316.0" class="ghost"/>
+<path d="M296.0 274.4L296.0 316.0" class="ghost"/>
+<path d="M286.40000000000003 274.4L286.40000000000003 316.0" class="ghost"/>
+<path d="M276.8 274.4L276.8 316.0" class="ghost"/>
+<path d="M267.2 274.4L267.2 316.0" class="ghost"/>
+<path d="M449.6 295.2L276.8 295.2" class="route"/>
+<path d="M276.8 295.2L289.6 287.2" class="route"/>
+<path d="M276.8 295.2L289.6 303.2" class="route"/>
+<text x="360.0" y="261.6" class="small" text-anchor="middle">DOWN  ·  20 steps</text>
+<rect x="486.72" y="434.4" width="34.56" height="36.0" class="route" fill="none"/>
+<text x="500.8" y="496.8" class="small" text-anchor="middle">H</text>
+<text x="260.8" y="570.4" class="" text-anchor="middle">DEN</text>
+<text x="260.8" y="596.0" class="small" text-anchor="middle">≈ 12.3 × 12.5 m</text>
+<text x="260.8" y="623.2" class="small" text-anchor="middle">Large scenic envelope</text>
+<text x="260.8" y="648.8" class="small" text-anchor="middle">Floor and walls do not fully match</text>
+<text x="672.0" y="479.2" class="" text-anchor="middle">WORKSHOP</text>
+<text x="672.0" y="503.2" class="small" text-anchor="middle">≈ 4.9 × 6 m</text>
+<text x="676.8" y="597.6" class="small" text-anchor="middle">Open model edge</text>
+<text x="500.8" y="628.0" class="" text-anchor="middle">HALL</text>
+<text x="500.8" y="653.6" class="small" text-anchor="middle">2.6 m</text>
+<text x="500.8" y="676.0" class="small" text-anchor="middle">wide</text>
+<text x="500.8" y="196.64" class="small" text-anchor="middle">LOCKED → unbuilt</text>
+<text x="616.0" y="301.6" class="small" text-anchor="start">Clear window</text>
+<text x="571.2" y="735.2" class="small" text-anchor="start">Open end</text>
+<text x="260.8" y="762.4" class="small" text-anchor="middle">No modeled exterior entrance</text>
+<text x="900" y="153" class="heading" text-anchor="start">02 / ATTIC  ·  y ≈ +3.2</text>
+<rect x="882" y="172" width="475" height="495" class="" fill="url(#grid)"/>
+<rect x="1046.52" y="353.2" width="88.96" height="284.8" class="ghost" fill="none"/>
+<rect x="924.6" y="538.1600000000001" width="121.92000000000002" height="99.84" class="ghost" fill="none"/>
+<rect x="1179.0" y="503.6" width="157.76" height="134.4" class="ghost" fill="none"/>
+<path d="M963.0 209.2L1219.0 209.2" class="wall"/>
+<path d="M963.0 209.2L963.0 452.4" class="wall"/>
+<path d="M1219.0 209.2L1219.0 452.4" class="wall"/>
+<path d="M963.0 452.4L1070.2 452.4" class="wall"/>
+<path d="M1111.8 452.4L1219.0 452.4" class="wall"/>
+<path d="M1069.24 209.2L1112.76 209.2" class="window"/>
+<path d="M1069.24 212.39999999999998L1112.76 212.39999999999998" class="window"/>
+<path d="M1070.2 452.4L1070.2 578.8" class="wall"/>
+<path d="M1111.8 452.4L1111.8 578.8" class="wall"/>
+<rect x="1073.72" y="578.8" width="34.56" height="36.0" class="route" fill="none"/>
+<path d="M1091.0 218.8L1091.0 442.8" class="ghost"/>
+<text x="1091.0" y="302.0" class="" text-anchor="middle">ATTIC</text>
+<text x="1091.0" y="327.6" class="small" text-anchor="middle">≈ 8 × 7.6 m</text>
+<text x="1091.0" y="356.4" class="small" text-anchor="middle">Low pitched roof</text>
+<circle cx="1199.8" cy="234.8" r="13" fill="#eead76"/>
+<text x="1199.8" y="240.8" text-anchor="middle" style="fill:#10283d;font-weight:bold">B</text>
+<text x="1123.0" y="519.6" class="small" text-anchor="start">Landing</text>
+<text x="1123.0" y="612.4" class="small" text-anchor="start">Hatch ↓</text>
+<text x="900" y="695" class="small" text-anchor="start">B  Roof footprint is mostly outside</text>
+<text x="922" y="717" class="small" text-anchor="start">the main-floor rooms below.</text>
+<text x="900" y="751" class="small" text-anchor="start">Dashed muted outlines: floor below</text>
+<text x="40" y="882" class="heading" text-anchor="start">03 / BASEMENT  ·  y = −4.0</text>
+<rect x="35" y="901" width="945" height="370" class="" fill="url(#grid)"/>
+<rect x="294.92" y="1096.16" width="393.59999999999997" height="160.64000000000001" class="ghost" fill="none"/>
+<rect x="688.52" y="911.2" width="88.96" height="345.6" class="ghost" fill="none"/>
+<rect x="80.20000000000005" y="952.8" width="415.99999999999994" height="320.0" class="wall" fill="none"/>
+<path d="M496.2 976.8v41.6" stroke="#10283d" stroke-width="6"/>
+<rect x="496.2" y="976.8" width="192.0" height="41.60000000000001" class="edge" fill="none"/>
+<path d="M688.2 976.8L688.2 1018.4" class="ghost"/>
+<path d="M678.6 976.8L678.6 1018.4" class="ghost"/>
+<path d="M669.0 976.8L669.0 1018.4" class="ghost"/>
+<path d="M659.4 976.8L659.4 1018.4" class="ghost"/>
+<path d="M649.8 976.8L649.8 1018.4" class="ghost"/>
+<path d="M640.2 976.8L640.2 1018.4" class="ghost"/>
+<path d="M630.6 976.8L630.6 1018.4" class="ghost"/>
+<path d="M621.0 976.8L621.0 1018.4" class="ghost"/>
+<path d="M611.4 976.8L611.4 1018.4" class="ghost"/>
+<path d="M601.8 976.8L601.8 1018.4" class="ghost"/>
+<path d="M592.2 976.8L592.2 1018.4" class="ghost"/>
+<path d="M582.6 976.8L582.6 1018.4" class="ghost"/>
+<path d="M573.0 976.8L573.0 1018.4" class="ghost"/>
+<path d="M563.4 976.8L563.4 1018.4" class="ghost"/>
+<path d="M553.8 976.8L553.8 1018.4" class="ghost"/>
+<path d="M544.2 976.8L544.2 1018.4" class="ghost"/>
+<path d="M534.6 976.8L534.6 1018.4" class="ghost"/>
+<path d="M525.0 976.8L525.0 1018.4" class="ghost"/>
+<path d="M515.4000000000001 976.8L515.4000000000001 1018.4" class="ghost"/>
+<path d="M505.8 976.8L505.8 1018.4" class="ghost"/>
+<path d="M496.2 976.8L496.2 1018.4" class="ghost"/>
+<path d="M80.20000000000005 1154.4L80.20000000000005 1212.0" class="window"/>
+<path d="M83.40000000000009 1154.4L83.40000000000009 1212.0" class="window"/>
+<path d="M80.20000000000005 1013.6L80.20000000000005 1071.2" class="window"/>
+<path d="M83.40000000000009 1013.6L83.40000000000009 1071.2" class="window"/>
+<path d="M195.39999999999998 1272.8L253.0 1272.8" class="window"/>
+<path d="M195.39999999999998 1276.0L253.0 1276.0" class="window"/>
+<text x="272.2" y="1050.4" class="" text-anchor="middle">BASEMENT</text>
+<text x="272.2" y="1076.0" class="small" text-anchor="middle">≈ 13 × 10 m</text>
+<text x="272.2" y="1103.2" class="small" text-anchor="middle">Pool table / archives</text>
+<text x="400.2" y="1215.2" class="small" text-anchor="middle">Den above →</text>
+<circle cx="157.0" cy="1212.0" r="13" fill="#eead76"/>
+<text x="157.0" y="1218.0" text-anchor="middle" style="fill:#10283d;font-weight:bold">C</text>
+<text x="592.2" y="962.4" class="small" text-anchor="middle">UP to hallway</text>
+<path d="M505.8 997.6L675.4 997.6" class="route"/>
+<path d="M675.4 997.6L662.6 989.6" class="route"/>
+<path d="M675.4 997.6L662.6 1005.6" class="route"/>
+<text x="1005" y="858" class="heading" text-anchor="start">READING THE PLAN</text>
+<path d="M1005 894L1044 894" class="wall"/>
+<text x="1057" y="900" class="small" text-anchor="start">Modeled wall</text>
+<path d="M1005 928L1044 928" class="window"/>
+<text x="1057" y="934" class="small" text-anchor="start">Window</text>
+<path d="M1005 962L1044 962" class="edge"/>
+<text x="1057" y="968" class="small" text-anchor="start">Open / inferred edge</text>
+<path d="M1005 996L1044 996" class="ghost"/>
+<text x="1057" y="1002" class="small" text-anchor="start">Other floor / slab edge</text>
+<text x="1005" y="1048" class="small" text-anchor="start">A  Hall view hits workshop.</text>
+<text x="1005" y="1080" class="small" text-anchor="start">B  Attic needs a house below it.</text>
+<text x="1005" y="1112" class="small" text-anchor="start">C  Basement extends west of den.</text>
+<text x="1005" y="1163" class="small" text-anchor="start">Missing from the current house:</text>
+<text x="1005" y="1187" class="small" text-anchor="start">Kitchen, bath, bedrooms, a front</text>
+<text x="1005" y="1211" class="small" text-anchor="start">entrance and a garage vehicle door.</text>
+<text x="40" y="1300" class="small" text-anchor="start">Dimensions are approximate scene units, not construction measurements. Solid lines follow authored wall runs; dashed edges do not invent missing walls.</text>
+</svg>

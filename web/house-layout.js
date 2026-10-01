@@ -24,19 +24,36 @@ export function buildConnections(layout){
  return {group,ladder};
 }
 
-// Round each corner within a bounded radius, preserving narrow door clearances.
-// Arc-length sampling keeps the camera moving through intermediate waypoints.
+// A corner blend with zero curvature at both ends. Collinear control pairs
+// make the straight runs and bends meet without a sudden steering change.
+class PassageBend extends THREE.Curve {
+ constructor(controls){super();this.controls=controls;this.arcLengthDivisions=100;}
+ getPoint(t,target=new THREE.Vector3()){
+  const p=this.controls.map(v=>v.clone());
+  for(let n=p.length-1;n>0;n--)for(let i=0;i<n;i++)p[i].lerp(p[i+1],t);
+  return target.copy(p[0]);
+ }
+ getTangent(t,target=new THREE.Vector3()){
+  const p=this.controls.slice(1).map((v,i)=>v.clone().sub(this.controls[i]));
+  for(let n=p.length-1;n>0;n--)for(let i=0;i<n;i++)p[i].lerp(p[i+1],t);
+  return target.copy(p[0]).normalize();
+ }
+}
 export function createRoute(points){
  const route=new THREE.CurvePath();let previous=points[0];
  for(let i=1;i<points.length-1;i++){
   const corner=points[i],before=points[i-1],after=points[i+1];
+  // Stay within the already checked passage rather than overshooting doors.
   const radius=Math.min(.45,corner.distanceTo(before)*.3,corner.distanceTo(after)*.3);
-  const enter=corner.clone().add(before.clone().sub(corner).setLength(radius));
-  const leave=corner.clone().add(after.clone().sub(corner).setLength(radius));
+  const incoming=corner.clone().sub(before).normalize(),outgoing=after.clone().sub(corner).normalize();
+  const enter=corner.clone().addScaledVector(incoming,-radius),leave=corner.clone().addScaledVector(outgoing,radius);
   route.add(new THREE.LineCurve3(previous.clone(),enter));
-  route.add(new THREE.QuadraticBezierCurve3(enter,corner.clone(),leave));previous=leave;
+  if(i===points.length-2)route.arrivalStart=route.getLength();
+  route.add(new PassageBend([enter,enter.clone().addScaledVector(incoming,radius*.4),enter.clone().addScaledVector(incoming,radius*.8),leave.clone().addScaledVector(outgoing,-radius*.8),leave.clone().addScaledVector(outgoing,-radius*.4),leave]));
+  previous=leave;
  }
  route.add(new THREE.LineCurve3(previous.clone(),points.at(-1).clone()));
+ route.arcLengthDivisions=1000;
  return route;
 }
 export function travelEase(t){t=THREE.MathUtils.clamp(t,0,1);return THREE.MathUtils.clamp(t*t*t*(t*(t*6-15)+10),0,1);}

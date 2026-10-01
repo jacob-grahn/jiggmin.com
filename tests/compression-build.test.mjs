@@ -49,7 +49,7 @@ test('catalog labels are compressed within the label bounds without changing the
 });
 
 test('both production room loaders share self-hosted Draco decoding',()=>{
- for(const file of ['app.js','house-renderer.js'])assert.match(readFileSync('dist/web/'+file,'utf8'),/from '\.\/model-loader\.js'/);
+ for(const file of ['app.js','house-renderer.js','house-release-renderer.js'])assert.match(readFileSync('dist/web/'+file,'utf8'),/from '\.\/model-loader\.js'/);
  const loader=readFileSync('dist/web/model-loader.js','utf8');
  assert.match(loader,/setDecoderPath\('\/web\/vendor\/draco\/'\)/);
  assert.doesNotMatch(loader,/node_modules|https?:/);

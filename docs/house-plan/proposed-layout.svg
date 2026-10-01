@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1510" viewBox="0 0 1400 1510"><rect width="1400" height="1510" fill="#10283d"/><style>text{font-family:Arial,sans-serif;fill:#e0edf4;font-size:18px}.small{font-size:15px;fill:#b5cbd9}.heading{font-size:23px}.title{font-size:32px;font-weight:bold}.wall{stroke:#d6e7f1;stroke-width:4;fill:none}.window{stroke:#73d5ee;stroke-width:4;fill:none}.detail{stroke:#7895a8;stroke-width:1.5;fill:none}.ghost{stroke:#7895a8;stroke-width:1.5;stroke-dasharray:7 5;fill:none}.route{stroke:#b5c59b;stroke-width:2;fill:none}</style>
+<text x="40" y="48" class="title" text-anchor="start">A HOUSE TO GROW INTO</text>
+<text x="40" y="80" class="small" text-anchor="start">PROPOSED / REVISION 3 · Two bedrooms · one bathroom · unfinished basement · attached garage workshop</text>
+<text x="40" y="127" class="heading" text-anchor="start">01 / MAIN FLOOR</text>
+<text x="40" y="155" class="small" text-anchor="start">Rear woods ↑     Front yard and road ↓     Room sizes are nominal, before wall thickness.</text>
+<rect x="80" y="208" width="732" height="732" class="wall" style="fill:none"/>
+<rect x="812" y="195.8" width="305" height="427.0" class="wall" style="fill:none"/>
+<path d="M372.8 208L372.8 940" class="wall"/>
+<path d="M464.3 208L464.3 622.8" class="wall"/>
+<path d="M80 439.79999999999995L372.8 439.79999999999995" class="wall"/>
+<path d="M464.3 439.79999999999995L812 439.79999999999995" class="wall"/>
+<path d="M635.1 439.79999999999995L635.1 622.8" class="wall"/>
+<path d="M80 622.8L372.8 622.8" class="wall"/>
+<path d="M464.3 622.8L812 622.8" class="wall"/>
+<path d="M464.3 714.3000000000001L812 714.3000000000001" class="wall"/>
+<path d="M635.1 714.3000000000001L635.1 940" class="wall"/>
+<path d="M372.8 342.20000000000005L372.8 397.1" stroke="#10283d" stroke-width="7"/>
+<path d="M372.8 342.20000000000005L409.4 342.20000000000005" class="route"/>
+<path d="M464.3 342.20000000000005L464.3 397.1" stroke="#10283d" stroke-width="7"/>
+<path d="M464.3 342.20000000000005L500.9 342.20000000000005" class="route"/>
+<path d="M372.8 519.0999999999999L372.8 586.2" stroke="#10283d" stroke-width="7"/>
+<path d="M372.8 519.0999999999999L409.4 519.0999999999999" class="route"/>
+<path d="M464.3 531.3L464.3 586.2" stroke="#10283d" stroke-width="7"/>
+<path d="M464.3 531.3L500.9 531.3" class="route"/>
+<path d="M690 622.8L744.9 622.8" stroke="#10283d" stroke-width="7"/>
+<path d="M690 622.8L690 586.2" class="route"/>
+<path d="M812 519.0999999999999L812 580.0999999999999" stroke="#10283d" stroke-width="7"/>
+<path d="M812 519.0999999999999L848.6 519.0999999999999" class="route"/>
+<path d="M372.8 769.1999999999999L372.8 854.6" stroke="#10283d" stroke-width="7"/>
+<path d="M372.8 769.1999999999999L409.4 769.1999999999999" class="route"/>
+<path d="M232.5 622.8L317.9 622.8" stroke="#10283d" stroke-width="7"/>
+<path d="M232.5 622.8L232.5 586.2" class="route"/>
+<path d="M690 714.3000000000001L751 714.3000000000001" stroke="#10283d" stroke-width="7"/>
+<path d="M690 714.3000000000001L690 677.7" class="route"/>
+<path d="M446 940L513.0999999999999 940" stroke="#10283d" stroke-width="7"/>
+<path d="M446 940L446 903.4" class="route"/>
+<path d="M80 525.2L80 580.0999999999999" stroke="#10283d" stroke-width="7"/>
+<path d="M80 525.2L116.6 525.2" class="route"/>
+<path d="M873 622.8L1056 622.8" stroke="#10283d" stroke-width="7"/>
+<path d="M873 622.8L1056 622.8" class="ghost"/>
+<path d="M165.39999999999998 208L275.20000000000005 208" class="window"/>
+<path d="M165.39999999999998 214.1L275.20000000000005 214.1" class="window"/>
+<path d="M586.3000000000001 208L720.5 208" class="window"/>
+<path d="M586.3000000000001 214.1L720.5 214.1" class="window"/>
+<path d="M388.05 208L449.05 208" class="window"/>
+<path d="M388.05 214.1L449.05 214.1" class="window"/>
+<path d="M80 455.04999999999995L80 503.84999999999997" class="window"/>
+<path d="M86.1 455.04999999999995L86.1 503.84999999999997" class="window"/>
+<path d="M80 832.03L80 897.9100000000001" class="window"/>
+<path d="M86.1 832.03L86.1 897.9100000000001" class="window"/>
+<path d="M812 638.05L812 699.0500000000001" class="window"/>
+<path d="M818.1 638.05L818.1 699.0500000000001" class="window"/>
+<path d="M568 940L616.8000000000001 940" class="window"/>
+<path d="M568 946.1L616.8000000000001 946.1" class="window"/>
+<path d="M891.3000000000001 195.8L1031.6 195.8" class="window"/>
+<path d="M891.3000000000001 201.9L1031.6 201.9" class="window"/>
+<path d="M1117 330L1117 427.6" class="window"/>
+<path d="M1123.1000000000001 330L1123.1000000000001 427.6" class="window"/>
+<text x="226.4" y="323.9" class="" text-anchor="middle">BEDROOM 1</text>
+<text x="226.4" y="348.29999999999995" class="small" text-anchor="middle">4.8 × 3.8 m</text>
+<text x="638.15" y="323.9" class="" text-anchor="middle">BEDROOM 2</text>
+<text x="638.15" y="348.29999999999995" class="small" text-anchor="middle">5.7 × 3.8 m incl. closet</text>
+<text x="226.4" y="531.3" class="" text-anchor="middle">KITCHEN / DINING</text>
+<text x="226.4" y="555.7" class="small" text-anchor="middle">4.8 × 3 m</text>
+<text x="549.6999999999999" y="531.3" class="" text-anchor="middle">BATH</text>
+<text x="549.6999999999999" y="555.7" class="small" text-anchor="middle">2.8 × 3 m</text>
+<text x="723.5500000000001" y="531.3" class="" text-anchor="middle">MUD / LAUNDRY</text>
+<text x="723.5500000000001" y="555.7" class="small" text-anchor="middle">2.9 × 3 m</text>
+<text x="226.4" y="781.4" class="" text-anchor="middle">DEN / LIVING</text>
+<text x="226.4" y="805.8000000000001" class="small" text-anchor="middle">4.8 × 5.2 m</text>
+<text x="503.94999999999993" y="830.1999999999999" class="" text-anchor="middle">ENTRY</text>
+<text x="503.94999999999993" y="854.6" class="small" text-anchor="middle">Front door / coats</text>
+<text x="723.5500000000001" y="741.75" class="" text-anchor="middle">STAIRS</text>
+<text x="964.5" y="439.79999999999995" class="" text-anchor="middle">GARAGE / WORKROOM</text>
+<text x="964.5" y="464.2" class="small" text-anchor="middle">5 × 7 m · one car + bench</text>
+<text x="418.55" y="455.04999999999995" class="small" text-anchor="middle">HALL</text>
+<text x="418.55" y="481.28000000000003" class="small" text-anchor="middle">1.5 m</text>
+<text x="592.4" y="697.22" class="small" text-anchor="middle">ATTIC HATCH</text>
+<rect x="92.2" y="220.2" width="51.85000000000001" height="97.60000000000001" class="detail" style="fill:none"/>
+<text x="117.82" y="330" class="small" text-anchor="middle">closet</text>
+<rect x="729.65" y="220.2" width="70.15000000000002" height="100.65" class="detail" style="fill:none"/>
+<text x="763.1999999999999" y="339.15" class="small" text-anchor="middle">closet</text>
+<rect x="476.5" y="452" width="103.69999999999996" height="48.79999999999999" class="detail" style="fill:none"/>
+<text x="528.3499999999999" y="485.55" class="small" text-anchor="middle">tub</text>
+<rect x="589.3499999999999" y="455.04999999999995" width="33.55000000000004" height="42.70000000000001" class="detail" style="fill:none"/>
+<rect x="595.4499999999999" y="558.75" width="30.5" height="48.79999999999999" class="detail" style="fill:none"/>
+<rect x="647.3000000000001" y="452" width="91.5" height="42.70000000000001" class="detail" style="fill:none"/>
+<text x="693.0500000000001" y="478.22999999999996" class="small" text-anchor="middle">washer / dryer</text>
+<rect x="92.2" y="452" width="213.5" height="36.59999999999998" class="detail" style="fill:none"/>
+<rect x="92.2" y="488.59999999999997" width="36.60000000000001" height="30.5" class="detail" style="fill:none"/>
+<rect x="171.5" y="534.3499999999999" width="109.79999999999998" height="51.85000000000003" class="detail" style="fill:none"/>
+<rect x="86.1" y="711.25" width="45.75" height="137.25" class="detail" style="fill:none"/>
+<text x="177.60000000000002" y="763.1" class="small" text-anchor="middle">TV / CONSOLE</text>
+<text x="171.5" y="915.6" class="small" text-anchor="middle">Original window</text>
+<rect x="385" y="879" width="45.75" height="48.80000000000004" class="detail" style="fill:none"/>
+<text x="409.40000000000003" y="868.02" class="small" text-anchor="middle">coats</text>
+<rect x="830.3000000000001" y="211.05" width="268.3999999999999" height="45.75" class="detail" style="fill:none"/>
+<text x="964.5" y="241.55" class="small" text-anchor="middle">EXISTING WORKBENCH</text>
+<rect x="879.1" y="290.35" width="122.0" height="268.40000000000003" class="ghost" style="fill:none"/>
+<text x="940.1" y="330" class="small" text-anchor="middle">Car clearance</text>
+<text x="1059.0500000000002" y="531.3" class="small" text-anchor="middle">Storage</text>
+<rect x="650.35" y="772.25" width="146.40000000000003" height="152.5" class="detail" style="fill:none"/>
+<path d="M723.5500000000001 772.25L723.5500000000001 863.75" class="detail"/>
+<path d="M650.35 863.75L796.75 863.75" class="detail"/>
+<path d="M650.35 772.25L717.4499999999999 772.25" class="detail"/>
+<path d="M729.65 772.25L796.75 772.25" class="detail"/>
+<path d="M650.35 787.5L717.4499999999999 787.5" class="detail"/>
+<path d="M729.65 787.5L796.75 787.5" class="detail"/>
+<path d="M650.35 802.75L717.4499999999999 802.75" class="detail"/>
+<path d="M729.65 802.75L796.75 802.75" class="detail"/>
+<path d="M650.35 818.0L717.4499999999999 818.0" class="detail"/>
+<path d="M729.65 818.0L796.75 818.0" class="detail"/>
+<path d="M650.35 833.25L717.4499999999999 833.25" class="detail"/>
+<path d="M729.65 833.25L796.75 833.25" class="detail"/>
+<path d="M650.35 848.5L717.4499999999999 848.5" class="detail"/>
+<path d="M729.65 848.5L796.75 848.5" class="detail"/>
+<path d="M650.35 863.75L717.4499999999999 863.75" class="detail"/>
+<path d="M729.65 863.75L796.75 863.75" class="detail"/>
+<text x="723.5500000000001" y="906.4499999999999" class="small" text-anchor="middle">↶ DOWN</text>
+<rect x="610.6999999999999" y="638.05" width="76.25" height="61.00000000000006" class="ghost" style="fill:none"/>
+<rect x="470.40000000000003" y="658.1800000000001" width="18.29999999999999" height="20.73999999999999" class="route" style="fill:none"/>
+<path d="M488.7 668.55L568 668.55" class="route"/>
+<path d="M568 668.55L549.7 659.4000000000001" class="route"/>
+<path d="M568 668.55L549.7 677.7" class="route"/>
+<text x="418.55" y="699.0500000000001" class="small" text-anchor="middle">CAM</text>
+<rect x="372.8" y="940" width="262.3" height="122" class="ghost" style="fill:none"/>
+<text x="503.95" y="1007.1" class="small" text-anchor="middle">COVERED FRONT PORCH</text>
+<text x="921.8000000000001" y="726.5" class="small" text-anchor="middle">Clear hall window → side woods</text>
+<text x="970.6" y="757" class="small" text-anchor="middle">Driveway below this view</text>
+<text x="40" y="1112" class="heading" text-anchor="start">02 / UNFINISHED BASEMENT</text>
+<text x="740" y="1112" class="heading" text-anchor="start">03 / ATTIC</text>
+<rect x="55" y="1145" width="300" height="300" class="wall" style="fill:none"/>
+<rect x="288.75" y="1376.25" width="60.00000000000001" height="62.5" class="detail" style="fill:none"/>
+<path d="M318.75 1376.25L318.75 1413.75" class="detail"/>
+<path d="M288.75 1413.75L348.75 1413.75" class="detail"/>
+<path d="M288.75 1376.25L316.25 1376.25" class="detail"/>
+<path d="M321.25 1376.25L348.75 1376.25" class="detail"/>
+<path d="M288.75 1382.5L316.25 1382.5" class="detail"/>
+<path d="M321.25 1382.5L348.75 1382.5" class="detail"/>
+<path d="M288.75 1388.75L316.25 1388.75" class="detail"/>
+<path d="M321.25 1388.75L348.75 1388.75" class="detail"/>
+<path d="M288.75 1395.0L316.25 1395.0" class="detail"/>
+<path d="M321.25 1395.0L348.75 1395.0" class="detail"/>
+<path d="M288.75 1401.25L316.25 1401.25" class="detail"/>
+<path d="M321.25 1401.25L348.75 1401.25" class="detail"/>
+<path d="M288.75 1407.5L316.25 1407.5" class="detail"/>
+<path d="M321.25 1407.5L348.75 1407.5" class="detail"/>
+<path d="M288.75 1413.75L316.25 1413.75" class="detail"/>
+<path d="M321.25 1413.75L348.75 1413.75" class="detail"/>
+<path d="M55 1195L55 1232.5" class="window"/>
+<path d="M57.5 1195L57.5 1232.5" class="window"/>
+<path d="M55 1345L55 1382.5" class="window"/>
+<path d="M57.5 1345L57.5 1382.5" class="window"/>
+<path d="M255 1145L292.5 1145" class="window"/>
+<path d="M255 1147.5L292.5 1147.5" class="window"/>
+<rect x="97.5" y="1245" width="135.0" height="102.49999999999999" class="ghost" style="fill:none"/>
+<rect x="133.75" y="1280.0" width="62.500000000000014" height="32.49999999999999" class="detail" style="fill:none"/>
+<text x="165.0" y="1337.5" class="small" text-anchor="middle">pool / clear play area</text>
+<text x="132.5" y="1187.5" class="small" text-anchor="middle">BASEMENT</text>
+<text x="132.5" y="1207.5" class="small" text-anchor="middle">unfinished</text>
+<rect x="212.5" y="1150.0" width="137.50000000000003" height="85.0" class="ghost" style="fill:none"/>
+<text x="280" y="1177.5" class="small" text-anchor="middle">utility zone</text>
+<rect x="62.5" y="1415.0" width="187.5" height="17.499999999999982" class="detail" style="fill:none"/>
+<text x="155" y="1406.25" class="small" text-anchor="middle">archive shelves</text>
+<text x="390" y="1190" class="small" text-anchor="start">Full cellar beneath the house.</text>
+<text x="390" y="1220" class="small" text-anchor="start">Garage stays on its own slab.</text>
+<text x="390" y="1250" class="small" text-anchor="start">Laundry / bath services above.</text>
+<text x="390" y="1280" class="small" text-anchor="start">High windows with exterior wells.</text>
+<text x="390" y="1310" class="small" text-anchor="start">Stairs align with main floor.</text>
+<text x="390" y="1360" class="small" text-anchor="start">Floor: approximately −4 m.</text>
+<rect x="750" y="1145" width="300" height="300" class="wall" style="fill:none"/>
+<path d="M900 1145L900 1445" class="ghost"/>
+<rect x="825" y="1145" width="150" height="300" class="ghost" style="fill:none"/>
+<rect x="967.5" y="1321.25" width="31.25" height="25.00000000000002" class="route" style="fill:none"/>
+<path d="M882.5 1145L917.5 1145" class="window"/>
+<path d="M882.5 1147.5L917.5 1147.5" class="window"/>
+<text x="900" y="1220" class="small" text-anchor="middle">UNFINISHED ATTIC</text>
+<text x="900" y="1382.5" class="small" text-anchor="middle">joists / stored objects</text>
+<text x="1080" y="1190" class="small" text-anchor="start">Roof over the house footprint.</text>
+<text x="1080" y="1220" class="small" text-anchor="start">Hatch above the cross hall.</text>
+<text x="1080" y="1250" class="small" text-anchor="start">Rear gable window → woods.</text>
+<text x="1080" y="1280" class="small" text-anchor="start">Low eaves along both sides.</text>
+<text x="1080" y="1310" class="small" text-anchor="start">Separate lower garage roof.</text>
+<text x="1080" y="1360" class="small" text-anchor="start">Attic floor: approximately +2.8 m.</text>
+<text x="40" y="1480" class="small" text-anchor="start">Cyan = windows · Green marks = door openings · Dashed = clearance / roof / porch · Concept for the game world; not a construction drawing.</text>
+</svg>

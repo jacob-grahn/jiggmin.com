@@ -30,3 +30,9 @@ __pycache__/
 
 # Rebuilt procedural house textures are embedded in the versioned GLBs
 /scene/house-textures/surface-finish/
+
+# Local Blender proposal preview; regenerate from source scripts
+/scene/preview/generated/
+
+# Intermediate house release bakes; final web assets are versioned
+/scene/exports/house-release/

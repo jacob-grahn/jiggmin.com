@@ -1,0 +1,25 @@
+✔ house camera preserves the den framing through travel and repeated resizes (7.800351ms)
+✔ ordinary house cameras retain their standard lens on resize (1.367373ms)
+✔ portrait exploration preserves the room horizontal field of view (0.509869ms)
+✔ den travel clears the authored right wall in both directions (13.253525ms)
+✔ den shares a single hallway doorway without an intervening corridor (0.887343ms)
+✔ attic stairs retract with the hatch and reopen at their original position (10.147662ms)
+✔ every passage has a continuous reversible camera path clear of its enclosure (97.004101ms)
+✔ basement is one storey below and the stairs reach its floor (0.263424ms)
+✔ travel eases gently at both endpoints (0.290571ms)
+✔ den sweep is one reversible curve crossing only the open doorway (1.370145ms)
+✔ Basement stairs have a continuous pitched ceiling and unlit inset fittings (0.267972ms)
+✔ basement entrance sleeve seals the stair-wall seam without obstructing the doorway (1.827756ms)
+✔ hinge transforms retain pivot and fully opened ladder retains its authored shape (2.413341ms)
+✔ folded ladder joints stay connected during deployment and reverse travel (6.926135ms)
+✔ preview cameras stay upright throughout travel and retain both endpoint views (13.686632ms)
+✔ preview travel curves clear proposed walls, floors and roof (127.671689ms)
+✔ new structural shell leaves actual door and hatch apertures (0.334427ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 402.226348

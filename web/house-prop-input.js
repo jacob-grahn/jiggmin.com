@@ -14,6 +14,8 @@ export function createHousePropInput(host,{getRoom,getCamera,onActivate,wake,red
  function down(event){
   if(!enabled||event.button!==0||gesture)return;
   suppressClick=false;
+  // Doorway controls take priority over props behind their screen-space buttons.
+  if(event.target?.closest?.('.house-hotspot:not(.house-prop-target)'))return;
   const hit=pick(event);if(!hit)return;
   const normal=getCamera().getWorldDirection(new THREE.Vector3());
   gesture={prop:hit.prop,point:hit.point.clone(),id:event.pointerId,start:[event.clientX,event.clientY],dragged:false,

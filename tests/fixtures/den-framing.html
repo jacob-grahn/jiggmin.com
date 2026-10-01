@@ -1,0 +1,28 @@
+<!doctype html><meta charset="utf-8"><title>Den framing comparison</title>
+<style>body{margin:0;background:#10151e;color:white;font:16px system-ui}header{padding:12px}main{display:flex}canvas{width:50% !important;height:auto !important}</style>
+<header id="result">Comparing the original den and its rigid house copy…</header><main></main>
+<script type="importmap">{"imports":{"three":"/web/vendor/three/three.module.js"}}</script>
+<script type="module">
+import * as THREE from '/web/vendor/three/three.module.js';
+import {GLTFLoader} from '/web/model-loader.js';
+import {prepareRoom} from '/web/room-renderer.js';
+import {captureSceneAnchors,composeCamera} from '/web/responsive-scene.js';
+import {createContinuousDen} from '/web/house-den-continuity.js?v=house-reference-20';
+const loader=new GLTFLoader(),textures=new THREE.TextureLoader();
+const [room,carts,lighting,propLighting]=await Promise.all([loader.loadAsync('/web/assets/room.glb'),loader.loadAsync('/web/assets/cartridges.glb'),textures.loadAsync('/web/assets/room-lighting.webp'),textures.loadAsync('/web/assets/room-props.webp')]);
+const scene=new THREE.Scene(),camera=carts.cameras[0];camera.aspect=1.6;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+const meta=await fetch('/web/assets/scene.json').then(r=>r.json());
+const anchors=captureSceneAnchors(camera,meta.screen,meta.slot);
+scene.add(prepareRoom(room,camera,lighting,propLighting).group);scene.updateMatrixWorld(true);
+composeCamera(camera,{aspect:16/9,zoom:1,focusY:.41,height:2.65},anchors.focus);
+const den=createContinuousDen({scene,camera}),endpoint=den.endpointCamera();den.scene.updateMatrixWorld(true);
+const width=960,height=540,arrays=[];
+for(const [model,view]of [[scene,camera],[den.scene,endpoint]]){
+ const renderer=new THREE.WebGLRenderer({antialias:false,preserveDrawingBuffer:true});renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.setSize(width,height);renderer.localClippingEnabled=true;document.querySelector('main').append(renderer.domElement);
+ view.layers.enableAll();renderer.render(model,view);
+ const gl=renderer.getContext(),pixels=new Uint8Array(width*height*4);gl.readPixels(0,0,width,height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);arrays.push(pixels);
+ const canvas=renderer.domElement,filename=arrays.length===1?'den-in-2.000.png':'den-in-3.000.png';canvas.toBlob(blob=>fetch('/_house_capture',{method:'POST',headers:{'Content-Type':'image/png','X-House-Frame':filename},body:blob}));
+}
+let max=0,total=0,changed=0;for(let i=0;i<arrays[0].length;i++){const delta=Math.abs(arrays[0][i]-arrays[1][i]);max=Math.max(max,delta);total+=delta;if(delta>3)changed++;}
+document.querySelector('#result').textContent=`Original (left), rigid house copy (right). Mean channel difference: ${(total/arrays[0].length).toFixed(4)}. Channels differing by >3: ${changed}. Maximum: ${max}.`;
+</script>

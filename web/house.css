@@ -82,3 +82,6 @@
 .house-paper .house-discovery,.house-journal .house-discovery{clear:both;color:#68533a;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.025em;text-transform:none}
 
 .house-header .house-back-down{left:50%;top:auto;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);min-height:48px}
+
+.house-header .house-back-den{left:auto;right:18px;margin:0}
+.house-overlay .house-hall-direction{min-width:44px;max-width:64px;min-height:64px;font-size:36px;color:#ded8c8;background:#0b141b70}

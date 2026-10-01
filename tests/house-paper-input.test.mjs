@@ -27,3 +27,17 @@ for(const gesture of ['tap','throw','cancel','lostpointercapture','blur','hidden
  assert.equal(releases,!['tap','escape'].includes(gesture)?1:0);assert.equal(cancelled,gesture==='escape'?1:0);assert.equal(kicks,gesture==='tap'?1:0);
  input.dispose();
 });
+test('explicit navigation wins over a prop behind its button',()=>{
+ globalThis.window=new EventTarget();globalThis.document=new EventTarget();
+ const host=new Surface(),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(60,1,.1,100);camera.position.z=4;camera.updateMatrixWorld();
+ host.closest=selector=>selector==='.house-hotspot:not(.house-prop-target)'?host:null;
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial());scene.add(mesh);
+ mesh.userData.houseProp={hotspot:'plate',mode:'wiggle'};
+ let activated=0,kicked=0;
+ const input=createHousePropInput(host,{getRoom:()=>({scene,props:{kick(){kicked++;}}}),getCamera:()=>camera,onActivate(){activated++;},wake(){},reduced:{matches:false}});input.setEnabled(true);
+ for(const type of ['pointerdown','pointerup','click']){
+  const event=new Event(type,{cancelable:true});Object.assign(event,{button:0,pointerId:1,clientX:50,clientY:50,detail:1});
+  host.dispatchEvent(event);assert.equal(event.defaultPrevented,false);assert.equal(host.captured,false);
+ }
+ assert.equal(activated,0);assert.equal(kicked,0);input.dispose();
+});

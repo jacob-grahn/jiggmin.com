@@ -1,8 +1,8 @@
-import {createHouseRenderer} from './house-renderer.js?v=no-game-posters-1';
+import {createHouseRenderer} from './house-release-renderer.js?v=house-reference-30';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
-const ROOMS = ['hallway', 'workshop', 'attic', 'basement'];
-const DOORS = { 'door-workshop': 'workshop', 'door-attic': 'attic', 'door-basement': 'basement' };
+const ROOMS = ['hallway', 'workshop', 'attic', 'basement', 'private-hall'];
+const DOORS = { 'door-workshop': 'workshop', 'door-attic': 'attic', 'door-basement': 'basement', 'door-private-hall': 'private-hall' };
 const focusable = 'button:not(:disabled),a[href],input,[tabindex="0"],ruffle-player,iframe';
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -22,7 +22,7 @@ async function json(url) {
 
 export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoomChange = () => {}, onCollectBonus = () => {}, getDen } = {}) {
   let open = false, destroyed = false, room = 'hallway', roomTicket = 0;
-  let data, manifest, anchors, view, travelling = false, contentRequest, discovered = new Set(), storage, persistence = true;
+  let data, manifest, view, travelling = false, contentRequest, discovered = new Set(), storage, persistence = true;
   let modalReturn, modalKind, journalOnly=false, revealing=false;
   try { storage = window.localStorage; } catch { persistence = false; }
   const root = el('section', 'house-overlay');
@@ -139,16 +139,21 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   }
   function hotspotLabel(id) {
     if (id === 'door-den') return 'Return to the den';
-    if (id === 'door-attic') return 'Pull cord to the attic';
+    if (id === 'door-private-hall') return 'Look left up the hallway';
+    if (id === 'door-attic') return 'Open the attic hatch';
     if (DOORS[id]) return `Enter ${data.rooms.find(info => info.id === DOORS[id]).title}`;
     return data.notes.find(note => note.room === room && note.hotspot === id)?.title
       ?? data.lockedDoors.find(door => door.id === id)?.title;
   }
   async function content() {
     if (data) return;
-    contentRequest ??= Promise.all([json('/data/house-notes.json?v=bitey-1'), json('/web/assets/house/hotspots.json?v=bitey-1'), json('/web/assets/house/anchors.json?v=bitey-1')])
-      .then(([notes, objects, positions]) => {
+    contentRequest ??= Promise.all([json('/data/house-notes.json?v=bitey-1'), json('/web/assets/house/hotspots.json?v=bitey-1')])
+      .then(([notes, objects]) => {
+        objects['private-hall']=[];
         const validData = validateHouseData(notes);
+        validData.rooms.push({id:'private-hall',title:'Rear hall'});
+        objects.hallway=objects.hallway.filter(o=>!o.id.startsWith('locked-door')&&o.id!=='door-den');
+        objects.hallway.push({id:'door-private-hall',x:.01,y:.4,width:.06,height:.2});
         for (const id of ROOMS) {
           if (!Array.isArray(objects?.[id])) throw new Error('The objects in this room could not load.');
           for (const object of objects[id]) {
@@ -159,7 +164,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
             }
           }
         }
-        data = validData; manifest = objects; anchors = positions;
+        data = validData; manifest = objects;
         discovered = readJournal(storage, data.notes.map(note => note.id)); updateJournal();
       }).catch(error => { contentRequest = null; throw error; });
     return contentRequest;
@@ -185,7 +190,8 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       if (!open || ticket !== roomTicket) return;
       room = destination;
       back.classList.toggle('house-back-down', room !== 'hallway');
-      back.textContent = room === 'hallway' ? '‹' : '↓';
+      back.textContent = room === 'hallway' ? '›' : '↓';
+      back.classList.toggle('house-back-den',room==='hallway');
       back.setAttribute('aria-label', room === 'hallway' ? 'Return to den' : 'Return to hallway');
       const info = data.rooms.find(info => info.id === destination);
       title.textContent = info.title;
@@ -194,6 +200,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
         const label = hotspotLabel(object.id); if (!label) continue;
         const hit = button('', () => activate(object.id), 'house-hotspot');
         hit.setAttribute('aria-label', label); hit.append(el('span', 'house-hotspot-label', label));
+        if(object.id==='door-private-hall'){hit.classList.add('house-hall-direction');const arrow=el('span','','‹');arrow.setAttribute('aria-hidden','true');hit.append(arrow);}
         Object.assign(hit.style, {left:`${object.x*100}%`,top:`${object.y*100}%`,width:`${object.width*100}%`,height:`${object.height*100}%`});
         hotspots.append(hit); targetButtons.set(object.id,hit);
       }
@@ -211,7 +218,8 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       }
       view.bindTargets(bindings);
       title.focus(); onRoomChange(destination);
-    } catch {
+    } catch (error) {
+      console.error('House entry failed',error);
       if (!open || ticket !== roomTicket) return;
       loading.hidden = false;
       loading.replaceChildren(el('p', '', 'The door is sticking. This room could not load.'), button('Try again', () => enter(destination, doorId)), button('Return to den', exit));
@@ -224,7 +232,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     if (travelling) return;
     travelling = true; back.disabled = true; hotspots.inert = true;
     const ticket = roomTicket;
-    try { await view?.depart(anchors?.hallway['door-den'], 'door-den'); }
+    try { await view?.depart(); }
     finally { hotspots.inert = false; if (ticket === roomTicket) exit(); }
   }
   function exit() {

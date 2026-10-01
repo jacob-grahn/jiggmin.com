@@ -2,7 +2,7 @@ import {createBonusCollection,getBonusGame} from './bonus-collection.js';
 import {createBonusCartridge,bonusDeliveryPoses} from './bonus-cartridge-model.js';
 import {cartridgeRoom} from './cartridge-storage.js';
 import * as THREE from 'three';
-import {createHouseEntry} from './house-entry.js?v=no-game-posters-1';
+import {createHouseEntry} from './house-entry.js?v=house-reference-30';
 import {createDenJournal} from './den-journal.js';
 import {GLTFLoader} from './model-loader.js';
 import {inSlot,slotTarget,playbackFile} from './interaction.js?v=aligned-slot-1';
@@ -41,7 +41,7 @@ const currentMode=()=>currentGame()?.gameplay.mode||'controller';
 const isCartridge=root=>root.userData.role==='draggable_cartridge';
 let houseOpen=false;
 const denMain=document.querySelector('main');
-const houseEntry=createHouseEntry({host:denMain,getDen:()=>({scene,camera,basementCartridges}),
+const houseEntry=createHouseEntry({host:denMain,getDen:()=>({scene,camera,basementCartridges,exposure:renderer?.toneMappingExposure}),
  onCollectBonus(id){bonusCollection.collect(id);},
  onOpen(){
   if(drag)finishDrag({pointerId:drag.id},false,true);

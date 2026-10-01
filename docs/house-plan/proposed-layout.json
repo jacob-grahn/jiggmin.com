@@ -1,0 +1,584 @@
+{
+  "revision": 3,
+  "status": "proposal; not implemented",
+  "units": "scene metres",
+  "axes": "X right; Z toward front road; Y up",
+  "main_footprint": [
+    0,
+    0,
+    12,
+    12
+  ],
+  "garage_footprint": [
+    12,
+    -0.2,
+    17,
+    6.8
+  ],
+  "elevations": {
+    "main": 0,
+    "basement": -4.0,
+    "attic": 2.8,
+    "garage": -0.15,
+    "yard_near_house": -0.45
+  },
+  "rooms": [
+    {
+      "id": "bedroom-1",
+      "name": "BEDROOM 1",
+      "bounds_xz": [
+        0,
+        0,
+        4.8,
+        3.8
+      ],
+      "dimension_label": "4.8 \u00d7 3.8 m"
+    },
+    {
+      "id": "bedroom-2",
+      "name": "BEDROOM 2",
+      "bounds_xz": [
+        6.3,
+        0,
+        12,
+        3.8
+      ],
+      "dimension_label": "5.7 \u00d7 3.8 m incl. closet"
+    },
+    {
+      "id": "kitchen",
+      "name": "KITCHEN / DINING",
+      "bounds_xz": [
+        0,
+        3.8,
+        4.8,
+        6.8
+      ],
+      "dimension_label": "4.8 \u00d7 3 m"
+    },
+    {
+      "id": "bath",
+      "name": "BATH",
+      "bounds_xz": [
+        6.3,
+        3.8,
+        9.1,
+        6.8
+      ],
+      "dimension_label": "2.8 \u00d7 3 m"
+    },
+    {
+      "id": "mudroom",
+      "name": "MUD / LAUNDRY",
+      "bounds_xz": [
+        9.1,
+        3.8,
+        12,
+        6.8
+      ],
+      "dimension_label": "2.9 \u00d7 3 m"
+    },
+    {
+      "id": "den",
+      "name": "DEN / LIVING",
+      "bounds_xz": [
+        0,
+        6.8,
+        4.8,
+        12
+      ],
+      "dimension_label": "4.8 \u00d7 5.2 m"
+    },
+    {
+      "id": "entry",
+      "name": "ENTRY",
+      "bounds_xz": [
+        4.8,
+        8.3,
+        9.1,
+        12
+      ],
+      "dimension_label": "Front door / coats"
+    },
+    {
+      "id": "stairs",
+      "name": "BASEMENT STAIRS",
+      "bounds_xz": [
+        9.1,
+        8.3,
+        12,
+        12
+      ],
+      "dimension_label": "U-shaped flight"
+    },
+    {
+      "id": "garage",
+      "name": "GARAGE / WORKROOM",
+      "bounds_xz": [
+        12,
+        -0.2,
+        17,
+        6.8
+      ],
+      "dimension_label": "5 \u00d7 7 m \u00b7 one car + bench"
+    }
+  ],
+  "doors": [
+    {
+      "id": "bedroom-1",
+      "segment_xz": [
+        4.8,
+        2.2,
+        4.8,
+        3.1
+      ]
+    },
+    {
+      "id": "bedroom-2",
+      "segment_xz": [
+        6.3,
+        2.2,
+        6.3,
+        3.1
+      ]
+    },
+    {
+      "id": "kitchen",
+      "segment_xz": [
+        4.8,
+        5.1,
+        4.8,
+        6.2
+      ]
+    },
+    {
+      "id": "bath",
+      "segment_xz": [
+        6.3,
+        5.3,
+        6.3,
+        6.2
+      ]
+    },
+    {
+      "id": "mudroom",
+      "segment_xz": [
+        10,
+        6.8,
+        10.9,
+        6.8
+      ]
+    },
+    {
+      "id": "garage",
+      "segment_xz": [
+        12,
+        5.1,
+        12,
+        6.1
+      ]
+    },
+    {
+      "id": "den",
+      "segment_xz": [
+        4.8,
+        8.634,
+        4.8,
+        10.034
+      ]
+    },
+    {
+      "id": "kitchen-den",
+      "segment_xz": [
+        2.5,
+        6.8,
+        3.9,
+        6.8
+      ]
+    },
+    {
+      "id": "stairs",
+      "segment_xz": [
+        10,
+        8.3,
+        11,
+        8.3
+      ]
+    },
+    {
+      "id": "front",
+      "segment_xz": [
+        6,
+        12,
+        7.1,
+        12
+      ]
+    },
+    {
+      "id": "kitchen-outside",
+      "segment_xz": [
+        0,
+        5.2,
+        0,
+        6.1
+      ]
+    },
+    {
+      "id": "vehicle",
+      "segment_xz": [
+        13,
+        6.8,
+        16,
+        6.8
+      ]
+    }
+  ],
+  "windows": [
+    {
+      "id": "bedroom-1",
+      "segment_xz": [
+        1.4,
+        0,
+        3.2,
+        0
+      ],
+      "view": "Rear woods"
+    },
+    {
+      "id": "bedroom-2",
+      "segment_xz": [
+        8.3,
+        0,
+        10.5,
+        0
+      ],
+      "view": "Rear woods"
+    },
+    {
+      "id": "hall-rear",
+      "segment_xz": [
+        5.05,
+        0,
+        6.05,
+        0
+      ],
+      "view": "Rear woods"
+    },
+    {
+      "id": "kitchen",
+      "segment_xz": [
+        0,
+        4.05,
+        0,
+        4.85
+      ],
+      "view": "Side yard"
+    },
+    {
+      "id": "den-west",
+      "segment_xz": [
+        0,
+        10.23,
+        0,
+        11.31
+      ],
+      "view": "Side woods; original window left of TV",
+      "sill_y": 0.588,
+      "head_y": 2.412
+    },
+    {
+      "id": "hall-right",
+      "segment_xz": [
+        12,
+        7.05,
+        12,
+        8.05
+      ],
+      "view": "Driveway / side woods; clears garage"
+    },
+    {
+      "id": "entry",
+      "segment_xz": [
+        8,
+        12,
+        8.8,
+        12
+      ],
+      "view": "Front porch"
+    },
+    {
+      "id": "garage-rear",
+      "segment_xz": [
+        13.3,
+        -0.2,
+        15.6,
+        -0.2
+      ],
+      "view": "Rear woods"
+    },
+    {
+      "id": "garage-side",
+      "segment_xz": [
+        17,
+        2,
+        17,
+        3.6
+      ],
+      "view": "Side woods"
+    }
+  ],
+  "site": {
+    "road_bounds_xz": [
+      -22,
+      40,
+      38,
+      46
+    ],
+    "driveway_bounds_xz": [
+      12.8,
+      6.8,
+      16.6,
+      40
+    ],
+    "turnaround_bounds_xz": [
+      16.6,
+      15,
+      22,
+      20
+    ],
+    "porch_bounds_xz": [
+      4.8,
+      12,
+      9.1,
+      14
+    ],
+    "rear_woodland_starts_z": -8,
+    "side_woodland_approx_x": [
+      -10,
+      26
+    ]
+  },
+  "circulation": [
+    {
+      "id": "hall",
+      "bounds_xz": [
+        4.8,
+        0,
+        6.3,
+        8.3
+      ]
+    },
+    {
+      "id": "cross-hall",
+      "bounds_xz": [
+        6.3,
+        6.8,
+        12,
+        8.3
+      ]
+    }
+  ],
+  "levels": {
+    "basement": {
+      "bounds_xz": [
+        0,
+        0,
+        12,
+        12
+      ],
+      "status": "existing contents, relocate shell"
+    },
+    "attic": {
+      "bounds_xz": [
+        0,
+        0,
+        12,
+        12
+      ],
+      "status": "existing contents, rebuild roof shell"
+    }
+  },
+  "vertical_connections": {
+    "basement_stairs": {
+      "bounds_xz": [
+        9.1,
+        8.3,
+        12,
+        12
+      ],
+      "levels": [
+        "main",
+        "basement"
+      ]
+    },
+    "attic_hatch": {
+      "bounds_xz": [
+        8.7,
+        7.05,
+        9.95,
+        8.05
+      ],
+      "levels": [
+        "main",
+        "attic"
+      ]
+    }
+  },
+  "navigation_hub": {
+    "id": "cross-hall-view",
+    "position_xyz": [
+      6.55,
+      1.65,
+      7.55
+    ],
+    "target_xyz": [
+      11.7,
+      1.9,
+      7.55
+    ],
+    "vertical_fov_degrees": 50,
+    "aspect_ratio": 1.6,
+    "status": "planning camera; final framing needs 3D blockout",
+    "ceiling_height": 2.6,
+    "destinations": [
+      {
+        "id": "workshop",
+        "trigger": "mudroom door",
+        "status": "initial",
+        "waypoints_xyz": [
+          [
+            6.55,
+            1.65,
+            7.55
+          ],
+          [
+            10.45,
+            1.65,
+            7.55
+          ],
+          [
+            10.45,
+            1.65,
+            5.6
+          ],
+          [
+            12.4,
+            1.5,
+            5.6
+          ]
+        ],
+        "arrival": "existing workbench view; travel through mudroom without a required stop"
+      },
+      {
+        "id": "basement",
+        "trigger": "stair door",
+        "status": "initial",
+        "waypoints_xyz": [
+          [
+            6.55,
+            1.65,
+            7.55
+          ],
+          [
+            10.5,
+            1.65,
+            7.55
+          ],
+          [
+            10.5,
+            1.65,
+            8.7
+          ]
+        ],
+        "arrival": "descend modeled U stair to basement view"
+      },
+      {
+        "id": "attic",
+        "trigger": "ceiling hatch / pull cord",
+        "status": "initial",
+        "arrival": "pull-down ladder in cross hall; direct attic landing"
+      },
+      {
+        "id": "den",
+        "trigger": "screen-right hallway navigation",
+        "status": "initial",
+        "waypoints_xyz": [
+          [
+            6.55,
+            1.65,
+            7.55
+          ],
+          [
+            5.55,
+            1.65,
+            9.9
+          ],
+          [
+            4.2,
+            1.65,
+            9.9
+          ]
+        ],
+        "arrival": "den via entry"
+      },
+      {
+        "id": "private-hall",
+        "trigger": "screen-left look up hallway",
+        "status": "future",
+        "waypoints_xyz": [
+          [
+            6.55,
+            1.65,
+            7.55
+          ],
+          [
+            5.55,
+            1.65,
+            6.7
+          ]
+        ],
+        "arrival": "later camera facing rear hall, opening bedrooms / bath / kitchen"
+      }
+    ],
+    "framing_notes": [
+      "Mudroom door on screen left, basement door on screen right, attic hatch overhead, outside window ahead.",
+      "Keep landing uncluttered and pull cord readable; den and private hall use edge controls, not visible destination doors.",
+      "Only the entrance targets need visibility, not the workbench, basement interior or den itself."
+    ]
+  },
+  "roof": {
+    "eaves_y": 2.8,
+    "ridge_y": 7.3,
+    "rise": 4.5,
+    "reason": "Headroom at shifted attic hatch; 9:12 main roof pitch"
+  },
+  "den_arrangement": {
+    "tv_wall": "west exterior wall (X=0)",
+    "window": "Original window remains screen-left of TV; lamp and seating remain screen-right",
+    "source_scale": [
+      0.55,
+      0.42,
+      0.6
+    ],
+    "source_translation_blender": [
+      0.819,
+      -9.4,
+      0
+    ],
+    "source_rotation_z_degrees": 90
+  },
+  "room_refits": {
+    "specification": "scene/room-refit.json",
+    "den": {
+      "uniform_units_to_metres": 0.55,
+      "additional_floor_ceiling_infill_bounds_xz": [
+        -1.4,
+        6.8,
+        0,
+        12
+      ],
+      "note": "Preserve the original den composition. The native assembly contains a west-side floor/ceiling bay; resolve its final exterior envelope before the connection bake."
+    },
+    "furniture": "Original dimensions with rigid assembly placements; no room fitting scale"
+  }
+}

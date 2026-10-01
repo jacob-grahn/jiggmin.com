@@ -1,0 +1,944 @@
+{
+  "views": {
+    "hub": {
+      "position": [
+        6.550000190734863,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      "target": [
+        11.544119834899902,
+        1.8924318552017212,
+        7.550000190734863
+      ],
+      "fov": 50.0000002530119
+    },
+    "workshop": {
+      "position": [
+        14.25,
+        1.87,
+        3.8
+      ],
+      "target": [
+        14.65,
+        1.38,
+        0.2
+      ],
+      "fov": 52
+    },
+    "basement": {
+      "position": [
+        8.7,
+        -2.35,
+        10.5
+      ],
+      "target": [
+        6.8,
+        -3.05,
+        3
+      ],
+      "fov": 48
+    },
+    "attic": {
+      "position": [
+        6.5,
+        4.25,
+        7.550000190734863
+      ],
+      "target": [
+        5.828299045562744,
+        2.9065990447998047,
+        2.780923366546631
+      ],
+      "fov": 50.0000002530119
+    },
+    "den": {
+      "position": [
+        4.137,
+        1.65,
+        9.334
+      ],
+      "target": [
+        -0.1255,
+        0.968,
+        9.4207
+      ],
+      "fov": 50.0000002530119
+    },
+    "private-hall": {
+      "position": [
+        5.550000190734863,
+        1.649999976158142,
+        6.699999809265137
+      ],
+      "target": [
+        5.550000190734863,
+        1.6500016450881958,
+        1.700000286102295
+      ],
+      "fov": 50.0000002530119
+    },
+    "overview": {
+      "position": [
+        24,
+        23,
+        28
+      ],
+      "target": [
+        21.60444450378418,
+        19.758956909179688,
+        25.04078483581543
+      ],
+      "fov": 50.0000002530119
+    }
+  },
+  "routes": {
+    "workshop": [
+      [
+        6.550000190734863,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      [
+        9.949999809265137,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      [
+        10.449999809265137,
+        1.649999976158142,
+        7.050000190734863
+      ],
+      [
+        10.449999809265137,
+        1.649999976158142,
+        5.599999904632568
+      ],
+      [
+        12.5,
+        1.5,
+        5.599999904632568
+      ],
+      [
+        14.25,
+        1.87,
+        3.8
+      ]
+    ],
+    "basement": [
+      [
+        6.550000190734863,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      [
+        10.449999809265137,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      [
+        10.449999809265137,
+        1.649999976158142,
+        8.649999618530273
+      ],
+      [
+        9.899999618530273,
+        1.649999976158142,
+        9.100000381469727
+      ],
+      [
+        9.899999618530273,
+        -0.3499999940395355,
+        10.949999809265137
+      ],
+      [
+        11.149999618530273,
+        -0.3499999940395355,
+        11.199999809265137
+      ],
+      [
+        11.149999618530273,
+        -0.3499999940395355,
+        10.800000190734863
+      ],
+      [
+        11.15,
+        -1.65,
+        9.1
+      ],
+      [
+        8.7,
+        -2.35,
+        10.5
+      ]
+    ],
+    "attic": [
+      [
+        6.550000190734863,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      [
+        7.599999904632568,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      [
+        9.029999732971191,
+        2.4000000953674316,
+        7.550000190734863
+      ],
+      [
+        9.100000381469727,
+        3.25,
+        7.550000190734863
+      ],
+      [
+        9.100000381469727,
+        4.400000095367432,
+        7.550000190734863
+      ],
+      [
+        8.199999809265137,
+        4.400000095367432,
+        7.550000190734863
+      ],
+      [
+        6.5,
+        4.25,
+        7.550000190734863
+      ]
+    ],
+    "den": [
+      [
+        6.550000190734863,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      [
+        5.55,
+        1.65,
+        7.55
+      ],
+      [
+        5.55,
+        1.65,
+        9.334
+      ],
+      [
+        4.137,
+        1.65,
+        9.334
+      ]
+    ],
+    "private-hall": [
+      [
+        6.550000190734863,
+        1.649999976158142,
+        7.550000190734863
+      ],
+      [
+        5.550000190734863,
+        1.649999976158142,
+        6.699999809265137
+      ]
+    ]
+  },
+  "hub_targets": {
+    "workshop": [
+      10.449999809265137,
+      1.100000023841858,
+      6.800000190734863
+    ],
+    "basement": [
+      10.5,
+      1.100000023841858,
+      8.300000190734863
+    ],
+    "attic": [
+      9.199999809265137,
+      2.5799999237060547,
+      7.550000190734863
+    ]
+  },
+  "revision": 3,
+  "source_report": {
+    "workshop": {
+      "source": "exports/house/workshop.glb",
+      "objects": 139,
+      "removed_envelope_objects": 31,
+      "staging_scale": [
+        1,
+        1,
+        1
+      ],
+      "model_refit": "Original-size furnishings placed as rigid assemblies"
+    },
+    "basement": {
+      "source": "exports/house/basement.glb",
+      "objects": 252,
+      "removed_envelope_objects": 37,
+      "staging_scale": [
+        1,
+        1,
+        1
+      ],
+      "model_refit": "Envelope geometry resized; furnishings repositioned as rigid assemblies"
+    },
+    "attic": {
+      "source": "exports/house/attic.glb",
+      "objects": 246,
+      "removed_envelope_objects": 170,
+      "staging_scale": [
+        1,
+        1,
+        1
+      ],
+      "model_refit": "Original-size furnishings placed as rigid assemblies"
+    },
+    "den": {
+      "source": "midnight-den-illustrated.blend",
+      "objects": 1671,
+      "removed_envelope_objects": 333,
+      "staging_scale": [
+        1,
+        1,
+        1
+      ],
+      "model_refit": "Uniform scene-unit conversion applied to geometry; original game framing preserved"
+    },
+    "hallway": {
+      "source": "exports/house/hallway.glb",
+      "objects": 36,
+      "removed_envelope_objects": 424,
+      "staging_scale": [
+        1,
+        1,
+        1
+      ],
+      "model_refit": "Original-size furnishings placed as rigid assemblies"
+    }
+  },
+  "fov": 50,
+  "aspect": 1.6,
+  "lights": [],
+  "version": 2,
+  "materials_restored": {
+    "hallway": 111,
+    "workshop": 139,
+    "basement": 252,
+    "attic": 244
+  },
+  "assets": {
+    "structure": "/web/assets/house/release/structure.glb?v=7f6ab5804d54",
+    "den": null,
+    "hallway": "/web/assets/house/release/hallway.glb?v=104b2523e5da",
+    "workshop": "/web/assets/house/release/workshop.glb?v=aa762c839ede",
+    "basement": "/web/assets/house/release/basement.glb?v=959b6adeccef",
+    "attic": "/web/assets/house/release/attic.glb?v=8edc3117ff0a"
+  },
+  "style": "original",
+  "lightingBake": {
+    "quality": "final",
+    "report": {
+      "quality": "release",
+      "samples": 64,
+      "atlases": {
+        "structure-den": {
+          "objects": 54,
+          "resolution": 2048
+        },
+        "structure-hall": {
+          "objects": 298,
+          "resolution": 4096
+        },
+        "structure-garage": {
+          "objects": 97,
+          "resolution": 2048
+        },
+        "structure-attic": {
+          "objects": 133,
+          "resolution": 2048
+        },
+        "structure-exterior": {
+          "objects": 152,
+          "resolution": 2048
+        },
+        "structure-stairs": {
+          "objects": 63,
+          "resolution": 2048
+        },
+        "basement-ceiling": {
+          "objects": 4,
+          "resolution": 2048
+        },
+        "basement-windows": {
+          "objects": 33,
+          "resolution": 2048
+        },
+        "basement-details": {
+          "objects": 11,
+          "resolution": 2048
+        }
+      },
+      "movableShadowsExcluded": true,
+      "denoised": true,
+      "lighting": {
+        "source": "scene/scripts/bake_room.py",
+        "worldStrength": 0.1,
+        "viewTransform": "AgX",
+        "exposure": -1.3,
+        "atticExposure": -0.7,
+        "saturation": 1.2,
+        "lighting": "blue windows and exterior moon backlight",
+        "windowRevision": 3,
+        "apertureEmitters": "outside, rectangular, lowered hall sources",
+        "liveWindowLights": false
+      },
+      "preservedOriginalRooms": [
+        "den",
+        "hallway",
+        "workshop",
+        "basement furnishings",
+        "attic"
+      ],
+      "sourceKey": "f6ddbe8a8aa3ead7e8f5741d73546002bfd73a0a489ffb0805b0d450a6f45e72",
+      "inputKey": "128ee5ffdce3c825e28ce3e14881be17f429bddbf4988aaf79618c77cab721a7",
+      "seconds": 3330.4,
+      "trimSourceRepair": {
+        "authoringScene": "scene/house-plan-preview.blend",
+        "removed": [
+          {
+            "id": "structure:613",
+            "name": "Finish / skirting.026",
+            "retained": "structure:225",
+            "group": "structure-den"
+          },
+          {
+            "id": "structure:614",
+            "name": "Finish / ceiling moulding.035",
+            "retained": "structure:226",
+            "group": "structure-den"
+          },
+          {
+            "id": "structure:615",
+            "name": "Finish / ceiling moulding.036",
+            "retained": "structure:227",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:616",
+            "name": "Finish / skirting.027",
+            "retained": "structure:228",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:617",
+            "name": "Finish / ceiling moulding.037",
+            "retained": "structure:229",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:618",
+            "name": "Finish / skirting.028",
+            "retained": "structure:230",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:619",
+            "name": "Finish / ceiling moulding.038",
+            "retained": "structure:231",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:620",
+            "name": "Finish / skirting.029",
+            "retained": "structure:232",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:621",
+            "name": "Finish / ceiling moulding.039",
+            "retained": "structure:233",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:622",
+            "name": "Finish / skirting.030",
+            "retained": "structure:243",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:623",
+            "name": "Finish / ceiling moulding.040",
+            "retained": "structure:244",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:624",
+            "name": "Finish / ceiling moulding.041",
+            "retained": "structure:245",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:625",
+            "name": "Finish / skirting.031",
+            "retained": "structure:246",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:626",
+            "name": "Finish / ceiling moulding.042",
+            "retained": "structure:247",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:627",
+            "name": "Finish / ceiling moulding.043",
+            "retained": "structure:248",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:628",
+            "name": "Finish / skirting.032",
+            "retained": "structure:249",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:629",
+            "name": "Finish / ceiling moulding.044",
+            "retained": "structure:250",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:630",
+            "name": "Finish / ceiling moulding.045",
+            "retained": "structure:251",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:631",
+            "name": "Finish / skirting.033",
+            "retained": "structure:252",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:632",
+            "name": "Finish / ceiling moulding.046",
+            "retained": "structure:253",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:724",
+            "name": "Finish / skirting.042",
+            "retained": "structure:243",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:725",
+            "name": "Finish / ceiling moulding.055",
+            "retained": "structure:244",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:726",
+            "name": "Finish / ceiling moulding.056",
+            "retained": "structure:245",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:727",
+            "name": "Finish / skirting.043",
+            "retained": "structure:246",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:728",
+            "name": "Finish / ceiling moulding.057",
+            "retained": "structure:247",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:729",
+            "name": "Finish / ceiling moulding.058",
+            "retained": "structure:248",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:730",
+            "name": "Finish / skirting.044",
+            "retained": "structure:249",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:731",
+            "name": "Finish / ceiling moulding.059",
+            "retained": "structure:250",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:732",
+            "name": "Finish / ceiling moulding.060",
+            "retained": "structure:251",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:733",
+            "name": "Finish / skirting.045",
+            "retained": "structure:252",
+            "group": "structure-hall"
+          },
+          {
+            "id": "structure:734",
+            "name": "Finish / ceiling moulding.061",
+            "retained": "structure:253",
+            "group": "structure-hall"
+          }
+        ],
+        "bakeSourceSnapshotUnchanged": true
+      },
+      "ceilingRepair": {
+        "samples": 256,
+        "resolution": 4096,
+        "receivers": [
+          "structure:606",
+          "structure:740",
+          "structure:227",
+          "structure:603",
+          "structure:248",
+          "structure:719",
+          "structure:245",
+          "structure:601",
+          "structure:721",
+          "structure:263",
+          "structure:737",
+          "structure:372",
+          "structure:251",
+          "structure:739",
+          "structure:255",
+          "structure:102",
+          "structure:104",
+          "structure:742",
+          "structure:736",
+          "structure:256",
+          "structure:605",
+          "structure:233",
+          "structure:231",
+          "structure:97",
+          "structure:258",
+          "structure:250",
+          "structure:713",
+          "structure:711",
+          "structure:100",
+          "structure:244",
+          "structure:634",
+          "structure:715",
+          "structure:723",
+          "structure:260",
+          "structure:229",
+          "structure:717",
+          "structure:261",
+          "structure:253",
+          "structure:247",
+          "structure:103",
+          "structure:365",
+          "structure:101"
+        ],
+        "duplicatesExcluded": [
+          "structure:613",
+          "structure:614",
+          "structure:615",
+          "structure:616",
+          "structure:617",
+          "structure:618",
+          "structure:619",
+          "structure:620",
+          "structure:621",
+          "structure:622",
+          "structure:623",
+          "structure:624",
+          "structure:625",
+          "structure:626",
+          "structure:627",
+          "structure:628",
+          "structure:629",
+          "structure:630",
+          "structure:631",
+          "structure:632",
+          "structure:724",
+          "structure:725",
+          "structure:726",
+          "structure:727",
+          "structure:728",
+          "structure:729",
+          "structure:730",
+          "structure:731",
+          "structure:732",
+          "structure:733",
+          "structure:734"
+        ],
+        "lighting": {
+          "source": "scene/scripts/bake_room.py",
+          "worldStrength": 0.1,
+          "viewTransform": "AgX",
+          "exposure": -1.3,
+          "atticExposure": -0.7,
+          "saturation": 1.2,
+          "lighting": "blue windows and exterior moon backlight",
+          "windowRevision": 3,
+          "apertureEmitters": "outside, rectangular, lowered hall sources",
+          "liveWindowLights": false
+        },
+        "seconds": 713.91,
+        "baseSourceKey": "f6ddbe8a8aa3ead7e8f5741d73546002bfd73a0a489ffb0805b0d450a6f45e72",
+        "recipeHash": "ef82d1acac0ae6ac4cf39fe98a293e8d30f3f434edef359db00a12d44402d1a9",
+        "recipeSnapshot": "scene/exports/house-release/ceiling-repair/bake-recipe.py",
+        "patchScriptHash": "3097fffda827317fa9877167dc2783ce74c57ade6d782dd6866606e89949677c",
+        "bakePNGHash": "83bc00e5bcc18187d085fb796cf6d8b83fbdde860ddc1cbb9272084ec1819f04",
+        "inputAtlasHash": "fba62bde6a3697c238076312fe84e4875231573be838d429f13a56b4ca45aedd",
+        "outputAtlasHash": "f01f99cce956e559af10416554303c19d96aff84e108bf38d62ac3997473fed8",
+        "changedPixels": 381940,
+        "untargetedPixelsUnchanged": true,
+        "geometryAndUVsUnchanged": true
+      },
+      "trimFiltering": {
+        "algorithm": "linear-light filtering within each board face and hallway ceiling underside; protected untargeted texels",
+        "scriptHash": "0f6a4a8ee18d4b48691bc2cbd67444f66e6f7841294bf09a9b01013326fcb048",
+        "inputStructureHash": "04895f7bf52f45f72df09a5e07a42d4c3f043b076601b9b6f854dcb98aae7a4e",
+        "outputStructureHash": "7f6ab5804d5491a9529beb64ef2937ebc5227443e482e6f1682161bb01435a56",
+        "filteredNodes": [
+          "structure:225",
+          "structure:226",
+          "structure:227",
+          "structure:228",
+          "structure:229",
+          "structure:230",
+          "structure:231",
+          "structure:232",
+          "structure:233",
+          "structure:234",
+          "structure:235",
+          "structure:236",
+          "structure:237",
+          "structure:238",
+          "structure:239",
+          "structure:240",
+          "structure:241",
+          "structure:242",
+          "structure:243",
+          "structure:244",
+          "structure:245",
+          "structure:246",
+          "structure:247",
+          "structure:248",
+          "structure:249",
+          "structure:250",
+          "structure:251",
+          "structure:252",
+          "structure:253",
+          "structure:254",
+          "structure:255",
+          "structure:256",
+          "structure:257",
+          "structure:258",
+          "structure:259",
+          "structure:260",
+          "structure:261",
+          "structure:262",
+          "structure:263",
+          "structure:264",
+          "structure:265",
+          "structure:266",
+          "structure:268",
+          "structure:269",
+          "structure:270",
+          "structure:272",
+          "structure:273",
+          "structure:274",
+          "structure:276",
+          "structure:277",
+          "structure:278",
+          "structure:280",
+          "structure:281",
+          "structure:282",
+          "structure:283",
+          "structure:284",
+          "structure:285",
+          "structure:287",
+          "structure:288",
+          "structure:289",
+          "structure:290",
+          "structure:291",
+          "structure:292",
+          "structure:348",
+          "structure:353",
+          "structure:354",
+          "structure:355",
+          "structure:364",
+          "structure:365",
+          "structure:366",
+          "structure:367",
+          "structure:368",
+          "structure:369",
+          "structure:370",
+          "structure:371",
+          "structure:372",
+          "structure:398",
+          "structure:399",
+          "structure:400",
+          "structure:401",
+          "structure:402",
+          "structure:403",
+          "structure:404",
+          "structure:405",
+          "structure:430",
+          "structure:431",
+          "structure:437",
+          "structure:438",
+          "structure:439",
+          "structure:440",
+          "structure:441",
+          "structure:442",
+          "structure:444",
+          "structure:445",
+          "structure:446",
+          "structure:447",
+          "structure:448",
+          "structure:449",
+          "structure:565",
+          "structure:566",
+          "structure:567",
+          "structure:568",
+          "structure:569",
+          "structure:570",
+          "structure:572",
+          "structure:573",
+          "structure:574",
+          "structure:575",
+          "structure:576",
+          "structure:577",
+          "structure:600",
+          "structure:601",
+          "structure:602",
+          "structure:603",
+          "structure:604",
+          "structure:605",
+          "structure:606",
+          "structure:607",
+          "structure:608",
+          "structure:609",
+          "structure:610",
+          "structure:611",
+          "structure:612",
+          "structure:633",
+          "structure:634",
+          "structure:710",
+          "structure:711",
+          "structure:712",
+          "structure:713",
+          "structure:714",
+          "structure:715",
+          "structure:716",
+          "structure:717",
+          "structure:718",
+          "structure:719",
+          "structure:720",
+          "structure:721",
+          "structure:722",
+          "structure:723",
+          "structure:735",
+          "structure:736",
+          "structure:737",
+          "structure:738",
+          "structure:739",
+          "structure:740",
+          "structure:741",
+          "structure:742",
+          "structure:743",
+          "structure:744",
+          "structure:745",
+          "structure:747",
+          "structure:748",
+          "structure:749",
+          "structure:751",
+          "structure:752",
+          "structure:753",
+          "structure:755",
+          "structure:756",
+          "structure:757",
+          "structure:759",
+          "structure:760",
+          "structure:761",
+          "structure:763",
+          "structure:764",
+          "structure:765",
+          "structure:766",
+          "structure:767",
+          "structure:768",
+          "structure:830",
+          "structure:831"
+        ],
+        "filteredCeilings": [
+          "structure:97",
+          "structure:100",
+          "structure:101",
+          "structure:102",
+          "structure:103",
+          "structure:104"
+        ],
+        "smoothedCeilingTrim": [
+          "structure:227",
+          "structure:229",
+          "structure:231",
+          "structure:233",
+          "structure:240",
+          "structure:242",
+          "structure:250",
+          "structure:251",
+          "structure:253",
+          "structure:255",
+          "structure:256",
+          "structure:258",
+          "structure:260",
+          "structure:261",
+          "structure:263",
+          "structure:372"
+        ],
+        "atlases": [
+          {
+            "name": "structure-den",
+            "faces": 96,
+            "inputHash": "988d269e74d5451416d0519f391187d9fdbcd464e065a71102cb96f0cc083957",
+            "outputHash": "d9d7f08e003327642a317bb875012697ac74d642655d03978f90d26b97f78841"
+          },
+          {
+            "name": "structure-hall",
+            "faces": 660,
+            "inputHash": "f01f99cce956e559af10416554303c19d96aff84e108bf38d62ac3997473fed8",
+            "outputHash": "959fa74f27889c2dca88815e7bd4bf2286ebeb098fe4dc04eff2da79eec5badf"
+          },
+          {
+            "name": "structure-garage",
+            "faces": 180,
+            "inputHash": "b63697715617deb3c6922eb5e919de97241fd17aa64f4ac5740173fcc1019330",
+            "outputHash": "334d889bbdd35e28405547c71e408f33c8ee65f164fdaa84e6efdbe6180d7f5a"
+          },
+          {
+            "name": "structure-attic",
+            "faces": 84,
+            "inputHash": "768432f85c80236c3468c3ea477f8dd57d3e73c9ee24073ddfc0acc05f18453a",
+            "outputHash": "7bbae33b939a627820367f4fa0b7fae3bfd3202023fe05942515528065a12fa1"
+          },
+          {
+            "name": "structure-stairs",
+            "faces": 6,
+            "inputHash": "1044e3ecbcc083766c51bbcbd7a39b69ab00db22881e363f3faa5575bb0649d6",
+            "outputHash": "530f0876501a932f32961ae70b04afe48aa1fc66356522cfeb050911ce498bd6"
+          }
+        ]
+      }
+    },
+    "source": "original-window-rig"
+  },
+  "denFloorReference": "/web/assets/house/release/den-floor-reference.glb"
+}

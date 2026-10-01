@@ -5,6 +5,7 @@ import * as THREE from 'three';
 export const TV_BOUNDS=new THREE.Box3(new THREE.Vector3(-1.39,1.05,-1.04),new THREE.Vector3(1.39,3.15,.27));
 export function repairDenProjection(material,sourceCamera,inverseRoom){
  if(!material.isShaderMaterial||!material.uniforms?.lighting||material.uniforms.bakeModelMatrix)return;
+ material.uniforms.denProjectionRepair={value:0};
  material.uniforms.denBakeEye={value:sourceCamera.position.clone()};
  material.uniforms.denInverseRoom={value:inverseRoom.clone()};
  material.uniforms.denTvMin={value:TV_BOUNDS.min.clone()};
@@ -13,7 +14,7 @@ export function repairDenProjection(material,sourceCamera,inverseRoom){
  material.uniforms.denWallUv={value:new THREE.Vector2(wallSample.x/wallSample.w*.5+.5,wallSample.y/wallSample.w*.5+.5)};
  material.vertexShader='varying vec3 denSurfacePosition;uniform mat4 denInverseRoom;\n'+material.vertexShader.replace('void main(){','void main(){denSurfacePosition=(denInverseRoom*modelMatrix*vec4(position,1.0)).xyz;');
  material.fragmentShader=`uniform sampler2D lighting;varying vec3 denSurfacePosition;
- uniform vec3 denBakeEye;uniform vec3 denTvMin;uniform vec3 denTvMax;uniform vec2 denWallUv;
+ uniform float denProjectionRepair;uniform vec3 denBakeEye;uniform vec3 denTvMin;uniform vec3 denTvMax;uniform vec2 denWallUv;
  vec4 denLighting(vec2 uv){
   vec3 direction=denSurfacePosition-denBakeEye;
   vec3 safeDirection=mix(vec3(.00001),direction,step(vec3(.00001),abs(direction)));
@@ -25,7 +26,7 @@ export function repairDenProjection(material,sourceCamera,inverseRoom){
    // Quiet plaster in the TV's shadow, with no screen, bezel or lettering.
    float grain=fract(sin(dot(denSurfacePosition.xy,vec2(127.1,311.7)))*43758.5453);
    vec3 wall=texture2D(lighting,denWallUv).rgb;
-   return vec4(wall*(.96+.08*grain),1.0);
+   return mix(texture2D(lighting,uv),vec4(wall*(.96+.08*grain),1.0),denProjectionRepair);
   }
   return texture2D(lighting,uv);
  }

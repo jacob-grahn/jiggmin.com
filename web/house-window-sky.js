@@ -21,10 +21,22 @@ export function createMoonlitSky(sky){
   shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`
    vec3 direction=normalize(skyDirection);
    vec2 skyUV=vec2(atan(direction.z,direction.x)*0.15915494309+.5,
-    asin(clamp(direction.y,-1.0,1.0))*0.31830988618+.5);
-   diffuseColor*=texture2D(map,skyUV);`);
+    clamp(asin(clamp(direction.y,-1.0,1.0))*0.31830988618+.64,.02,.98));
+   vec4 scenery=texture2D(map,skyUV);
+   // Lift existing cloud rims and distant moonlit branches, preserving the
+   // dark forest. Eye-level windows should see the sky above the tree line.
+   float detail=dot(scenery.rgb,vec3(.2126,.7152,.0722));
+   scenery.rgb*=mix(.18,.55,smoothstep(.035,.24,detail));
+   // A quiet moon in the east-facing hallway opening. It is scenery, not a
+   // browser light: the room still receives only its Blender-baked moonlight.
+   float moonDistance=acos(clamp(dot(direction,normalize(vec3(1.0,.062,-.048))),-1.0,1.0));
+   float moon=1.0-smoothstep(.017,.019,moonDistance);
+   float halo=exp(-moonDistance*moonDistance/ .003)*.018;
+   scenery.rgb+=vec3(.08,.12,.20)*halo;
+   scenery.rgb=mix(scenery.rgb,vec3(.29,.34,.42),moon);
+   diffuseColor*=scenery;`);
  };
- material.customProgramCacheKey=()=> 'moonlit-world-sky-1';
+ material.customProgramCacheKey=()=> 'moonlit-world-sky-3';
  const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),material);
  mesh.name='Shared moonlit sky';mesh.frustumCulled=false;mesh.renderOrder=-1000;return mesh;
 }
@@ -47,11 +59,12 @@ export function createMoonlitWindows(model,sky,eye){
  const glass=[];
  windows.forEach((mesh,i)=>{
   const source=Array.isArray(mesh.material)?mesh.material[0]:mesh.material;
-  mesh.material=new THREE.MeshStandardMaterial({name:'Clear window glass',color:0xb8cbd7,
-   transparent:true,opacity:.075,roughness:.12,metalness:0,envMap:sky,envMapIntensity:.45,
+  mesh.material=new THREE.MeshBasicMaterial({name:'Clear window glass',color:0x192532,
+   transparent:true,opacity:.025,toneMapped:false,
    depthWrite:false,side:THREE.DoubleSide,clippingPlanes:source.clippingPlanes});
   mesh.userData.houseOutlined=true;mesh.userData.windowGlass=true;glass.push(mesh);
   const frame=frames[i];exterior.add(createWindowTrees(frame));
+  if(model.getObjectByName(`Baked window reveal ${i} left`)||model.getObjectByName(`Baked_window_reveal_${i}_left`))return;
   // Cap the newly cut edges with an actual wooden reveal. Its inner edges sit
   // just beyond the aperture, underneath the existing frame and sill.
   const reveal=new THREE.Group();reveal.position.copy(frame.center);

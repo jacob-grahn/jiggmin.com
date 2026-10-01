@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><title>House release validation</title>
+<style>body{margin:0;background:#111;color:#ddd;font:14px monospace}#view{position:absolute;inset:45px 0 0}canvas{display:block;width:100%;height:100%}nav{height:45px;display:flex;gap:12px;align-items:center}button{padding:6px}#targets button{position:absolute;background:#fff2;border:1px solid #fff8;color:white}#status{margin-left:12px}</style>
+<script type="importmap">{"imports":{"three":"/web/vendor/three/three.module.js","three/webgpu":"/web/vendor/three/three.webgpu.js","three/tsl":"/web/vendor/three/three.tsl.js","cannon-es":"/web/vendor/cannon-es.js"}}</script></head>
+<body><nav><button data-room="hallway">Hallway</button><button data-room="workshop">Workshop</button><button data-room="basement">Basement</button><button data-room="attic">Attic</button><button data-room="private-hall">Rear hall</button><a href="/">Test live den handoff in game</a><button id="capture">Save frame</button><span id="status">Loading</span></nav><div id="view"><div id="targets"></div></div>
+<script type="module">
+import {createHouseRenderer} from '/web/house-release-renderer.js?v=house-reference-30';
+const status=document.querySelector('#status'),host=document.querySelector('#view'),targets=document.querySelector('#targets');
+let currentRoom='hallway';
+const test=new URLSearchParams(location.search).has('test');
+if(new URLSearchParams(location.search).has('clean'))targets.hidden=true;
+const view=createHouseRenderer(host,{layoutURL:test?'/scene/exports/house-release/test/layout.json':'/web/assets/house/release/layout.json',onActivate:id=>{status.textContent='Activated '+id;}});
+async function go(id){try{document.querySelectorAll('nav button').forEach(b=>b.disabled=true);status.textContent='Travelling';targets.replaceChildren();view.setActive(false);await view.travel(id);const bindings=new Map();for(const prop of view.props){const b=document.createElement('button');b.textContent=prop.hotspot??prop.title;b.onclick=()=>view.activateProp(prop);targets.append(b);bindings.set(prop,b);}view.bindTargets(bindings);view.setActive(true);currentRoom=id;status.textContent=id+' ready · '+view.props.length+' props';}catch(e){status.textContent='ERROR '+e.message;console.error(e);}finally{document.querySelectorAll('nav button').forEach(b=>b.disabled=false);}}
+document.querySelectorAll('nav button[data-room]').forEach(b=>b.onclick=()=>go(b.dataset.room));document.querySelector('#capture').onclick=()=>{const a=document.createElement('a');a.download='house-'+(test?'test':'release')+'-'+currentRoom+'.png';a.href=view.capture();a.click();};new ResizeObserver(()=>view.resize()).observe(host);go('hallway');
+</script></body></html>

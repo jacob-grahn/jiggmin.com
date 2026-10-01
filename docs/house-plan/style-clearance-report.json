@@ -1,0 +1,56 @@
+{
+  "routes": {
+    "workshop": {
+      "structural_crossings": [],
+      "contents_crossings": [],
+      "animated_access_crossings": [],
+      "body_clearance_warnings": []
+    },
+    "basement": {
+      "structural_crossings": [],
+      "contents_crossings": [],
+      "animated_access_crossings": [],
+      "body_clearance_warnings": []
+    },
+    "attic": {
+      "structural_crossings": [],
+      "contents_crossings": [],
+      "animated_access_crossings": [],
+      "body_clearance_warnings": []
+    },
+    "den": {
+      "structural_crossings": [],
+      "contents_crossings": [],
+      "animated_access_crossings": [],
+      "body_clearance_warnings": []
+    },
+    "private-hall": {
+      "structural_crossings": [],
+      "contents_crossings": [],
+      "animated_access_crossings": [],
+      "body_clearance_warnings": []
+    }
+  },
+  "viewport_targets": {
+    "16:10": {
+      "workshop": true,
+      "basement": true,
+      "attic": true
+    },
+    "16:9": {
+      "workshop": true,
+      "basement": true,
+      "attic": true
+    },
+    "4:3": {
+      "workshop": true,
+      "basement": true,
+      "attic": true
+    },
+    "portrait": {
+      "workshop": true,
+      "basement": true,
+      "attic": true
+    }
+  }
+}

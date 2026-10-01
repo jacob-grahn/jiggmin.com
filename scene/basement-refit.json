@@ -1,0 +1,19 @@
+{
+  "translation": [6, -3.06, -4],
+  "envelope": [1.2, 0.9, 1],
+  "architecture": "^(Concrete slab|Basement ceiling|Basement painted masonry|Copper water pipe)",
+  "assemblies": [
+    {"id":"pool","anchor":[-1.8,-2.3],"names":"^Pool (table|ball)"},
+    {"id":"lamp","anchor":[0.8,1],"names":"^(Brass shade|Opal lamp|Lamp stem|Basement ceiling light canopy)"},
+    {"id":"moon-picture","anchor":[-0.2,3.255],"names":"^Moon garden basement picture"},
+    {"id":"fish-picture","anchor":[-3.95,3.255],"names":"^Fish boots basement picture"},
+    {"id":"side-picture","anchor":[-4.855,0.35],"names":"^Odd cellar wall picture"},
+    {"id":"chair","anchor":[-1.2,0.05],"names":"^(Chair |Folded wool blanket)"},
+    {"id":"stool","anchor":[-3.5,-1.65],"names":"^(Old stool|Stool foot|D notebook|D$)"},
+    {"id":"story-shelf","anchor":[-2.4,2.75],"names":"^(Archive shelf for unfinished stories|Neverending Light folder|II$|III$)","region":[-4.1,-0.2,2.02,3.3,1.6,3.5]},
+    {"id":"archive","anchor":[2.65,2.3],"names":"^(Archive shelf|Shelf upright|Archive carton|Carton label|ARCHIVE|Small shelf picture|Stored flexible hose)","region":[0.2,5.1,1.75,3.2,-0.5,3.5]},
+    {"id":"community","anchor":[-2.7,1.25],"names":"^(Community |Open box shadow|COMMUNITY|Box under community table|Work surface$|Table leg(?:\\.00[123])?$)","region":[-4.2,-1,0.6,1.9,-0.5,2]},
+    {"id":"laundry","anchor":[4.03,-1.16],"names":"^(Laundry basket|Basket )","region":[3.5,4.7,-1.8,-0.8,-0.5,1]},
+    {"id":"recorder","anchor":[3.25,-0.4],"names":"^(Work surface\\.002|Table leg\\.0(?:08|09|10|11)|Voice tape recorder|Tape reel|Reel hub|Recorder key|Mic stand|Microphone|Coiled audio cable|Recorder table storage box|Unmarked small recorder-table case)","region":[2,4.6,-0.95,0.65,-0.5,2]}
+  ]
+}

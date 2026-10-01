@@ -795,11 +795,6 @@ def house_art(room):
   anchor('bitey',*[ob for ob in bpy.data.objects if ob not in before])
  elif room=='workshop':
   displayed_print('Odd picture among bench tools',odd(2),(-1.30,1.31,1.29),.25,.27,True,lean=-.10,frame_mat='blue',standing=True)
-  from mathutils import Matrix
-  before=set(bpy.data.objects);printed_tshirt('web/assets/labels/platform-racing-2-screenprint-v3.webp');bpy.context.view_layer.update()
-  transform=Matrix.Translation((1.60,-.58,.28))@Matrix.Scale(.60,4)
-  for ob in bpy.data.objects:
-   if ob not in before:ob.matrix_world=transform@ob.matrix_world
  elif room=='attic':
   print_plane('Stored odd paper study',odd(1),(-.67,2.921,.67),.44,.54)
   print_plane('Odd stored packing-board print',odd(2),(1.66,1.925,.67),.35,.49)

@@ -14,7 +14,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBon
  const update=()=>{nav.hidden=active||!ready;};
  function styles(){
   return stylesheet??=new Promise((resolve,reject)=>{
-   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=bonus-cartridges-1';
+   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=house-reference-30';
    link.onload=resolve;link.onerror=()=>{link.remove();stylesheet=null;reject(new Error('The house styles could not load. Try the arrow again.'));};document.head.append(link);
   });
  }
@@ -22,7 +22,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBon
   if(loading||active)return;origin=originElement;const ticket=++entryTicket;
   buttons.forEach(button=>{button.disabled=true;button.setAttribute('aria-busy','true');});
   loading=(async()=>{
-   if(!instance){const [module]=await Promise.all([import('./house.js?v=no-game-posters-1'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=house-reference-30'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
     onOpen(){active=true;update();onOpen?.();},
     onExit(){active=false;update();onExit?.();if(origin?.isConnected&&!origin.hidden)origin.focus();},
    });}

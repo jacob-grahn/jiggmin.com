@@ -1,0 +1,27 @@
+<!doctype html><meta charset="utf-8"><title>Baked house den comparison</title>
+<style>body{margin:0;background:#10151e;color:white;font:16px system-ui}header{padding:12px}main{width:960px}section{position:relative;width:960px;height:540px}canvas{display:block}</style>
+<header id="result">Comparing original den with the baked house endpoint…</header><main><section id="original"></section><section id="assembled"></section></main>
+<script type="importmap">{"imports":{"three":"/web/vendor/three/three.module.js","three/webgpu":"/web/vendor/three/three.webgpu.js","three/tsl":"/web/vendor/three/three.tsl.js","cannon-es":"/web/vendor/cannon-es.js"}}</script>
+<script type="module">
+import * as THREE from '/web/vendor/three/three.module.js';
+import {GLTFLoader} from '/web/model-loader.js';
+import {prepareRoom} from '/web/room-renderer.js';
+import {captureSceneAnchors,composeCamera} from '/web/responsive-scene.js';
+import {createHouseRenderer} from '/web/house-release-renderer.js?v=house-reference-30';
+const loader=new GLTFLoader(),textures=new THREE.TextureLoader();
+const [room,carts,lighting,propLighting]=await Promise.all([loader.loadAsync('/web/assets/room.glb'),loader.loadAsync('/web/assets/cartridges.glb'),textures.loadAsync('/web/assets/room-lighting.webp'),textures.loadAsync('/web/assets/room-props.webp')]);
+const scene=new THREE.Scene(),camera=carts.cameras[0];camera.aspect=1.6;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+const meta=await fetch('/web/assets/scene.json').then(r=>r.json()),anchors=captureSceneAnchors(camera,meta.screen,meta.slot);
+scene.add(prepareRoom(room,camera,lighting,propLighting).group);scene.updateMatrixWorld(true);
+composeCamera(camera,{aspect:16/9,zoom:1,focusY:.41,height:2.65},anchors.focus);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.localClippingEnabled=true;renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(960,540);renderer.setClearColor('#10191e');document.querySelector('#original').append(renderer.domElement);
+camera.layers.enableAll();renderer.render(scene,camera);
+const originalData=renderer.domElement.toDataURL('image/png');
+const house=createHouseRenderer(document.querySelector('#assembled'),{getDen:()=>({scene,camera,exposure:.95})});await house.travel('den');
+const assembledData=house.capture();
+async function pixels(data){const image=new Image();image.src=data;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const c=canvas.getContext('2d');c.drawImage(image,0,0);return {canvas,pixels:c.getImageData(0,0,canvas.width,canvas.height).data};}
+const a=await pixels(originalData),b=await pixels(assembledData);let max=0,total=0,changed=0;
+for(let i=0;i<a.pixels.length;i++){const delta=Math.abs(a.pixels[i]-b.pixels[i]);max=Math.max(max,delta);total+=delta;if(delta>3)changed++;}
+document.querySelector('#result').textContent=`Original (top), assembled house (bottom). Mean channel difference: ${(total/a.pixels.length).toFixed(4)}. Channels differing by >3: ${changed}. Maximum: ${max}.`;
+for(const [capture,name] of [[a,'den-in-4.000.png'],[b,'den-in-5.000.png']])capture.canvas.toBlob(blob=>fetch('/_house_capture',{method:'POST',headers:{'Content-Type':'image/png','X-House-Frame':name},body:blob}));
+</script>

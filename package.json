@@ -8,7 +8,21 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "build": "python3 scripts/build_routes.py",
     "perf:visibility": "node scripts/benchmark-visibility.mjs",
-    "assets:compare": "node scripts/compress-assets.mjs"
+    "assets:compare": "node scripts/compress-assets.mjs",
+    "preview:house": "python3 scripts/house_preview.py serve",
+    "preview:house:build": "python3 scripts/house_preview.py build",
+    "preview:house:export": "python3 scripts/house_preview.py export",
+    "preview:house:render": "python3 scripts/house_preview.py render",
+    "preview:house:check": "node scripts/check-house-preview.mjs",
+    "preview:house:finish": "python3 scripts/house_preview.py finish",
+    "preview:house:sample": "node scripts/sample-house-preview.mjs",
+    "release:house:classify": "node scripts/classify-house-release.mjs",
+    "release:house:publish": "python3 scripts/house_release.py publish",
+    "release:house:check": "node --test tests/house-release.test.mjs && node scripts/check-house-release.mjs",
+    "release:house:prepare": "python3 scripts/house_release.py prepare",
+    "release:house:test": "python3 scripts/house_release.py test",
+    "release:house:bake": "python3 scripts/house_release.py release",
+    "release:house:style": "node scripts/restore-house-style.mjs"
   },
   "dependencies": {
     "@ruffle-rs/ruffle": "0.6.0",

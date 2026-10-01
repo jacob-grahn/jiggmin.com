@@ -81,6 +81,7 @@ export function addBasementDetails(model,{floorTexture}={}){
   canopy.name='Basement ceiling light canopy';canopy.position.set(.8,3.805,-1);model.add(canopy);
  }
  // The dark inset sits below the rim and bars, without a glowing flat decal.
+ if(model.getObjectByName('Basement_floor_drain_recess')||model.getObjectByName('Basement floor drain recess'))return {slab,drain:null,floorTexture};
  const drain=new THREE.Group();drain.name='Basement floor drain';drain.position.set(1.55,.009,.12);model.add(drain);
  const metal=new THREE.MeshStandardMaterial({color:0x777e79,roughness:.82,metalness:.15});
  const dark=new THREE.MeshStandardMaterial({color:0x060909,roughness:1});

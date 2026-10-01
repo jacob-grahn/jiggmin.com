@@ -19,6 +19,7 @@ test('projection repair affects only the travel material, preserving moving prop
  repairDenProjection(clone,camera,new THREE.Matrix4());
  assert.ok(clone.fragmentShader.includes('gl_FragColor=denLighting('));
  assert.ok(!source.fragmentShader.includes('denLighting'));
+ assert.equal(clone.uniforms.denProjectionRepair.value,0,'original den view must use its untouched baked plate');
  assert.deepEqual(clone.uniforms.denBakeEye.value.toArray(),[.12,3,7.9]);
  const prop=source.clone();prop.uniforms.bakeModelMatrix={value:new THREE.Matrix4()};
  repairDenProjection(prop,camera,new THREE.Matrix4());assert.equal(prop.fragmentShader,source.fragmentShader);

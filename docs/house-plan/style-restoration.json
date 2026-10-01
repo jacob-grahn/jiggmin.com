@@ -1,0 +1,21 @@
+{
+  "style": "original",
+  "rooms": {
+    "hallway": {
+      "restored": 111,
+      "baked": 78
+    },
+    "workshop": {
+      "restored": 134,
+      "baked": 60
+    },
+    "basement": {
+      "restored": 285,
+      "baked": 64
+    },
+    "attic": {
+      "restored": 244,
+      "baked": 21
+    }
+  }
+}

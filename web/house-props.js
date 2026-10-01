@@ -150,7 +150,7 @@ function roofCollider(mesh){
   quaternion:new THREE.Quaternion().setFromRotationMatrix(basis).toArray()};
 }
 
-export function createHouseProps(model,scene){
+export function createHouseProps(model,scene,{floorY,roomBounds}={}){
  model.updateMatrixWorld(true);
  const bounds=new THREE.Box3().setFromObject(model);
  const {props,staticMeshes}=groupHouseProps(model,scene);
@@ -164,9 +164,9 @@ export function createHouseProps(model,scene){
   colliders.push({name:mesh.name,center:center.toArray(),halfExtents:size,quaternion:rotation.toArray()});
  }
  for(const p of props.filter(p=>p.mode==='wiggle'))colliders.push({name:p.title,center:p.home.toArray(),halfExtents:p.size.toArray().map(n=>Math.max(.01,n/2)),quaternion:p.rest.toArray()});
- const x0=bounds.min.x-.25,x1=bounds.max.x+.25,z0=bounds.min.z-.25,z1=bounds.max.z+.25;
+ const [x0,z0,x1,z1]=roomBounds??[bounds.min.x-.25,bounds.min.z-.25,bounds.max.x+.25,bounds.max.z+.25];
  const walls=[[x0,(z0+z1)/2,.1,(z1-z0)/2],[x1,(z0+z1)/2,.1,(z1-z0)/2],[(x0+x1)/2,z0,(x1-x0)/2,.1],[(x0+x1)/2,z1,(x1-x0)/2,.1]];
- const physics=new CartridgePhysics(colliders,()=>{},{bounds:walls,floorY:bounds.min.y});
+ const physics=new CartridgePhysics(colliders,()=>{},{bounds:walls,floorY:floorY??bounds.min.y});
  // Decorative objects remain attached until grabbed or hit by a loose object, including wall art.
  for(const p of props){
   if(p.mode==='wiggle')continue;

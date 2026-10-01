@@ -1,0 +1,5 @@
+import {doorMotion,ladderMotion} from '../scene/preview/access-animation.js';
+import fs from 'node:fs';import * as T from 'three';import {createRoute} from '../web/house-layout.js';import {travelPose} from '../scene/preview/travel-camera.js';
+const m=JSON.parse(fs.readFileSync('scene/preview/generated/preview.json'));
+const frames=[];for(const [id,points]of Object.entries(m.routes)){const route=createRoute(points.map(p=>new T.Vector3(...p)));for(const p of [0,.3,.45,.6,.75,1]){const v=travelPose(route,p,m.views.hub,m.views[id],id);frames.push({id,progress:p,position:v.position.toArray(),quaternion:v.quaternion.toArray(),fov:m.views.hub.fov,doors:Object.fromEntries(['mudroom','garage','stairs','den','attic'].map(key=>[key,doorMotion(key,({workshop:['mudroom','garage'],basement:['stairs'],attic:['attic'],den:['den'],'private-hall':[]}[id]).includes(key)?p:0).toArray()])),ladder:[0,1,2].map(section=>ladderMotion(section,p).toArray())});}}
+fs.writeFileSync('scene/preview/generated/audit-frames.json',JSON.stringify(frames));
