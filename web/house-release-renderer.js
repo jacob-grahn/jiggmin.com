@@ -1,3 +1,4 @@
+import {createStructureStore} from './house-structure-store.js?v=room-shells-1';
 import {fixtureAnchors,turnOffCeilingFixtures,refineRoomFixtures} from './house-fixture-refinements.js?v=fixture-refinement-3';
 import {batchHouseMeshes} from './house-render-batches.js?v=prop-cleanup-1';
 import {tidyHouseProps} from './house-prop-cleanup.js?v=prop-cleanup-1';
@@ -24,17 +25,21 @@ import {createRoute} from './house-layout.js?v=house-reference-38';
 import {resizeHouseCamera} from './house-camera.js';
 import {travelPose,travelDuration} from './house-travel.js?v=house-reference-38';
 import {doorMotion,ladderMotion} from './house-access.js';
-export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new Set(),layoutURL='/web/assets/house/release/layout.json?v=prebake-refit-1'}={}) {
+export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unloadDen,loadBasementCartridges,collected=new Set(),layoutURL='/web/assets/house/release/layout.json?v=room-shells-1'}={}) {
  const debugParams=new URLSearchParams(location.search),slowValue=debugParams.get('slowHouseTravel');
  // Slow motion must never encode PNGs during travel. Captures are manual only.
  const captureEnabled=debugParams.get('captureHouseTravel')==='1';
  const debugTravel=slowValue!==null||captureEnabled;
  const slowFactor=THREE.MathUtils.clamp(Number(slowValue)||1,1,20);
- const renderer=new THREE.WebGLRenderer({antialias:true});
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;
- renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;renderer.localClippingEnabled=true;
- renderer.shadowMap.enabled=false;
- renderer.domElement.className='house-canvas';host.prepend(renderer.domElement);
+ // The application owns one WebGL context. Move its canvas between views.
+ const renderer=getDen?.()?.renderer;
+ if(!renderer)throw Error('The shared renderer must be ready before house travel');
+ function configureRenderer(){
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;
+  renderer.localClippingEnabled=true;renderer.shadowMap.enabled=false;renderer.setClearColor('#10191e');
+ }
+ configureRenderer();renderer.domElement.id='';renderer.domElement.classList.add('house-canvas');host.prepend(renderer.domElement);
  const saveFrame=captureEnabled?document.createElement('button'):null;
  const captureFrame=()=>{
   render();const canvas=document.createElement('canvas');canvas.width=renderer.domElement.width;canvas.height=renderer.domElement.height;
@@ -84,6 +89,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  function render(){if(camera){
   renderedFrames++;
   host.dataset.houseLoadedRooms=[...rooms.keys()].join(',');
+  host.dataset.houseLoadedShells=[...structures.entries.keys()].join(',');
   renderIsolatedRooms(renderer,world,camera,[...rooms.keys()].filter(id=>id!=='private-hall'),continuousDen?.exposure);
   updateTargets();
  }}
@@ -134,7 +140,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    const details=addBasementDetails(gltf.scene);if(details.drain)details.drain.position.set(1.86,.009,.108);
    assembly.matrix.copy(matrix);matrix.decompose(assembly.position,assembly.quaternion,assembly.scale);assembly.updateMatrixWorld(true);
   }
-  if(id==='basement')for(const cartridge of createBasementCartridges(getDen?.()?.basementCartridges??[])){
+  if(id==='basement')for(const cartridge of createBasementCartridges(gltf.archive??[])){
    cartridge.position.add(new THREE.Vector3(6.53,-4,3.29));gltf.scene.add(cartridge);
   }
   refineRoomFixtures(gltf.scene,id,{structure:connections.group,...connections.fixtureAnchors});
@@ -150,38 +156,56 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   windows?.glass.forEach(mesh=>mesh.layers.set(WINDOW_GLASS_LAYER));
   rooms.set(id,{id,scene:world,resources,roots,model:gltf.scene,view,doors:new Map(),props,scraps,pickRoots:[connections.group,gltf.scene,...props.props.map(p=>p.root)]});
  }
- function unloadRoom(id){
+ function unloadRoom(id,{releaseDen=true}={}){
   const room=rooms.get(id);if(!room)return;
-  if(id==='den'){continuousDen.scene.removeFromParent();continuousDen.resources.dispose();continuousDen=null;rooms.delete(id);return;}
-  room.props.cancel();room.roots.forEach(root=>root.removeFromParent());room.resources.dispose();rooms.delete(id);renderer.renderLists.dispose();
+  if(id==='den'){continuousDen.scene.removeFromParent();continuousDen.resources.dispose();continuousDen=null;rooms.delete(id);if(releaseDen)unloadDen?.();structures.remove('den');refreshStructure();renderer.renderLists.dispose();return;}
+  room.props.cancel();room.roots.forEach(root=>root.removeFromParent());room.resources.dispose({closeImages:true});rooms.delete(id);if(id!=='hallway'&&id!=='private-hall'){structures.remove(id);refreshStructure();}renderer.renderLists.dispose();
+ }
+ function refreshStructure(){
+  if(!connections)return;
+  connections.mechanisms=[...structures.entries.values()].flatMap(s=>s.mechanisms);
+  connections.structureColliders=[...structures.entries.values()].flatMap(s=>s.colliders);
+  connections.fixtureAnchors={supports:[...structures.entries.values()].flatMap(s=>s.anchors.supports)};
+  connections.floorMaterial=structures.entries.get('den')?.floorMaterial;
+ }
+ const structures=createStructureStore({
+  async load(id){
+   const url=layout.structureAssets?.[id];if(!url)throw Error(`Missing room-owned structure: ${id}`);
+   const resources=createRoomResources();let group;
+   try{
+    const gltf=await loader.loadAsync(url);group=gltf.scene;resources.capture(group);
+    if(id==='hallway'&&layout.hatchLighting){const reference=await loader.loadAsync(layout.hatchLighting);resources.capture(reference.scene);applyHatchLighting(group,reference.scene);}
+    integrateDenOpening(group);materials(group);turnOffCeilingFixtures(group);
+    finishHallSurfaces(group);if(id==='hallway')replaceExteriorTrees(group);hideExteriorGround(group);
+    const colliders=collectHouseStructureColliders(group),anchors=fixtureAnchors(group),mechanisms=[];
+    group.updateMatrixWorld(true);
+    group.traverse(o=>{if(!o.isMesh||!['door','ladder'].includes(o.userData.preview_kind))return;
+     o.updateMatrix();mechanisms.push({mesh:o,rest:o.matrix.clone()});o.matrixAutoUpdate=false;
+    });
+    illustrateHouse([group]);resources.capture(group);
+    if(!debugParams.has('unbatched'))batchHouseMeshes(group,{staticCells:true});resources.capture(group);
+    let floorMaterial;
+    if(id==='den'&&layout.denFloorReference){const reference=await loader.loadAsync(layout.denFloorReference);resources.capture(reference.scene);reference.scene.traverse(o=>{if(o.isMesh&&o.material.map)floorMaterial=o.material;});}
+    return {group,resources,mechanisms,colliders,anchors,floorMaterial};
+   }catch(error){if(group)resources.capture(group);resources.dispose({closeImages:true});throw error;}
+  },
+  dispose(shell){shell.group.removeFromParent();shell.resources.dispose({closeImages:true});renderer.renderLists.dispose();}
+ });
+ async function ensureStructure(id){
+  const key=id==='private-hall'?'hallway':id,shell=await structures.ensure(key);
+  if(!shell||structures.entries.get(key)!==shell||!connections)return null;
+  connections.group.add(shell.group);refreshStructure();return shell;
  }
  async function load(){
   if(!loading)loading=(async()=>{
    const response=await fetch(layoutURL,{cache:'no-cache'});if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
-   const gltf=await loader.loadAsync(debugParams.get('hallwayStyle')==='illustrated'?'/web/assets/house/hallway-style/structure.glb':debugParams.get('hallwayInk')==='transfer'?'/web/assets/house/hallway-ink/structure.glb':roomAsset('structure'));
-   if(layout.fixedFixtures){const fixtures=await loader.loadAsync(layout.fixedFixtures);gltf.scene.add(fixtures.scene);}
-   if(layout.hatchLighting){const reference=await loader.loadAsync(layout.hatchLighting);applyHatchLighting(gltf.scene,reference.scene);}
-   integrateDenOpening(gltf.scene);materials(gltf.scene);
-   const anchors=fixtureAnchors(gltf.scene);turnOffCeilingFixtures(gltf.scene);
-   finishHallSurfaces(gltf.scene);replaceExteriorTrees(gltf.scene);hideExteriorGround(gltf.scene);
-   const structureColliders=collectHouseStructureColliders(gltf.scene);
-   illustrateHouse([gltf.scene]);
-   if(!debugParams.has('unbatched'))batchHouseMeshes(gltf.scene,{staticCells:true});
-   sky=await new THREE.TextureLoader().loadAsync(MOONLIT_SKY_URL);gltf.scene.add(createMoonlitSky(sky));
-   const resources=createRoomResources();resources.capture(gltf.scene);world.add(gltf.scene);
-   let denFloorReference;
-   if(layout.denFloorReference){
-    const reference=await loader.loadAsync(layout.denFloorReference);resources.capture(reference.scene);
-    reference.scene.traverse(o=>{if(o.isMesh&&o.material.map)denFloorReference=o.material;});
-   }
-   const mechanisms=[];gltf.scene.updateMatrixWorld(true);
-   gltf.scene.traverse(o=>{if(!o.isMesh||!['door','ladder'].includes(o.userData.preview_kind))return;
-    o.updateMatrix();mechanisms.push({mesh:o,rest:o.matrix.clone()});o.matrixAutoUpdate=false;
-   });
-   const lights=[];
-   for(const l of layout.lights??[]){const light=new THREE.PointLight(new THREE.Color(...l.color),l.intensity,8,2);light.position.fromArray(l.position);world.add(light);lights.push(light);}
-   let floorMaterial=denFloorReference;gltf.scene.traverse(o=>{if(!floorMaterial&&o.isMesh&&o.userData.preview_kind==='floor'&&o.material.name==='oak.001')floorMaterial=o.material;});
-   connections={group:gltf.scene,resources,mechanisms,lights,floorMaterial,fixtureAnchors:anchors,structureColliders};access('',0);
+   const group=new THREE.Group();world.add(group);
+   connections={group,mechanisms:[],structureColliders:[],fixtureAnchors:{supports:[]}};
+   // The hall is the only shared shell; all branch architecture is room-owned.
+   await ensureStructure('hallway');
+   sky=await new THREE.TextureLoader().loadAsync(MOONLIT_SKY_URL);world.add(createMoonlitSky(sky));
+   for(const l of layout.lights??[]){const light=new THREE.PointLight(new THREE.Color(...l.color),l.intensity,8,2);light.position.fromArray(l.position);world.add(light);}
+   access('',0);
   })().catch(error=>{loading=null;throw error;});
   await loading;
  }
@@ -196,17 +220,30 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  }
  async function ensureRoom(id,ticket){
   if(rooms.has(id))return;
-  if(id==='den'){
-   const source=getDen?.();if(!source?.scene||!source.camera)throw Error('The live den must be ready before house travel');
-   continuousDen=createContinuousDen(source,{floorMaterial:connections.floorMaterial});world.add(continuousDen.scene);rooms.set(id,{id,view:continuousDen.endpointCamera()});return;
+  let gltf,archive=[];
+  try{
+   if(!await ensureStructure(id)||ticket!==revision)return;
+   if(id==='den'){
+    await ensureDen?.();if(ticket!==revision)return;configureRenderer();
+    const source=getDen?.();if(!source?.scene||!source.camera)throw Error('The live den must be ready before house travel');
+    continuousDen=createContinuousDen(source,{floorMaterial:connections.floorMaterial});world.add(continuousDen.scene);rooms.set(id,{id,view:continuousDen.endpointCamera()});return;
+   }
+   gltf=id==='private-hall'?{scene:new THREE.Group()}:await loader.loadAsync(id==='hallway'&&debugParams.get('hallwayStyle')==='illustrated'?'/web/assets/house/hallway-style/hallway.glb':id==='hallway'&&debugParams.get('hallwayInk')==='transfer'?'/web/assets/house/hallway-ink/hallway.glb':roomAsset(id));
+   if(ticket!==revision)return;
+   if(id==='basement')archive=await loadBasementCartridges?.()??[];
+   if(ticket!==revision)return;
+   gltf.archive=archive;addRoom(id,gltf);
+  }finally{
+   const r=createRoomResources();archive.forEach(root=>r.capture(root));r.dispose();
+   if(!rooms.has(id)){
+    if(gltf){gltf.scene.removeFromParent();r.capture(gltf.scene);}r.dispose({closeImages:true});
+    if(id!=='hallway'&&id!=='private-hall'){structures.remove(id);refreshStructure();}
+   }
   }
-  const gltf=id==='private-hall'?{scene:new THREE.Group()}:await loader.loadAsync(id==='hallway'&&debugParams.get('hallwayStyle')==='illustrated'?'/web/assets/house/hallway-style/hallway.glb':id==='hallway'&&debugParams.get('hallwayInk')==='transfer'?'/web/assets/house/hallway-ink/hallway.glb':roomAsset(id));
-  if(ticket!==revision){const r=createRoomResources();r.capture(gltf.scene);r.dispose();return;}
-  addRoom(id,gltf);
  }
  function cancel(){
   setActive(false);targets.clear();revision++;cancelAnimationFrame(frame);finish?.();finish=null;current=null;camera=null;
-  access('',0);for(const id of [...rooms.keys()])unloadRoom(id);renderer.clear();
+  access('',0);for(const id of [...rooms.keys()])unloadRoom(id,{releaseDen:false});renderer.clear();
  }
  async function moveAlong(destination,branch,reverse){
   const ticket=revision;
@@ -252,30 +289,35 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  async function travel(id,onReady=()=>{}){
   revealRevision++;setActive(false);targets.clear();const ticket=revision;await load();if(ticket!==revision)return;
   if(reduced.matches){
-   // Jump directly to the final room: no connecting hall or intermediate frames.
+   // Release the old room before decoding its replacement, even for teleports.
+   for(const room of [...rooms.keys()])if(room!==id)unloadRoom(room);
+   if(id!=='den')unloadDen?.();
+   current=null;camera=null;
    await ensureRoom(id,ticket);
    if(ticket!==revision)return;
    current=rooms.get(id);
    camera=id==='den'?continuousDen.endpointCamera():viewFor(id);
    denProgress=id==='den'?1:0;
    access(id==='hallway'?'':id,id==='hallway'?0:1);
-   for(const room of [...rooms.keys()])if(room!==id)unloadRoom(room);
    resize();onReady();return;
   }
-  // Load both ends and the connecting hall only for the duration of travel.
   const initial=current?.id??(getDen?.()?.scene?'den':'hallway');
-  const needed=new Set(initial===id?[id]:['hallway',id,initial]);
-  await Promise.all([...needed].map(room=>ensureRoom(room,ticket)));
-  if(ticket!==revision)return;
+  await ensureRoom(initial,ticket);if(ticket!==revision)return;
   if(!current){current=rooms.get(initial);camera=continuousDen?continuousDen.endpointCamera():viewFor(initial);denProgress=continuousDen?1:0;resize();}
+  if(initial===id){render();onReady();return;}
+  await ensureRoom('hallway',ticket);if(ticket!==revision)return;
   render();onReady();
-  const from=current.id,destination=rooms.get(id);
-  if(from===id){render();return;}
-  if(from!=='hallway'&&id!=='hallway'){await moveAlong(rooms.get('hallway'),from,true);if(ticket!==revision)return;}
-  if(id==='hallway')await moveAlong(destination,from,true);
-  else await moveAlong(destination,id,false);
-  if(ticket!==revision)return;
-  for(const room of [...rooms.keys()])if(room!==id)unloadRoom(room);
+  if(initial!=='hallway'){
+   await moveAlong(rooms.get('hallway'),initial,true);if(ticket!==revision)return;
+   unloadRoom(initial);render();
+  }
+  // At the hall boundary there are no other rooms resident. Only now load
+  // the next room, so travel never overlaps two non-hall rooms.
+  if(id!=='hallway'){
+   await ensureRoom(id,ticket);if(ticket!==revision)return;
+   await moveAlong(rooms.get(id),id,false);if(ticket!==revision)return;
+   unloadRoom('hallway');
+  }
   render();
  }
  async function revealScrap(id,bonusId){
@@ -361,6 +403,6 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    return result;
   },
   bindTargets(value){targets=value;updateTargets();},activateProp(prop){input.activate(prop);},
-  dispose(){cancel();input.dispose();connections?.resources?.dispose();const resources=createRoomResources();resources.capture(world);resources.dispose();targetGeometry.dispose();targetMaterial.dispose();renderer.dispose();renderer.domElement.remove();saveFrame?.remove();}
+  async dispose(){cancel();input.dispose();await loading?.catch(()=>{});await structures.dispose();const resources=createRoomResources();resources.capture(world);resources.dispose({closeImages:true});world.clear();connections=null;sky=null;loading=null;targetGeometry.dispose();targetMaterial.dispose();renderer.renderLists.dispose();saveFrame?.remove();}
  };
 }

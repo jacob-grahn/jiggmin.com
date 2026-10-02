@@ -870,5 +870,258 @@
     "den": "original projection",
     "delivery": "One shared asset set; 1024/2048px atlas limits, WebP quality 80",
     "retainedFixtureSourceKey": "5ce9c63d81e3e82f33bbf330e007fc0931fb27315d19bff2bcab65ef257ecc69"
+  },
+  "structureAssets": {
+    "hallway": "/web/assets/house/release/structure/hallway.glb?v=bea9682becf8",
+    "den": "/web/assets/house/release/structure/den.glb?v=fffd9f0c2cef",
+    "workshop": "/web/assets/house/release/structure/workshop.glb?v=26d1306d63e8",
+    "basement": "/web/assets/house/release/structure/basement.glb?v=3adb2dd4f98b",
+    "attic": "/web/assets/house/release/structure/attic.glb?v=a6f95e3c51eb"
+  },
+  "structureStreaming": {
+    "version": 1,
+    "sourceKey": "8261784ec495a346cae55d914154a35306ed51f8cb99b79f4f3ceab238feede6",
+    "rooms": {
+      "hallway": {
+        "nodes": 451,
+        "bytes": 26154184,
+        "textureMiB": 302.49,
+        "textures": [
+          {
+            "name": "structure-hall-walls",
+            "width": 4096,
+            "height": 4096
+          },
+          {
+            "name": "hallway / structure-hall-floor",
+            "width": 4092,
+            "height": 4085
+          },
+          {
+            "name": "structure-hall-ceiling",
+            "width": 4096,
+            "height": 4096
+          },
+          {
+            "name": "finish-oak-rough",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-timber-normal",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-wood",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "White paint over rough wood grain",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "hallway / structure-hall-trim",
+            "width": 2048,
+            "height": 2047
+          },
+          {
+            "name": "hallway / structure-exterior-trim",
+            "width": 2037,
+            "height": 2048
+          },
+          {
+            "name": "finish-oak",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-brass-rough",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-metal-normal",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-brass",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "hallway / lighting",
+            "width": 331,
+            "height": 947
+          }
+        ],
+        "sha256": "bea9682becf84b1099b4c771982d06c35b7b519bcd9989171f3a0c2cd3350680"
+      },
+      "den": {
+        "nodes": 45,
+        "bytes": 6555008,
+        "textureMiB": 69.33,
+        "textures": [
+          {
+            "name": "structure-den-floor",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "structure-den-ceiling",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "structure-den-walls",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "structure-den-trim",
+            "width": 1024,
+            "height": 1024
+          }
+        ],
+        "sha256": "fffd9f0c2cef1d544771ffe3957ded961614bf490a60600a4db99d4ff2fa8516"
+      },
+      "workshop": {
+        "nodes": 90,
+        "bytes": 11239728,
+        "textureMiB": 116.84,
+        "textures": [
+          {
+            "name": "structure-garage-walls",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "structure-garage-trim",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "structure-stairs-floor",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "structure-garage-ceiling",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "finish-oak-rough",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-timber-normal",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-wood",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "workshop / structure-exterior-trim",
+            "width": 707,
+            "height": 1738
+          },
+          {
+            "name": "structure-garage",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "structure-garage-floor",
+            "width": 512,
+            "height": 512
+          },
+          {
+            "name": "workshop / lighting",
+            "width": 330,
+            "height": 947
+          }
+        ],
+        "sha256": "26d1306d63e8a55d04aa4adde16b09ea28c4dd67f1b639e3177c12584477f169"
+      },
+      "basement": {
+        "nodes": 81,
+        "bytes": 6513580,
+        "textureMiB": 70.09,
+        "textures": [
+          {
+            "name": "basement / structure-hall-trim",
+            "width": 1963,
+            "height": 2041
+          },
+          {
+            "name": "basement / structure-hall-floor",
+            "width": 1420,
+            "height": 402
+          },
+          {
+            "name": "basement / structure-attic-trim",
+            "width": 1822,
+            "height": 2577
+          },
+          {
+            "name": "structure-stairs-trim",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "basement / lighting",
+            "width": 331,
+            "height": 947
+          }
+        ],
+        "sha256": "3adb2dd4f98bb520b3725dc0b645c5d4052f27d6b9ee83500677e68e619d5820"
+      },
+      "attic": {
+        "nodes": 155,
+        "bytes": 9643312,
+        "textureMiB": 107.19,
+        "textures": [
+          {
+            "name": "attic / structure-attic-trim",
+            "width": 4094,
+            "height": 4059
+          },
+          {
+            "name": "finish-oak-rough",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-timber-normal",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-wood",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-oak",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "structure-attic-floor",
+            "width": 2048,
+            "height": 2048
+          }
+        ],
+        "sha256": "a6f95e3c51ebc1a55bf538823ab85f8e19b70179d600a8e079da3c369ce447ba"
+      }
+    }
   }
 }

@@ -22,6 +22,7 @@ def build(output=OUTPUT):
     slugs = game_slugs()
     if not (ROOT / 'games').is_dir():
         raise FileNotFoundError('Restore the local games/ archive before building. See README.md.')
+    subprocess.run(['node', str(ROOT / 'scripts/split-house-structure.mjs')], cwd=ROOT, check=True)
     output.mkdir(parents=True, exist_ok=True)
     html = (ROOT / 'index.html').read_text()
     (output / 'index.html').write_text(html)

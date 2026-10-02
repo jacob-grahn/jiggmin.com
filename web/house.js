@@ -1,5 +1,5 @@
 import {setRoomNavigation,fadeNavigation} from './room-navigation.js?v=fade-1';
-import {createHouseRenderer} from './house-release-renderer.js?v=teleport-1';
+import {createHouseRenderer} from './house-release-renderer.js?v=room-shells-1';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 const ROOMS = ['hallway', 'workshop', 'attic', 'basement', 'private-hall'];
@@ -21,7 +21,8 @@ async function json(url) {
   return response.json();
 }
 
-export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoomChange = () => {}, onCollectBonus = () => {}, getDen } = {}) {
+export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoomChange = () => {}, onCollectBonus = () => {}, getDen, ensureDen, unloadDen, loadBasementCartridges } = {}) {
+  let exiting;
   let open = false, destroyed = false, room = 'hallway', roomTicket = 0;
   let data, manifest, view, travelling = false, contentRequest, discovered = new Set(), storage, persistence = true;
   let modalReturn, modalKind, journalOnly=false, revealing=false;
@@ -181,7 +182,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     return contentRequest;
   }
   async function enter(destination = 'hallway', doorId) {
-    if (destroyed || travelling) return;
+    if (destroyed || travelling || exiting) return;
     if (!ROOMS.includes(destination)) destination = 'hallway';
     closeModal();
     const wasOpen = open;
@@ -198,7 +199,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       hotspots.replaceChildren();
       await content();
       if (!open || ticket !== roomTicket) return;
-      view ??= createHouseRenderer(scene,{onActivate:activate,getDen,collected:new Set(data.notes.filter(note=>data.notes.filter(n=>n.hotspot===note.hotspot).every(n=>discovered.has(n.id))).map(note=>note.hotspot))});
+      view ??= createHouseRenderer(scene,{onActivate:activate,getDen,ensureDen,unloadDen,loadBasementCartridges,collected:new Set(data.notes.filter(note=>data.notes.filter(n=>n.hotspot===note.hotspot).every(n=>discovered.has(n.id))).map(note=>note.hotspot))});
       await view.load(destination);
       if (!open || ticket !== roomTicket) return;
       await view.travel(destination, () => { loading.hidden = true; });
@@ -260,14 +261,28 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       hotspots.replaceChildren();
       await view?.depart();
     }
-    finally { hotspots.inert = false; if (ticket === roomTicket) exit(); }
+    catch(error){console.error('Den travel failed',error);}
+    finally { hotspots.inert = false; if (ticket === roomTicket) await exit(); }
   }
   function exit() {
-    if (!open) return;
+    if(exiting)return exiting;
+    if(!open)return Promise.resolve();
     journalOnly=false;root.classList.remove('house-journal-only');
-    roomTicket++; closeModal(); open = false; root.hidden = true; root.inert = true;
-    fadeNavigation(hotspots, false); fadeNavigation(back, false);
-    hotspots.replaceChildren(); view?.cancel(); travelling = false; back.disabled = false; onExit();
+    roomTicket++;shade.hidden=true;modalBody.replaceChildren();open=false;
+    header.inert=viewport.inert=footer.inert=false;
+    fadeNavigation(hotspots,false);fadeNavigation(back,false);hotspots.replaceChildren();
+    travelling=true;
+    const oldView=view;view=null;
+    exiting=(async()=>{
+      await oldView?.dispose();
+      await ensureDen?.();
+      root.hidden=true;root.inert=true;travelling=false;back.disabled=false;onExit();
+    })().catch(error=>{
+      open=true;travelling=false;loading.hidden=false;
+      loading.replaceChildren(el('p','','The den could not load.'),button('Try again',()=>exit()));
+      console.error('Den return failed',error);
+    }).finally(()=>{exiting=null;});
+    return exiting;
   }
   function keydown(event) {
     if (!open) return;

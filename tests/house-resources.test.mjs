@@ -23,3 +23,11 @@ test('unloading includes textures in shader uniforms',()=>{
  const resources=createRoomResources();resources.capture(new THREE.Mesh(new THREE.PlaneGeometry(),material));resources.dispose();
  assert.equal(disposed,1);
 });
+
+test('owned bitmap sources close once, while shared sources remain open by default',()=>{
+ let closed=0;const bitmap={close(){closed++;}};
+ const original=new THREE.Texture(bitmap),copy=original.clone();
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(),new THREE.MeshBasicMaterial({map:original,alphaMap:copy}));
+ const shared=createRoomResources();shared.capture(mesh);shared.dispose();assert.equal(closed,0);
+ const owned=createRoomResources();owned.capture(mesh);owned.dispose({closeImages:true});owned.dispose({closeImages:true});assert.equal(closed,1);
+});

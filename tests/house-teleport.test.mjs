@@ -11,7 +11,7 @@ function coordinator(){
  const create=new Function('rooms','events','endpoint',`
   let revealRevision=0,revision=0,current=rooms.get('workshop'),camera,denProgress;
   const reduced={matches:true},targets=new Map(),continuousDen={endpointCamera:()=>endpoint};
-  const setActive=()=>{},load=async()=>{};
+  const setActive=()=>{},load=async()=>{},unloadDen=()=>{};
   const ensureRoom=async id=>{events.push(['load',id]);rooms.set(id,{id});};
   const viewFor=id=>({id}),access=(...args)=>events.push(['access',...args]);
   const unloadRoom=id=>{events.push(['unload',id]);rooms.delete(id);};

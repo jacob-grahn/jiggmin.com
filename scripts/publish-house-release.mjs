@@ -28,3 +28,5 @@ else{
  copyFileSync(`${dir}/bake-report.json`,'docs/house-plan/release-bake-report.json');
  console.log(`Published ${quality} original-window bake locally. No deployment performed.`);
 }
+
+await (await import('./split-house-structure.mjs')).splitHouseStructure();

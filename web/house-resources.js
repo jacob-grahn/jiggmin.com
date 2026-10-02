@@ -11,7 +11,9 @@ export function createRoomResources(){
     for(const uniform of Object.values(material.uniforms??{}))texture(uniform.value);
    }
   });},
-  dispose(){
+  dispose({closeImages=false}={}){
+   // Close owned decoded bitmaps only when no remaining room shares them.
+   if(closeImages){const images=new Set();textures.forEach(t=>{for(const image of Array.isArray(t.image)?t.image:[t.image])if(image)images.add(image);});images.forEach(image=>image.close?.());}
    geometries.forEach(value=>value.dispose());materials.forEach(value=>value.dispose());textures.forEach(value=>value.dispose());
    geometries.clear();materials.clear();textures.clear();
   },

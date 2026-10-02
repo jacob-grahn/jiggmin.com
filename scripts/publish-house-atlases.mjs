@@ -18,3 +18,5 @@ for(const key of ['denFloorReference','fixedFixtures','hatchLighting'])if(layout
 }
 await writeFile(`${out}/layout.json`,JSON.stringify(layout,null,2)+'\n');
 console.log('Published atlas refresh locally; original den projection and live props retained.');
+
+await (await import('./split-house-structure.mjs')).splitHouseStructure();

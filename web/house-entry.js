@@ -1,7 +1,7 @@
 import {setRoomNavigation,fadeNavigation} from './room-navigation.js?v=fade-1';
 // This small entrance is the only house module loaded with the den.
 // Room code, notes, artwork, and bonus games are fetched after exploration begins.
-export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBonus}){
+export function createHouseEntry({host,onOpen,onExit,onError,getDen,ensureDen,unloadDen,loadBasementCartridges,onCollectBonus}){
  const nav=document.createElement('nav');
  nav.style.opacity='0';
  nav.className='house-entrance';nav.setAttribute('aria-label','Explore the house');
@@ -26,7 +26,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBon
   nav.inert=true;nav.setAttribute('aria-hidden','true');
   loading=(async()=>{
    await fadeNavigation(nav,false);
-   if(!instance){const [module]=await Promise.all([import('./house.js?v=teleport-1'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=room-shells-1'),styles()]);instance=await module.createHouse({getDen,ensureDen,unloadDen,loadBasementCartridges,onCollectBonus,
     onOpen(){active=true;update();onOpen?.();},
     onExit(){active=false;update();onExit?.();if(origin?.isConnected&&ready&&!playing)origin.focus();},
    });}
@@ -37,5 +37,5 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBon
  }
  for(const button of buttons)button.addEventListener('click',event=>open(event.currentTarget));
  update();
- return {setPlaying(value){playing=value;update();},setReady(){ready=true;update();},openJournal(){if(ready)return open(null,true);},exit(){entryTicket++;instance?.exit();}};
+ return {setPlaying(value){playing=value;update();},setReady(){ready=true;update();},openJournal(){if(ready)return open(null,true);},exit(){entryTicket++;return instance?.exit();}};
 }

@@ -179,3 +179,5 @@ layout.assets.den=null; // The actual live den is cloned at the start of travel.
 layout.routes.den=[layout.views.hub.position,[5.55,1.65,7.55],[5.55,1.65,layout.views.den.position[2]],layout.views.den.position];
 writeFileSync(`${out}/layout.json`,JSON.stringify(includeFixedFixtures(layout),null,2)+'\n');
 writeFileSync('docs/house-plan/style-restoration.json',JSON.stringify(report,null,2)+'\n');console.log(report);
+
+await (await import('./split-house-structure.mjs')).splitHouseStructure({directory:out});

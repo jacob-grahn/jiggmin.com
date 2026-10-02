@@ -1,8 +1,9 @@
+import {createRoomResources} from './house-resources.js';
 import {createBonusCollection,getBonusGame} from './bonus-collection.js';
 import {createBonusCartridge,bonusDeliveryPoses} from './bonus-cartridge-model.js';
 import {cartridgeRoom} from './cartridge-storage.js';
 import * as THREE from 'three';
-import {createHouseEntry} from './house-entry.js?v=teleport-1';
+import {createHouseEntry} from './house-entry.js?v=room-shells-1';
 import {createDenJournal} from './den-journal.js';
 import {GLTFLoader} from './model-loader.js';
 import {inSlot,slotTarget,playbackFile} from './interaction.js?v=aligned-slot-1';
@@ -24,7 +25,7 @@ const say=text=>status.textContent=text;
 let basementCartridges=[];
 let bonusStorage;try{bonusStorage=window.localStorage;}catch{}
 const bonusCollection=createBonusCollection(bonusStorage),bonusPrepared=new Map();
-let bonusSync;
+let bonusSync,denLoading,denRevision=0;
 let renderer,camera,scene,environment,physics,cord,roots=[],games,meta,drag=null,inserted=null,player=null,loadId=0,lastTime=0,dirty=true;
 const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),intersection=new THREE.Vector3();
 const motions=new Map(),recovery=new RecoveryQueue();
@@ -41,7 +42,7 @@ const currentMode=()=>currentGame()?.gameplay.mode||'controller';
 const isCartridge=root=>root.userData.role==='draggable_cartridge';
 let houseOpen=false;
 const denMain=document.querySelector('main');
-const houseEntry=createHouseEntry({host:denMain,getDen:()=>({scene,camera,basementCartridges,exposure:renderer?.toneMappingExposure}),
+const houseEntry=createHouseEntry({host:denMain,getDen:()=>({scene,camera,renderer,exposure:.95}),ensureDen,unloadDen,loadBasementCartridges,
  onCollectBonus(id){bonusCollection.collect(id);},
  onOpen(){
   if(drag)finishDrag({pointerId:drag.id},false,true);
@@ -50,17 +51,23 @@ const houseEntry=createHouseEntry({host:denMain,getDen:()=>({scene,camera,baseme
   if(camera)updateZoom(0,true);
   houseOpen=true;denMain.inert=true;denMain.setAttribute('aria-hidden','true');lastTime=0;
  },
- onExit(){houseOpen=false;denMain.inert=false;denMain.removeAttribute('aria-hidden');lastTime=0;dirty=true;recovery.defer(performance.now()/1000);syncBonusCartridges().catch(error=>showError(error.message));},
+ onExit(){restoreDenRenderer();houseOpen=false;denMain.inert=false;denMain.removeAttribute('aria-hidden');lastTime=0;dirty=true;recovery.defer(performance.now()/1000);syncBonusCartridges().catch(error=>showError(error.message));},
  onError:showError,
 });
-function syncBonusCartridges(){
- if(!physics||houseOpen)return Promise.resolve();
+function syncBonusCartridges(restoring=false){
+ if(!physics||(houseOpen&&!restoring))return Promise.resolve();
  return bonusSync??=(async()=>{
+  const revision=denRevision;
   for(const [index,id] of bonusCollection.found.entries()){
    if(roots.some(root=>gameId(root)===id))continue;
    const game=await getBonusGame(id);
-   if(!bonusPrepared.has(id))bonusPrepared.set(id,await createBonusCartridge(id));
-   if(houseOpen)return;
+   if(revision!==denRevision)return;
+   if(!bonusPrepared.has(id)){
+    const prepared=await createBonusCartridge(id);
+    if(revision!==denRevision){const resources=createRoomResources();resources.capture(prepared);resources.dispose({closeImages:true});return;}
+    bonusPrepared.set(id,prepared);
+   }
+   if(houseOpen&&!restoring)return;
    const root=bonusPrepared.get(id);bonusPrepared.delete(id);
    if(!games.some(game=>game.id===id))games.push(game);
    optimizeCartridge(root);illustrateObject(root);scene.add(root);roots.push(root);
@@ -315,8 +322,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'&&drag)finishDrag({poin
 window.addEventListener('blur',()=>{if(drag)finishDrag({pointerId:drag.id},false,true);});
 document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden&&drag)finishDrag({pointerId:drag.id},false,true);});
 
-function applyRoute(){
- houseEntry.exit();
+async function applyRoute(){
+ await houseEntry.exit();
  if(!physics)return;if(drag)finishDrag({pointerId:drag.id},true);
  const route=resolveRoute(location.pathname,games);
  if(route.kind==='game'&&cartridgeRoom(route.game)==='basement'){eject({updateUrl:false});say(`${route.game.title} is marked broken and stored on the basement archive shelf.`);return;}
@@ -335,7 +342,39 @@ function screenTransform(){
   Object.assign(player.style,{width:`${game.embedWidth}px`,height:`${game.embedHeight}px`,left:`${fit.left}px`,top:`${fit.top}px`,transform:`scale(${fit.scale})`});
  }
 }
-async function init(){
+function restoreDenRenderer(){
+ room.append(canvas);canvas.id='cartridges';canvas.classList.remove('house-canvas');
+ renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0,0);
+ renderer.localClippingEnabled=false;renderer.shadowMap.enabled=true;renderer.toneMappingExposure=.95;
+ renderer.setSize(room.clientWidth,room.clientHeight,false);updateZoom(0,true);dirty=true;
+}
+function unloadDen(){
+ if(!scene)return;
+ denRevision++;
+ const resources=createRoomResources();resources.capture(scene);
+ // Include the alternate CRT material, which may have been rendered earlier.
+ environment?.setPlaying(true);resources.capture(scene);environment?.setPlaying(false);
+ for(const root of [...basementCartridges,...bonusPrepared.values()])resources.capture(root);
+ scene.traverse(o=>o.shadow?.dispose());resources.dispose({closeImages:true});renderer?.renderLists.dispose();
+ roots=[];basementCartridges=[];bonusPrepared.clear();stored.clear();motions.clear();recovery.lastMoved.clear();
+ scene=camera=environment=physics=cord=controller=controllerDock=upperShelf=anchors=null;room.dataset.denLoaded='false';upperBodies=[];
+ upperMode=false;shelfSlots=SHELF_SLOTS;cameraDrop=0;focusY=.41;
+}
+function ensureDen(){
+ if(denLoading)return denLoading;
+ if(scene&&physics)return Promise.resolve();
+ return denLoading??=loadDen().catch(error=>{unloadDen();throw error;}).finally(()=>{denLoading=null;});
+}
+async function loadBasementCartridges(){
+ // Build archive props only for a basement visit; no den scene is needed.
+ const result=[];
+ try{for(const game of games.filter(game=>cartridgeRoom(game)==='basement')){
+  const root=new THREE.Group();root.userData={role:'draggable_cartridge',game_id:game.id,title:game.title};
+  result.push(root);await remodelCartridge(root,game);
+ }}catch(error){const resources=createRoomResources();result.forEach(root=>resources.capture(root));resources.dispose();throw error;}
+ return result;
+}
+async function loadDen(){
  const loader=new GLTFLoader();
  const json=async path=>{const r=await fetch(path);if(!r.ok)throw Error(`Could not load ${path}`);return r.json();};
  const denLighting=new URLSearchParams(location.search).get('denLighting');
@@ -361,7 +400,7 @@ async function init(){
   scene.add(root);roots.push(root);
  }
  const tablePoses=roots.filter(r=>r.userData.storage==='table').map(r=>({position:r.position.clone(),quaternion:r.quaternion.clone()}));
- await Promise.all(roots.map(root=>remodelCartridge(root,games.find(g=>g.id===gameId(root)))));
+ await Promise.all(roots.filter(root=>cartridgeRoom(games.find(g=>g.id===gameId(root)))!=='basement').map(root=>remodelCartridge(root,games.find(g=>g.id===gameId(root)))));
  basementCartridges=roots.filter(root=>cartridgeRoom(games.find(game=>game.id===gameId(root)))==='basement');
  for(const root of basementCartridges)root.removeFromParent();
  roots=roots.filter(root=>!basementCartridges.includes(root));
@@ -390,20 +429,25 @@ async function init(){
  controller.userData.title='J/01 controller';roots.push(controller);
  physics.addController(gameId(controller),{position:controller.position,quaternion:controller.quaternion});
  cord=createControllerCord(controller);scene.add(cord.mesh);
- renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0,0);renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;
+ if(!renderer){renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'high-performance'});renderer.toneMapping=THREE.ACESFilmicToneMapping;}
  addCartridgeLighting(scene,renderer);
  document.querySelector('.backdrop').hidden=true;
  slot.style.left=`${meta.slot[0]*100}%`;slot.style.top=`${meta.slot[1]*100}%`;
- mobileControls=createMobileController({getPlayer:()=>player,getAspect:()=>{const g=currentGame();return g?g.embedWidth/g.embedHeight:4/3;},onQuit:()=>eject(),onGesture:unlockAudio});
+ mobileControls??=createMobileController({getPlayer:()=>player,getAspect:()=>{const g=currentGame();return g?g.embedWidth/g.embedHeight:4/3;},onQuit:()=>eject(),onGesture:unlockAudio});
  controllerDock=createControllerDock({controller,physics,cord,camera,room,panel:$('mobile-controller'),controls:mobileControls,reducedMotion});
- $('eject-game').addEventListener('click',()=>eject());
- touchLayout.addEventListener('change',()=>{mobileControls.release();updateTouchSurface();});
- new ResizeObserver(()=>{tip.hidden=true;mobileControls.release();if(drag)finishDrag({pointerId:drag.id},false,true);renderer.setSize(room.clientWidth,room.clientHeight,false);updateZoom(0,true);}).observe(room);
  updateZoom(0,true);
-
+ await bonusSync;
+ await syncBonusCartridges(true);
+ room.dataset.denLoaded='true';
+}
+async function init(){
+ await ensureDen();restoreDenRenderer();
+ $('eject-game').addEventListener('click',()=>eject());
+ touchLayout.addEventListener('change',()=>{mobileControls.release();if(scene)updateTouchSurface();});
+ new ResizeObserver(()=>{if(houseOpen||!scene)return;tip.hidden=true;mobileControls.release();if(drag)finishDrag({pointerId:drag.id},false,true);renderer.setSize(room.clientWidth,room.clientHeight,false);updateZoom(0,true);}).observe(room);
  renderer.setAnimationLoop(time=>{
   const dt=lastTime?Math.min((time-lastTime)/1000,.08):0;lastTime=time;
-  if(!document.hidden&&!houseOpen){mobileControls.update(dt);physics.step(dt);updateMotions(dt);syncObjects();recoverCartridges(dt);updateZoom(dt);dirty=controllerDock.update(dt)||dirty;const flicker=environment.updateIdle(time/1000);dirty=environment.reactions.update(dt,reducedMotion.matches)||dirty;if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
+  if(!document.hidden&&!houseOpen&&scene){mobileControls.update(dt);physics.step(dt);updateMotions(dt);syncObjects();recoverCartridges(dt);updateZoom(dt);dirty=controllerDock.update(dt)||dirty;const flicker=environment.updateIdle(time/1000);dirty=environment.reactions.update(dt,reducedMotion.matches)||dirty;if(dirty||drag||flicker){cord.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=dirty||!!drag;renderer.render(scene,camera);dirty=false;}}
  });
  if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
  await syncBonusCartridges().catch(error=>showError(error.message));
