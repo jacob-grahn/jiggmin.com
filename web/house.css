@@ -1,11 +1,11 @@
 .house-overlay[hidden],.house-overlay [hidden]{display:none!important}
 .house-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:#080e12;color:#e1d9c8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.house-overlay button:not(.room-navigation){background:#17201de8;border-color:#56625780;color:#ded8c8;letter-spacing:.015em;transition:background .15s,border-color .15s}
-.house-overlay button:not(.room-navigation):hover{background:#303932;border-color:#a0ab9180}
+.house-overlay button:where(:not(.room-navigation)){background:#17201de8;border-color:#56625780;color:#ded8c8;letter-spacing:.015em;transition:background .15s,border-color .15s}
+.house-overlay button:where(:not(.room-navigation)):hover{background:#303932;border-color:#a0ab9180}
 .house-overlay button:focus-visible{outline:2px solid #d3c59b;outline-offset:4px}
 .house-header{position:absolute;inset:20px 24px auto;z-index:3;display:flex;align-items:center;gap:12px;pointer-events:none}
-.house-header button:not(.room-navigation),.house-footer button{pointer-events:auto;background:#0b141b70;border-color:transparent;opacity:.65}
-.house-header button:not(.room-navigation):hover,.house-header button:not(.room-navigation):focus-visible,.house-footer button:hover,.house-footer button:focus-visible{opacity:1}
+.house-header button:where(:not(.room-navigation)),.house-footer button{pointer-events:auto;background:#0b141b70;border-color:transparent;opacity:.65}
+.house-header button:where(:not(.room-navigation)):hover,.house-header button:where(:not(.room-navigation)):focus-visible,.house-footer button:hover,.house-footer button:focus-visible{opacity:1}
 .house-heading{flex:1}.house-heading h1{margin:0;font-weight:400;font-size:24px;letter-spacing:.025em;outline:none}
 .house-kicker{margin:0 0 5px;text-transform:uppercase;letter-spacing:.16em;font-size:10px;color:#aaa994}
 .house-viewport{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
@@ -15,8 +15,9 @@
 .house-header:has(.house-back[hidden]){justify-content:flex-end}
 .house-image{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none}
 .house-hotspots{position:absolute;inset:0}
-.house-overlay .house-hotspot{position:absolute;padding:0;border:1px solid transparent;background:transparent;border-radius:9px;box-shadow:none}
-.house-overlay .house-hotspot:hover,.house-overlay .house-hotspot:focus-visible{background:#efd39c08;border-color:#e1d6ae66;box-shadow:0 0 15px #ddcb9020;outline-offset:3px}
+.house-overlay .house-hotspot{position:absolute;padding:0;border:0;background:transparent;box-shadow:none}
+/* Object feedback uses the small dot and label, never a rectangular hitbox. */
+.house-overlay .house-hotspot,.house-overlay .house-hotspot:hover,.house-overlay .house-hotspot:focus-visible{border:0;background:transparent;box-shadow:none;outline:none}
 .house-hotspot:after{content:'';position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#f4e6b1;box-shadow:0 0 8px #f4e6b1;opacity:0;transform:translate(-50%,-50%)}
 .house-hotspot:hover:after,.house-hotspot:focus-visible:after{opacity:.8}
 .house-hotspot-label{position:absolute;left:50%;bottom:100%;width:max-content;max-width:220px;transform:translateX(-50%);padding:7px 10px;border:1px solid #858b695c;background:#111916ed;border-radius:4px;font-size:12px;line-height:1.4;pointer-events:none;opacity:0;transition:opacity .15s}
