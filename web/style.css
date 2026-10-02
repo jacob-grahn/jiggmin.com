@@ -71,7 +71,8 @@ body{display:block;overflow:hidden}main{position:relative;width:100%;height:100s
 
 /* An invitation at the edge of the den; the house itself loads on request. */
 .house-entrance[hidden]{display:none}
-.house-entrance button{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:7}
+.house-entrance button{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));right:max(18px,env(safe-area-inset-right));z-index:7}
+.house-entrance .room-navigation-label{left:auto;right:0;transform:none}
 /* One navigation treatment for entrances, doors, and room returns. */
 button.room-navigation{width:56px;height:56px;min-width:56px;min-height:56px;padding:0;border:0;border-radius:50%;background:transparent;color:#eadbc0;opacity:1;touch-action:manipulation;overflow:visible}
 button.room-navigation:hover,button.room-navigation:focus-visible{background:transparent}
@@ -83,6 +84,7 @@ button.room-navigation:hover,button.room-navigation:focus-visible{background:tra
 [data-direction=up-right] .room-navigation-chevron{transform:translate(-2px,2px)}
 [data-direction=up-left] .room-navigation-chevron{transform:translate(2px,2px) rotate(-90deg)}
 .room-navigation-label{position:absolute;left:50%;bottom:calc(50% + 34px);transform:translateX(-50%);width:max-content;max-width:120px;padding:3px 7px;border-radius:4px;background:#141b26ed;color:#eadbc0;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.015em;pointer-events:none;text-align:center}
-.room-navigation:hover .room-navigation-circle,.room-navigation:focus-visible .room-navigation-circle{background:#303443;border-color:#e1d6ae}
+.room-navigation:focus-visible .room-navigation-circle{background:#303443;border-color:#e1d6ae}
+@media(hover:hover) and (pointer:fine){.room-navigation:hover .room-navigation-circle{background:#303443;border-color:#e1d6ae}}
 .room-navigation:focus-visible .room-navigation-circle{outline:2px solid #8cd1df;outline-offset:4px}
 @media(prefers-reduced-motion:reduce){.room-navigation-circle{transition:none}}

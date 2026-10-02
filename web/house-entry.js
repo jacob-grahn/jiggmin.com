@@ -16,7 +16,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,ensureDen,un
  const update=()=>{const visible=!active&&ready&&!playing&&!loading;nav.inert=!visible;nav.setAttribute('aria-hidden',String(!visible));fadeNavigation(nav,visible);};
  function styles(){
   return stylesheet??=new Promise((resolve,reject)=>{
-   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=navigation-fade-1';
+   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=nav-background-1';
    link.onload=resolve;link.onerror=()=>{link.remove();stylesheet=null;reject(new Error('The house styles could not load. Try the arrow again.'));};document.head.append(link);
   });
  }

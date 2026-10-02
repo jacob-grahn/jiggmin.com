@@ -1,11 +1,11 @@
 .house-overlay[hidden],.house-overlay [hidden]{display:none!important}
 .house-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:#080e12;color:#e1d9c8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.house-overlay button{background:#17201de8;border-color:#56625780;color:#ded8c8;letter-spacing:.015em;transition:background .15s,border-color .15s}
-.house-overlay button:hover{background:#303932;border-color:#a0ab9180}
+.house-overlay button:not(.room-navigation){background:#17201de8;border-color:#56625780;color:#ded8c8;letter-spacing:.015em;transition:background .15s,border-color .15s}
+.house-overlay button:not(.room-navigation):hover{background:#303932;border-color:#a0ab9180}
 .house-overlay button:focus-visible{outline:2px solid #d3c59b;outline-offset:4px}
 .house-header{position:absolute;inset:20px 24px auto;z-index:3;display:flex;align-items:center;gap:12px;pointer-events:none}
-.house-header button,.house-footer button{pointer-events:auto;background:#0b141b70;border-color:transparent;opacity:.65}
-.house-header button:hover,.house-header button:focus-visible,.house-footer button:hover,.house-footer button:focus-visible{opacity:1}
+.house-header button:not(.room-navigation),.house-footer button{pointer-events:auto;background:#0b141b70;border-color:transparent;opacity:.65}
+.house-header button:not(.room-navigation):hover,.house-header button:not(.room-navigation):focus-visible,.house-footer button:hover,.house-footer button:focus-visible{opacity:1}
 .house-heading{flex:1}.house-heading h1{margin:0;font-weight:400;font-size:24px;letter-spacing:.025em;outline:none}
 .house-kicker{margin:0 0 5px;text-transform:uppercase;letter-spacing:.16em;font-size:10px;color:#aaa994}
 .house-viewport{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
