@@ -744,7 +744,7 @@ def displayed_print(n,path,loc,w,h,framed=False,angle=0,lean=0,frame_mat='wood',
  box(n+' backing',(0,.012,0),(w+.025,.024,h+.025),'paper',.002)
  print_plane(n+' image',path,(0,-.005,0),w,h)
  if credit:
-  emit('Artwork credit',(.88,.90,.82),.7)
+  emit('Artwork credit',(.008023,.070360,.026241),.7) # Dark green, sRGB #164b2d.
   lettering=text(credit,(w/2-.022,-.008,-h/2+.025),.027,'Artwork credit')
   lettering.name=n+' artist credit';lettering.data.align_x='RIGHT'
  if framed:
@@ -783,27 +783,23 @@ def printed_tshirt(path):
  ob=bpy.data.objects.new('PR2 cartridge screenprint on T-shirt chest',me);bpy.context.collection.objects.link(ob);me.materials.append(M[printed_material(path)])
 
 def house_art(room):
- # Original odd prints are ordinary belongings; game-label posters are omitted.
- art_dir=R/'scene/house-textures/art'
- weird=sorted(p for p in art_dir.glob('*') if p.suffix.lower() in ('.webp','.png','.jpg','.jpeg'))
- if len(weird)<3:raise RuntimeError('Original odd art textures are not ready')
- def odd(i):return str(weird[i%len(weird)].relative_to(R))
+ # Supplied personal influences; artwork textures are fitted without cropping.
  if room=='hallway':
-  displayed_print('Odd entrance picture',odd(0),(1.575,1.65,1.85),.62,.70,True,-math.pi/2,frame_mat='pale')
+  displayed_print('Odd entrance picture','scene/house-textures/influences/wind-waker.png',(1.575,1.65,1.85),.62,.70,True,-math.pi/2,frame_mat='pale')
   before=set(bpy.data.objects)
-  displayed_print('Bitey painting','scene/house-textures/bitey/bitey.jpeg',(-1.575,1.55,1.65),.72,.72,True,math.pi/2,frame_mat='wood',credit='Adam Phillips')
+  displayed_print('Bitey painting','scene/house-textures/bitey/bitey-credited.png',(-1.575,1.55,1.65),.72,.72,True,math.pi/2,frame_mat='wood')
   anchor('bitey',*[ob for ob in bpy.data.objects if ob not in before])
  elif room=='workshop':
-  displayed_print('Odd picture among bench tools',odd(2),(-1.30,1.31,1.29),.25,.27,True,lean=-.10,frame_mat='blue',standing=True)
+  displayed_print('Odd picture among bench tools','scene/house-textures/influences/total-annihilation.png',(-1.30,1.31,1.29),.25,.27,True,lean=-.10,frame_mat='blue',standing=True)
  elif room=='attic':
-  print_plane('Stored odd paper study',odd(1),(-.67,2.921,.67),.44,.54)
-  print_plane('Odd stored packing-board print',odd(2),(1.66,1.925,.67),.35,.49)
+  print_plane('Stored odd paper study','scene/house-textures/influences/outer-wilds.png',(-.67,2.921,.67),.44,.54)
+  print_plane('Odd stored packing-board print','scene/house-textures/influences/muse.png',(1.66,1.925,.67),.35,.49)
   box('Plain carton supporting stored cartridge art',(-.94,.82,.40),(.61,.38,.54),'clay',.01)
  elif room=='basement':
-  displayed_print('Moon garden basement picture','scene/house-textures/basement-art/moon-garden.png',(-.20,3.255,2.12),1.10,.825,True,frame_mat='pale')
-  displayed_print('Fish boots basement picture','scene/house-textures/art/fish-boots.png',(-3.95,3.255,2.70),.65,.81,True,frame_mat='wood')
-  displayed_print('Odd cellar wall picture',odd(2),(-4.855,.35,1.83),.77,.87,True,math.pi/2,frame_mat='wood')
-  displayed_print('Small shelf picture',odd(0),(1.77,1.813,1.45),.35,.40,True,lean=-.08,frame_mat='pale',standing=True)
+  displayed_print('Moon garden basement picture','scene/house-textures/influences/flcl.png',(-.20,3.255,2.12),1.10,.825,True,frame_mat='pale')
+  displayed_print('Fish boots basement picture','scene/house-textures/influences/death.png',(-3.95,3.255,2.70),.65,.81,True,frame_mat='wood')
+  displayed_print('Odd cellar wall picture','scene/house-textures/influences/journey.png',(-4.855,.35,1.83),.77,.87,True,math.pi/2,frame_mat='wood')
+  displayed_print('Small shelf picture','scene/house-textures/influences/my-neighbor-totoro.png',(1.77,1.813,1.45),.35,.40,True,lean=-.08,frame_mat='pale',standing=True)
 
 def tighten_attic_view():
  # Stand behind the foreground brace and look slightly left toward the discoveries.

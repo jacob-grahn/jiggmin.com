@@ -3,7 +3,7 @@ import {roomBoundaryPlanes} from './house-boundaries.js';
 import {prepareHallwayBake,prepareSurfaceBake,isHallwayConnection} from './hallway-bake.js?v=stairs-1';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
 import {createBasementCartridges} from './cartridge-storage.js';
-import {illustrateHouse} from './house-illustration.js?v=3';
+import {illustrateHouse} from './house-illustration.js?v=4';
 import {repairDenProjection} from './den-projection.js';
 import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
 import {createRoomResources} from './house-resources.js';

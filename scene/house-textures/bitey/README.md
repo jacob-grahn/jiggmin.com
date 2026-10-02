@@ -1,1 +1,3 @@
-Bitey illustration by Adam Phillips, supplied by the site owner. Original JPEG preserved without cropping or modification. The hallway model overlays the artist credit at the bottom right and retains the square aspect ratio.
+Bitey illustration by Adam Phillips, supplied by the site owner. The original JPEG is preserved. `bitey-credited.png` includes the dark-green (#164b2d) artist credit at bottom right and retains the square aspect ratio. The browser uses only the picture mesh, with no separate credit geometry.
+
+Reproduce the credited texture with Blender: `Blender -b --python scene/scripts/bake_bitey_credit.py`. This renders the original image and native text into one unlit texture. `node scripts/update-house-art.mjs` updates existing exported models; `scene/scripts/update_house_art.py` synchronizes saved Blender scenes.
