@@ -1,8 +1,9 @@
-import {setRoomNavigation} from './room-navigation.js';
+import {setRoomNavigation,fadeNavigation} from './room-navigation.js?v=fade-1';
 // This small entrance is the only house module loaded with the den.
 // Room code, notes, artwork, and bonus games are fetched after exploration begins.
 export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBonus}){
  const nav=document.createElement('nav');
+ nav.style.opacity='0';
  nav.className='house-entrance';nav.setAttribute('aria-label','Explore the house');
  const buttons=['bottom'].map(side=>{
   const button=document.createElement('button');button.className=`house-entrance-${side}`;
@@ -12,20 +13,22 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,onCollectBon
  });
  host.append(nav);
  let instance,loading,stylesheet,active=false,ready=false,playing=false,origin,entryTicket=0;
- const update=()=>{nav.hidden=active||!ready||playing;};
+ const update=()=>{const visible=!active&&ready&&!playing&&!loading;nav.inert=!visible;nav.setAttribute('aria-hidden',String(!visible));fadeNavigation(nav,visible);};
  function styles(){
   return stylesheet??=new Promise((resolve,reject)=>{
-   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=room-navigation-2';
+   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=navigation-fade-1';
    link.onload=resolve;link.onerror=()=>{link.remove();stylesheet=null;reject(new Error('The house styles could not load. Try the arrow again.'));};document.head.append(link);
   });
  }
  async function open(originElement,journalRequest=false){
   if(loading||active)return;origin=originElement;const ticket=++entryTicket;
   buttons.forEach(button=>{button.disabled=true;button.setAttribute('aria-busy','true');});
+  nav.inert=true;nav.setAttribute('aria-hidden','true');
   loading=(async()=>{
-   if(!instance){const [module]=await Promise.all([import('./house.js?v=ceiling-collision-1'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
+   await fadeNavigation(nav,false);
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=teleport-1'),styles()]);instance=await module.createHouse({getDen,onCollectBonus,
     onOpen(){active=true;update();onOpen?.();},
-    onExit(){active=false;update();onExit?.();if(origin?.isConnected&&!origin.hidden)origin.focus();},
+    onExit(){active=false;update();onExit?.();if(origin?.isConnected&&ready&&!playing)origin.focus();},
    });}
    if(ticket===entryTicket){if(journalRequest)await instance.openJournal();else await instance.enter('hallway');}
   })();

@@ -1,5 +1,5 @@
-import {setRoomNavigation} from './room-navigation.js';
-import {createHouseRenderer} from './house-release-renderer.js?v=ceiling-collision-1';
+import {setRoomNavigation,fadeNavigation} from './room-navigation.js?v=fade-1';
+import {createHouseRenderer} from './house-release-renderer.js?v=teleport-1';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 const ROOMS = ['hallway', 'workshop', 'attic', 'basement', 'private-hall'];
@@ -30,6 +30,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   root.hidden = true; root.inert = true; root.setAttribute('aria-label', 'Explore the house');
   const header = el('header', 'house-header');
   const back = button('', () => room === 'hallway' ? returnToDen() : enter('hallway'), 'house-back');
+  back.style.opacity = '0';
   back.setAttribute('aria-label', 'Return to hallway');
   setRoomNavigation(back, 'Hallway', 'down');
   const heading = el('div', 'house-heading');
@@ -58,6 +59,14 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   modalHeader.append(modalTitle, close); dialog.append(modalHeader, modalBody); shade.append(dialog);
   root.append(header, viewport, footer, live, shade); document.body.append(root);
 
+  async function hideNavigation() {
+    hotspots.inert = true; back.disabled = true; view?.setInteractive(false);
+    await Promise.all([fadeNavigation(hotspots, false), fadeNavigation(back, false)]);
+  }
+  function showNavigation() {
+    hotspots.inert = false; back.disabled = false;
+    fadeNavigation(hotspots, true); fadeNavigation(back, true);
+  }
   function resize() {
     if (!open) return;
     const rect = viewport.getBoundingClientRect();
@@ -179,10 +188,14 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     open = true; root.hidden = false; root.inert = false;
     if (!wasOpen) onOpen();
     const ticket = ++roomTicket;
-    travelling = true; back.disabled = true; hotspots.replaceChildren();
+    travelling = true;
+    const fading = hideNavigation();
     loading.hidden = wasOpen; loading.classList.toggle('house-loading-transition', wasOpen);
     loading.replaceChildren(el('p', '', 'Opening the door…')); resize();
     try {
+      await fading;
+      if (!open || ticket !== roomTicket) return;
+      hotspots.replaceChildren();
       await content();
       if (!open || ticket !== roomTicket) return;
       view ??= createHouseRenderer(scene,{onActivate:activate,getDen,collected:new Set(data.notes.filter(note=>data.notes.filter(n=>n.hotspot===note.hotspot).every(n=>discovered.has(n.id))).map(note=>note.hotspot))});
@@ -234,20 +247,26 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       loading.replaceChildren(el('p', '', 'The door is sticking. This room could not load.'), button('Try again', () => enter(destination, doorId)), button('Return to den', exit));
       loading.querySelector('button')?.focus();
     } finally {
-      if (ticket === roomTicket) { travelling = false; back.disabled = false; view?.setActive(shade.hidden); }
+      if (ticket === roomTicket) { travelling = false; showNavigation(); view?.setActive(shade.hidden); }
     }
   }
   async function returnToDen() {
     if (travelling) return;
-    travelling = true; back.disabled = true; hotspots.inert = true;
+    travelling = true;
     const ticket = roomTicket;
-    try { await view?.depart(); }
+    try {
+      await hideNavigation();
+      if (!open || ticket !== roomTicket) return;
+      hotspots.replaceChildren();
+      await view?.depart();
+    }
     finally { hotspots.inert = false; if (ticket === roomTicket) exit(); }
   }
   function exit() {
     if (!open) return;
     journalOnly=false;root.classList.remove('house-journal-only');
     roomTicket++; closeModal(); open = false; root.hidden = true; root.inert = true;
+    fadeNavigation(hotspots, false); fadeNavigation(back, false);
     hotspots.replaceChildren(); view?.cancel(); travelling = false; back.disabled = false; onExit();
   }
   function keydown(event) {

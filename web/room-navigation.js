@@ -13,3 +13,18 @@ export function setRoomNavigation(button, label, direction) {
   name.textContent = label;
   button.replaceChildren(circle, name);
 }
+
+const fades = new WeakMap();
+export function fadeNavigation(node, visible) {
+  const opacity = visible ? '1' : '0';
+  const previous = fades.get(node);
+  if (previous?.opacity === opacity) return previous.finished;
+  const from = getComputedStyle(node).opacity;
+  previous?.animation.cancel();
+  node.style.opacity = opacity;
+  const duration = from === opacity || matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1000;
+  const animation = node.animate([{opacity: from}, {opacity}], {duration, easing: 'ease-in-out'});
+  const finished = animation.finished.catch(() => {});
+  fades.set(node, {opacity, animation, finished});
+  return finished;
+}

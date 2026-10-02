@@ -46,7 +46,7 @@
 .house-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .house-header{inset:0;pointer-events:none}
 .house-header .house-back{position:absolute;left:18px;top:48%;pointer-events:auto;opacity:1;background:transparent}
-.house-header .house-back:disabled{opacity:0;pointer-events:none}
+.house-header .house-back:disabled{pointer-events:none}
 .house-scene{touch-action:none}
 /* Mouse picking uses the visible meshes. These moving targets provide keyboard
    access without placing a rectangle in front of a different 3D object. */

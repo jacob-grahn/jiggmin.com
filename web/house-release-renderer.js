@@ -251,6 +251,17 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  }
  async function travel(id,onReady=()=>{}){
   revealRevision++;setActive(false);targets.clear();const ticket=revision;await load();if(ticket!==revision)return;
+  if(reduced.matches){
+   // Jump directly to the final room: no connecting hall or intermediate frames.
+   await ensureRoom(id,ticket);
+   if(ticket!==revision)return;
+   current=rooms.get(id);
+   camera=id==='den'?continuousDen.endpointCamera():viewFor(id);
+   denProgress=id==='den'?1:0;
+   access(id==='hallway'?'':id,id==='hallway'?0:1);
+   for(const room of [...rooms.keys()])if(room!==id)unloadRoom(room);
+   resize();onReady();return;
+  }
   // Load both ends and the connecting hall only for the duration of travel.
   const initial=current?.id??(getDen?.()?.scene?'den':'hallway');
   const needed=new Set(initial===id?[id]:['hallway',id,initial]);
