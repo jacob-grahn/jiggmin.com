@@ -1,4 +1,5 @@
-import {createHouseRenderer} from './house-release-renderer.js?v=house-reference-46';
+import {setRoomNavigation} from './room-navigation.js';
+import {createHouseRenderer} from './house-release-renderer.js?v=ceiling-collision-1';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 const ROOMS = ['hallway', 'workshop', 'attic', 'basement', 'private-hall'];
@@ -28,8 +29,9 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
   const root = el('section', 'house-overlay');
   root.hidden = true; root.inert = true; root.setAttribute('aria-label', 'Explore the house');
   const header = el('header', 'house-header');
-  const back = button('‹', () => room === 'hallway' ? returnToDen() : enter('hallway'), 'house-back');
+  const back = button('', () => room === 'hallway' ? returnToDen() : enter('hallway'), 'house-back');
   back.setAttribute('aria-label', 'Return to hallway');
+  setRoomNavigation(back, 'Hallway', 'down');
   const heading = el('div', 'house-heading');
   const kicker = el('p', 'house-kicker');
   const title = el('h1', '', 'The house'); title.tabIndex = -1;
@@ -190,7 +192,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       if (!open || ticket !== roomTicket) return;
       room = destination;
       back.classList.toggle('house-back-down', room !== 'hallway');
-      back.textContent = room === 'hallway' ? '›' : '↓';
+      setRoomNavigation(back, room === 'hallway' ? 'Den' : 'Hallway', room === 'hallway' ? 'right' : 'down');
       back.classList.toggle('house-back-den',room==='hallway');
       back.setAttribute('aria-label', room === 'hallway' ? 'Return to den' : 'Return to hallway');
       const info = data.rooms.find(info => info.id === destination);
@@ -199,8 +201,15 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       for (const object of manifest[destination]) {
         const label = hotspotLabel(object.id); if (!label) continue;
         const hit = button('', () => activate(object.id), 'house-hotspot');
-        hit.setAttribute('aria-label', label); hit.append(el('span', 'house-hotspot-label', label));
-        if(object.id==='door-private-hall'){hit.classList.add('house-hall-direction');const arrow=el('span','','‹');arrow.setAttribute('aria-hidden','true');hit.append(arrow);}
+        hit.setAttribute('aria-label', label);
+        if (DOORS[object.id] || object.id === 'door-den') {
+          const destination = DOORS[object.id];
+          const name = destination ? data.rooms.find(info => info.id === destination).title : 'Den';
+          const direction = object.id === 'door-private-hall' ? 'left' : object.id === 'door-attic' ? 'up' : object.id === 'door-workshop' ? 'up-left' : 'up-right';
+          hit.classList.add('house-door-navigation');
+          if (object.id === 'door-private-hall') hit.classList.add('house-hall-direction');
+          setRoomNavigation(hit, name, direction);
+        } else hit.append(el('span', 'house-hotspot-label', label));
         Object.assign(hit.style, {left:`${object.x*100}%`,top:`${object.y*100}%`,width:`${object.width*100}%`,height:`${object.height*100}%`});
         hotspots.append(hit); targetButtons.set(object.id,hit);
       }

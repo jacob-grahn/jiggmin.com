@@ -2,7 +2,7 @@ import {createBonusCollection,getBonusGame} from './bonus-collection.js';
 import {createBonusCartridge,bonusDeliveryPoses} from './bonus-cartridge-model.js';
 import {cartridgeRoom} from './cartridge-storage.js';
 import * as THREE from 'three';
-import {createHouseEntry} from './house-entry.js?v=den-door-41';
+import {createHouseEntry} from './house-entry.js?v=ceiling-collision-1';
 import {createDenJournal} from './den-journal.js';
 import {GLTFLoader} from './model-loader.js';
 import {inSlot,slotTarget,playbackFile} from './interaction.js?v=aligned-slot-1';

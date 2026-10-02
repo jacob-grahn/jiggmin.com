@@ -71,7 +71,18 @@ body{display:block;overflow:hidden}main{position:relative;width:100%;height:100s
 
 /* An invitation at the edge of the den; the house itself loads on request. */
 .house-entrance[hidden]{display:none}
-.house-entrance button{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:7;display:grid;justify-items:center;gap:0;width:56px;padding:8px 4px;border:1px solid #aaaf9b25;border-radius:30px;background:#0b141b70;color:#d6d5ba;box-shadow:0 5px 25px #0003;opacity:.66;transition:opacity .2s,background .2s}
-.house-entrance button:hover,.house-entrance button:focus-visible{opacity:1;background:#18232be8}
-.house-entrance span{font:36px Georgia,serif;line-height:1}.house-entrance small{font:9px ui-monospace,monospace;letter-spacing:.04em}
-@media(prefers-reduced-motion:reduce){.house-entrance button{transition:none}}
+.house-entrance button{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:7}
+/* One navigation treatment for entrances, doors, and room returns. */
+button.room-navigation{width:56px;height:56px;min-width:56px;min-height:56px;padding:0;border:0;border-radius:50%;background:transparent;color:#eadbc0;opacity:1;touch-action:manipulation;overflow:visible}
+button.room-navigation:hover,button.room-navigation:focus-visible{background:transparent}
+.room-navigation-circle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:56px;height:56px;border:1px solid #b9b6a580;border-radius:50%;background:rgb(20 27 38 / 10%);box-shadow:0 4px 16px #0005;pointer-events:none;transition:background .15s,border-color .15s}
+.room-navigation-chevron{width:13px;height:13px;border-top:2px solid currentColor;border-right:2px solid currentColor;transform:translateX(-3px) rotate(45deg)}
+[data-direction=left] .room-navigation-chevron{transform:translateX(3px) rotate(-135deg)}
+[data-direction=down] .room-navigation-chevron{transform:translateY(-3px) rotate(135deg)}
+[data-direction=up] .room-navigation-chevron{transform:translateY(3px) rotate(-45deg)}
+[data-direction=up-right] .room-navigation-chevron{transform:translate(-2px,2px)}
+[data-direction=up-left] .room-navigation-chevron{transform:translate(2px,2px) rotate(-90deg)}
+.room-navigation-label{position:absolute;left:50%;bottom:calc(50% + 34px);transform:translateX(-50%);width:max-content;max-width:120px;padding:3px 7px;border-radius:4px;background:#141b26ed;color:#eadbc0;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.015em;pointer-events:none;text-align:center}
+.room-navigation:hover .room-navigation-circle,.room-navigation:focus-visible .room-navigation-circle{background:#303443;border-color:#e1d6ae}
+.room-navigation:focus-visible .room-navigation-circle{outline:2px solid #8cd1df;outline-offset:4px}
+@media(prefers-reduced-motion:reduce){.room-navigation-circle{transition:none}}

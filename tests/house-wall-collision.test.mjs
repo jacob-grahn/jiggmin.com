@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
 import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
-import {collectHouseWallColliders,createHouseProps} from '../web/house-props.js';
+import {collectHouseStructureColliders,createHouseProps} from '../web/house-props.js';
 import {tidyHouseProps} from '../web/house-prop-cleanup.js';
 globalThis.ProgressEvent??=class{};
 async function model(room){
@@ -14,7 +14,7 @@ async function model(room){
 }
 test('production hallway throws collide with the visible right and left house walls',async()=>{
  const structure=await model('structure'),root=await model('hallway'),world=new THREE.Scene();world.add(root);tidyHouseProps(root,'hallway');
- const structureColliders=collectHouseWallColliders(structure);
+ const structureColliders=collectHouseStructureColliders(structure);
  const {physics}=createHouseProps(root,world,{floorY:0,roomBounds:[4.8,6.8,12,12],structureColliders});
  // Isolate the walls from hanging pictures and other detachable decorations.
  for(const {body} of physics.items.values())physics.world.removeBody(body);
@@ -32,4 +32,24 @@ test('production hallway throws collide with the visible right and left house wa
  assert.ok(!structureColliders.some(c=>c.bounds.containsPoint(new THREE.Vector3(10.5,1.5,8.3))));
  assert.ok(structureColliders.some(c=>c.bounds.containsPoint(new THREE.Vector3(10.5,2.4,8.3))));
  assert.ok(!physics.world.bodies.some(b=>b.name==='Proposed wall 00'),'distant walls stay out of hallway physics');
+});
+
+test('production hallway throws hit the ceiling panels without filling the attic hatch',async()=>{
+ const structure=await model('structure'),root=await model('hallway'),world=new THREE.Scene();world.add(root);tidyHouseProps(root,'hallway');
+ const structureColliders=collectHouseStructureColliders(structure);
+ const {physics}=createHouseProps(root,world,{floorY:0,roomBounds:[4.8,6.8,12,12],structureColliders});
+ for(const {body} of physics.items.values())physics.world.removeBody(body);
+ // Test the front and rear ceiling panels on either side of the hatch.
+ for(const x of [8,10.5]){
+  const body=physics.add(`ceiling-probe-${x}`,{position:{x,y:1.8,z:7.55},quaternion:{x:0,y:0,z:0,w:1}},{size:[.12,.12,.12],center:{x:0,y:0,z:0}});
+  const hits=[];body.addEventListener('collide',e=>hits.push(e.body.name));body.velocity.set(0,6,0);body.wakeUp();
+  let highest=body.position.y;
+  for(let i=0;i<90;i++){physics.step(1/120);highest=Math.max(highest,body.position.y);}
+  assert.ok(hits.some(name=>name?.startsWith('Attic floor / hall ceiling')),`throw at x=${x} missed the ceiling: ${hits}`);
+  assert.ok(highest<2.6,`prop crossed the visible ceiling: ${highest}`);
+  physics.world.removeBody(body);
+ }
+ const ceiling=structureColliders.filter(c=>c.name.startsWith('Attic floor / hall ceiling'));
+ assert.equal(ceiling.length,8);
+ assert.ok(!ceiling.some(c=>c.bounds.containsPoint(new THREE.Vector3(9.3,2.7,7.55))),'the moving hatch opening must stay clear');
 });

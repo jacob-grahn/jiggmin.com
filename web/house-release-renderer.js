@@ -15,7 +15,7 @@ import {createContinuousDen,integrateDenOpening} from './house-den-continuity.js
 import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
 import {illustrateHouse} from './house-illustration.js';
 import {createRoomResources} from './house-resources.js';
-import {createHouseProps,collectHouseWallColliders} from './house-props.js?v=wall-collision-1';
+import {createHouseProps,collectHouseStructureColliders} from './house-props.js?v=ceiling-collision-1';
 import {createHousePropInput} from './house-prop-input.js?v=prop-cleanup-1';
 import {createHiddenScraps} from './house-scraps.js?v=prop-cleanup-1';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
@@ -74,7 +74,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    let top=Math.max(0,Math.min(...points.map(p=>(1-p.y)/2))),bottom=Math.min(1,Math.max(...points.map(p=>(1-p.y)/2)));
    button.hidden=right<=left||bottom<=top||points.every(p=>p.z>1||p.z< -1);
    if(prop.navigation&&!button.hidden){
-    const width=Math.max(right-left,44/viewport.width),height=Math.max(bottom-top,44/viewport.height);
+    const width=Math.max(right-left,56/viewport.width),height=Math.max(bottom-top,56/viewport.height);
     left=THREE.MathUtils.clamp((left+right-width)/2,0,1-width);top=THREE.MathUtils.clamp((top+bottom-height)/2,0,1-height);right=left+width;bottom=top+height;
    }
    Object.assign(button.style,{left:`${left*100}%`,top:`${top*100}%`,width:`${(right-left)*100}%`,height:`${(bottom-top)*100}%`});
@@ -139,7 +139,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   }
   refineRoomFixtures(gltf.scene,id,{structure:connections.group,...connections.fixtureAnchors});
   const resources=createRoomResources();resources.capture(gltf.scene);const view=viewFor(id);
-  const props=id==='den'||id==='private-hall'?{props:[],cancel(){},update(){return {};}}:createHouseProps(gltf.scene,world,{floorY:id==='basement'?-4:id==='attic'?2.8:0,roomBounds:id==='workshop'?[12,0,17,7]:id==='hallway'?[4.8,6.8,12,12]:[0,0,12,12],structureColliders:connections.wallColliders});
+  const props=id==='den'||id==='private-hall'?{props:[],cancel(){},update(){return {};}}:createHouseProps(gltf.scene,world,{floorY:id==='basement'?-4:id==='attic'?2.8:0,roomBounds:id==='workshop'?[12,0,17,7]:id==='hallway'?[4.8,6.8,12,12]:[0,0,12,12],structureColliders:connections.structureColliders});
   const windows=id==='basement'?createMoonlitWindows(gltf.scene,sky,view.position):null;
   if(windows){world.add(windows.exterior);shadeBasementWindowSpills(gltf.scene,windows.frames);}
   const scraps=createHiddenScraps(props.props,view,world,collected);
@@ -164,7 +164,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    integrateDenOpening(gltf.scene);materials(gltf.scene);
    const anchors=fixtureAnchors(gltf.scene);turnOffCeilingFixtures(gltf.scene);
    finishHallSurfaces(gltf.scene);replaceExteriorTrees(gltf.scene);hideExteriorGround(gltf.scene);
-   const wallColliders=collectHouseWallColliders(gltf.scene);
+   const structureColliders=collectHouseStructureColliders(gltf.scene);
    illustrateHouse([gltf.scene]);
    if(!debugParams.has('unbatched'))batchHouseMeshes(gltf.scene,{staticCells:true});
    sky=await new THREE.TextureLoader().loadAsync(MOONLIT_SKY_URL);gltf.scene.add(createMoonlitSky(sky));
@@ -181,7 +181,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    const lights=[];
    for(const l of layout.lights??[]){const light=new THREE.PointLight(new THREE.Color(...l.color),l.intensity,8,2);light.position.fromArray(l.position);world.add(light);lights.push(light);}
    let floorMaterial=denFloorReference;gltf.scene.traverse(o=>{if(!floorMaterial&&o.isMesh&&o.userData.preview_kind==='floor'&&o.material.name==='oak.001')floorMaterial=o.material;});
-   connections={group:gltf.scene,resources,mechanisms,lights,floorMaterial,fixtureAnchors:anchors,wallColliders};access('',0);
+   connections={group:gltf.scene,resources,mechanisms,lights,floorMaterial,fixtureAnchors:anchors,structureColliders};access('',0);
   })().catch(error=>{loading=null;throw error;});
   await loading;
  }

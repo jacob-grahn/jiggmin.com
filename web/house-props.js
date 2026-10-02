@@ -158,13 +158,13 @@ function boxCollider(mesh){
  return {name:mesh.name,center:center.toArray(),halfExtents:size,quaternion:rotation.toArray()};
 }
 
-// Capture individual wall sections before rendering merges them into batches.
-// Keep authored door/window openings instead of filling a batch's bounding box.
-export function collectHouseWallColliders(root){
+// Capture individual walls and hall ceiling panels before rendering batches them.
+// Preserve door, window, and attic hatch openings instead of boxing whole batches.
+export function collectHouseStructureColliders(root){
  root.updateMatrixWorld(true);const colliders=[];
  root.traverse(mesh=>{
   const name=mesh.userData.house_bake_source??nameOf(mesh);
-  if(!mesh.isMesh||!mesh.visible||mesh.userData.release_dynamic||!/^Proposed wall\b/.test(name))return;
+  if(!mesh.isMesh||!mesh.visible||mesh.userData.release_dynamic||!/^(?:Proposed wall\b|Attic floor \/ hall ceiling\b)/.test(name))return;
   colliders.push({...boxCollider(mesh),name,bounds:new THREE.Box3().setFromObject(mesh)});
  });
  return colliders;
