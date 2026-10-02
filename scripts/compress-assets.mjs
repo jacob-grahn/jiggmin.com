@@ -84,13 +84,28 @@ for(const preset of presets){
       document.setLogger(new Logger(Logger.Verbosity.WARN));
       const signature=sceneSignature(document);
       beforeTriangles=inspectGeometry(document);
+      const hasAtlas=document.getRoot().listNodes().some(n=>n.getExtras().release_baked||n.getExtras().den_native_artwork||n.getExtras().texture_pixel_exact);
+      // The one shared delivery set has a fixed atlas budget on every device.
+      // Resize from lossless masters before the only lossy encoding step.
+      const limits=new Map();
+      for(const node of document.getRoot().listNodes()){
+        const cap=node.getExtras().atlas_delivery_max;if(!cap)continue;
+        for(const p of node.getMesh()?.listPrimitives()??[]){
+          const texture=p.getMaterial()?.getEmissiveTexture();
+          if(texture)limits.set(texture,Math.max(cap,limits.get(texture)??0));
+        }
+      }
+      for(const [texture,cap] of limits){
+        const pixels=await sharp(texture.getImage()).resize({width:cap,height:cap,fit:'inside',withoutEnlargement:true}).png().toBuffer();
+        texture.setImage(pixels).setMimeType('image/png');
+      }
       await document.transform(textureCompress({encoder:sharp,targetFormat:'webp',
         slots:/^(baseColorTexture|emissiveTexture)$/,
         quality:preset.quality,effort:60,
         ...(preset.maxTextureSize?{resize:[preset.maxTextureSize,preset.maxTextureSize]}:{}),
       }),draco({method:'sequential',encodeSpeed:5,decodeSpeed:5,
         quantizePosition:preset.positionBits,quantizeNormal:preset.normalBits,
-        quantizeTexcoord:preset.uvBits,quantizationVolume:'mesh'}));
+        quantizeTexcoord:hasAtlas?Math.max(18,preset.uvBits):preset.uvBits,quantizationVolume:'mesh'}));
       await io.write(target,document);
       const decoded=await io.read(target);
       assert.deepEqual(sceneSignature(decoded),signature,`${source}: scene structure changed`);

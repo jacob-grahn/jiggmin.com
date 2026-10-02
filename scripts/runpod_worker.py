@@ -26,6 +26,8 @@ TOKEN = os.environ.pop('BAKE_TOKEN')
 KEY = os.environ.pop('BAKE_RUNPOD_KEY')
 DEADLINE = float(os.environ['BAKE_DEADLINE'])
 QUALITY = os.environ['BAKE_QUALITY']
+TARGET = os.environ.get('BAKE_TARGET', 'house')
+if TARGET not in {'house', 'den', 'hallway-style', 'house-atlases'}: raise ValueError('Unsupported bake target')
 VERSION = '4.5.14'
 # https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256
 BLENDER_SHA256 = '9ba871ff2ecd36526b77432745980b7e6664ecd0c7ca11c48849073dcfe06da3'
@@ -104,13 +106,16 @@ def execute():
             project.mkdir()
             unpack(WORK / 'input.tar.gz', project)
             status(phase='baking')
-            command = [str(blender), '-b', str(project / 'scene/house-release.blend'),
+            scene_file = 'scene/midnight-den-illustrated.blend' if TARGET == 'den' else 'scene/house-release.blend'
+            command = [str(blender), '-b', str(project / scene_file),
                        '--python-exit-code', '1', '--python', str(project / 'scene/scripts/cloud_bake.py'),
                        '--', '--test' if QUALITY == 'test' else '--release']
             subprocess.run(command, cwd=project, stdout=log, stderr=log, check=True)
-            output = project / 'scene/exports/house-release' / QUALITY
+            output = project / 'scene/renders/den-uv-bake' if TARGET == 'den' else project / 'scene/exports/house-release' / QUALITY
+            if TARGET == 'hallway-style': output = project / 'scene/renders/hallway-style'
+            if TARGET == 'house-atlases': output = project / 'scene/renders/house-atlases'
             result = WORK / 'result.tar.gz'
-            with tarfile.open(result, 'w:gz') as bundle:
+            with tarfile.open(result, 'w:gz', compresslevel=1) as bundle:
                 for path in sorted(output.iterdir()):
                     if path.is_file():
                         bundle.add(path, arcname=path.name)

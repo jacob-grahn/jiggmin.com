@@ -13,9 +13,9 @@ test('restored room textures come from the original artwork and lighting atlases
   const original=await io.read(`web/assets/house/${room}-baked.glb`),restored=await io.read(`web/assets/house/release/${room}.glb`);
   const originals=new Set(original.getRoot().listTextures().map(t=>hash(t.getImage())));
   const paintedLighting=new Set();
-  for(const node of restored.getRoot().listNodes().filter(n=>n.getExtras().house_window_bake)){
-   assert.ok(['basement','attic'].includes(room));assert.ok(node.getExtras().ceiling_paint==='light cream'||node.getExtras().house_window_receiver||node.getExtras().house_fixed_receiver);
-   if(room==='attic')assert.ok(node.getExtras().review_fixed_fixture,'only the reviewed fixed attic fixtures may get new lighting');
+  for(const node of restored.getRoot().listNodes().filter(n=>n.getExtras().house_window_bake||n.getExtras().atlas_group)){
+   if(!node.getExtras().atlas_group){assert.ok(['basement','attic'].includes(room));assert.ok(node.getExtras().ceiling_paint==='light cream'||node.getExtras().house_window_receiver||node.getExtras().house_fixed_receiver);
+   if(room==='attic')assert.ok(node.getExtras().review_fixed_fixture,'only the reviewed fixed attic fixtures may get new lighting');}
    for(const p of node.getMesh().listPrimitives())paintedLighting.add(hash(p.getMaterial().getEmissiveTexture().getImage()));
   }
   for(const texture of restored.getRoot().listTextures())assert.ok(originals.has(hash(texture.getImage()))||paintedLighting.has(hash(texture.getImage())),`${room}: newly substituted artwork texture`);

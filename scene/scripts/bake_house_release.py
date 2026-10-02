@@ -7,6 +7,7 @@ from mathutils import Vector
 sys.path.insert(0,str(Path(__file__).parent))
 from basement_model_refit import import_source,refit
 from house_bake_lighting import configure
+from house_bake_groups import structural_group
 ROOT=Path(__file__).resolve().parents[2];test='--test' in sys.argv
 INPUT=ROOT/'scene/exports/house-release/bake-input';OUT=ROOT/('scene/exports/house-release/test' if test else 'scene/exports/house-release/final');OUT.mkdir(parents=True,exist_ok=True)
 S=bpy.context.scene;start=time.monotonic();native=list(S.objects)
@@ -69,12 +70,12 @@ for room in ['structure','basement','attic']:
   # updates. Use its owned vertices so each room gets its own texel budget.
   points=[o.matrix_world@v.co for v in o.data.vertices]
   center=Vector(tuple((min(p[i] for p in points)+max(p[i] for p in points))/2 for i in range(3)))
-  group='attic-fixtures' if room=='attic' else ('basement-windows' if window_receiver else 'basement-details' if o.get('house_fixed_receiver') else 'basement-ceiling') if room=='basement' else 'structure-'+('exterior' if o.get('preview_kind')=='site' else 'attic' if center.z>2.75 else 'stairs' if center.z<-.2 else 'garage' if center.x>=12 else 'den' if center.x<4.8 and center.y< -6.5 else 'hall')
+  group='attic-fixtures' if room=='attic' else ('basement-windows' if window_receiver else 'basement-details' if o.get('house_fixed_receiver') else 'basement-ceiling') if room=='basement' else structural_group(name,o.get('preview_kind'),points)
   static.setdefault(group,[]).append(o)
 lighting=configure(S);S.cycles.samples=8 if test else 64;S.cycles.use_denoising=True
 S.render.bake.use_pass_direct=True;S.render.bake.use_pass_indirect=True;S.render.bake.use_pass_color=True;S.render.bake.margin=4 if test else 12
 S.view_settings.view_transform='AgX';S.view_settings.exposure=-1.3
-source_key=hashlib.sha256((ROOT/'scene/house-release.blend').read_bytes()+b''.join((INPUT/f'{r}.glb').read_bytes() for r in ['structure','basement','attic'])+Path(__file__).read_bytes()+(Path(__file__).parent/'house_bake_lighting.py').read_bytes()).hexdigest()
+source_key=hashlib.sha256((ROOT/'scene/house-release.blend').read_bytes()+b''.join((INPUT/f'{r}.glb').read_bytes() for r in ['structure','basement','attic'])+Path(__file__).read_bytes()+(Path(__file__).parent/'house_bake_lighting.py').read_bytes()+(Path(__file__).parent/'house_bake_groups.py').read_bytes()).hexdigest()
 cache_key=hashlib.sha256((source_key+str(test)).encode()).hexdigest()
 cache_path=OUT/'atlas-cache.json';cache=json.loads(cache_path.read_text()) if cache_path.exists() else {}
 if cache.get('key')!=cache_key:cache={'key':cache_key,'complete':[]}

@@ -6,6 +6,13 @@ import {mergeGeometries} from './vendor/three/BufferGeometryUtils.js';
 // clipping and physics ownership. Doors, ladders and special surface shaders stay
 // separate. Original resources remain owned by the room until it is unloaded.
 export function batchHouseMeshes(root,{staticCells=false}={}){
+ // Keep shallow picture assemblies intact: merging their backing and contour
+ // meshes can put the contour in front of the separate artwork plane.
+ if(!staticCells){
+  let artwork=false;
+  root.traverse(mesh=>{if(mesh.isMesh&&(Array.isArray(mesh.material)?mesh.material:[mesh.material]).some(m=>/print|artwork/i.test(m.name)))artwork=true;});
+  if(artwork)return 0;
+ }
  root.updateMatrixWorld(true);
  const inverse=root.matrixWorld.clone().invert(),groups=new Map();
  root.traverse(mesh=>{

@@ -28,7 +28,7 @@ test('hatch reference lighting retains its reviewed geometry, painted grain and 
  assert.ok(stats.channels.some(c=>c.max-c.min>25),'bake must have visible lighting variation');
  assert.ok(patch.getMesh().listPrimitives().every(p=>p.getAttribute('TEXCOORD_0')));
  const report=JSON.parse(readFileSync('docs/house-plan/attic-hatch-bake-report.json')),layout=JSON.parse(readFileSync('web/assets/house/release/layout.json'));
- assert.equal(report.samples,64);assert.equal(report.bakedGLBHash,hash(readFileSync(path)));assert.equal(report.houseSourceKey,layout.lightingBake.report.sourceKey);
+ assert.equal(report.samples,64);assert.equal(report.bakedGLBHash,hash(readFileSync(path)));assert.equal(report.houseSourceKey,layout.atlasRefresh?.retainedFixtureSourceKey??layout.lightingBake.report.sourceKey);
  assert.ok(layout.hatchLighting.startsWith('/'+path+'?v='));
 });
 test('applying the hatch lightmap preserves the moving door and hinge transform',async()=>{

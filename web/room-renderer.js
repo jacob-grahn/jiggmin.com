@@ -1,3 +1,4 @@
+import {prepareBakedDen} from './den-baked-room.js';
 import {accelerateRaycasts} from './raycast-acceleration.js';
 import * as THREE from 'three';
 import {createPropReactions} from './prop-reactions.js?v=stronger-wiggle-2';
@@ -6,6 +7,8 @@ import {mergeGeometries} from './vendor/three/BufferGeometryUtils.js';
 // A camera-space light bake on actual 3D surfaces: the depth buffer, not DOM order,
 // determines whether the rack, TV, or table hides a moving cartridge.
 export function prepareRoom(gltf, camera, lighting, propLighting=lighting) {
+  let uvBaked=false;gltf.scene.traverse(o=>{if(o.userData.role==='room_geometry'&&o.userData.den_baked)uvBaked=true;});
+  if(uvBaked)return prepareBakedDen(gltf);
   lighting.colorSpace = THREE.SRGBColorSpace;
   lighting.minFilter = THREE.LinearFilter;
   propLighting.colorSpace=THREE.SRGBColorSpace;propLighting.minFilter=THREE.LinearFilter;

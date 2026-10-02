@@ -197,6 +197,6 @@ bpy.data.objects.remove(helper,do_unlink=True)
 # Runtime lights and movable objects retain the original export materials and transforms.
 bpy.ops.object.select_all(action='DESELECT')
 for o in originals:o.hide_render=False;o.select_set(True)
-bpy.ops.export_scene.gltf(filepath=str(R/f'web/assets/house/{room}-baked.glb'),use_selection=True,export_format='GLB',export_cameras=True,export_lights=True,export_extras=True,export_image_format='JPEG',export_jpeg_quality=96)
+bpy.ops.export_scene.gltf(filepath=str(R/f'web/assets/house/{room}-baked.glb'),use_selection=True,export_format='GLB',export_cameras=True,export_lights=True,export_extras=True,export_image_format='AUTO')
 (EXPORTS/f'{room}-bake.json').write_text(json.dumps({'staticMeshes':len(static),'connections':connection_names,'samples':samples,'denoised':True,'exposure':exposure,'saturation':1.2,'resolution':4096,'ceilingResolution':2048,'ceilingPaint':'light cream' if room=='hallway' else 'original concrete' if room=='basement' else 'original timber','ceilingLightsOn':ceiling_lights_on and room in {'hallway','basement'},'practicalLightsOn':ceiling_lights_on,'lighting':'blue windows and warm practicals' if ceiling_lights_on else 'blue windows only','excludedMovableShadows':True},indent=2)+'\n')
 print(room.upper()+'_BAKE_COMPLETE',flush=True)

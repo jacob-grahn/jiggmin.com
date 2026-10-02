@@ -29,7 +29,7 @@ export function createMoonlitSky(sky){
    // Lift existing cloud rims and distant moonlit branches, preserving the
    // dark forest. Eye-level windows should see the sky above the tree line.
    float detail=dot(scenery.rgb,vec3(.2126,.7152,.0722));
-   scenery.rgb*=mix(.18,.55,smoothstep(.035,.24,detail))*(2.0/3.0);
+   scenery.rgb*=mix(.18,.55,smoothstep(.035,.24,detail))*.5;
    // Retain the faint atmospheric halo and the room's baked illumination.
    // The visible moon disc is gone from both the shader and the image.
    float moonDistance=acos(clamp(dot(direction,normalize(vec3(1.0,.062,-.048))),-1.0,1.0));
@@ -37,7 +37,7 @@ export function createMoonlitSky(sky){
    scenery.rgb+=vec3(.08,.12,.20)*halo;
    diffuseColor*=scenery;`);
  };
- material.customProgramCacheKey=()=> 'night-forest-world-sky-5';
+ material.customProgramCacheKey=()=> 'night-forest-world-sky-6';
  const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),material);
  mesh.name='Shared moonlit sky';mesh.frustumCulled=false;mesh.renderOrder=-1000;return mesh;
 }

@@ -20,7 +20,7 @@ def check(quality):
  run(['node','--test','tests/house-release.test.mjs','tests/house-bake.test.mjs','tests/house-fixture-refinements.test.mjs'],env=env)
  run(['node','scripts/check-house-release.mjs'],env=env)
 def source_key():
- paths=['scene/house-release.blend','scene/exports/house-release/bake-input/structure.glb','scene/exports/house-release/bake-input/basement.glb','scene/exports/house-release/bake-input/attic.glb','scene/scripts/bake_house_release.py','scene/scripts/house_bake_lighting.py']
+ paths=['scene/house-release.blend','scene/exports/house-release/bake-input/structure.glb','scene/exports/house-release/bake-input/basement.glb','scene/exports/house-release/bake-input/attic.glb','scene/scripts/bake_house_release.py','scene/scripts/house_bake_lighting.py','scene/scripts/house_bake_groups.py']
  return hashlib.sha256(b''.join((ROOT/path).read_bytes() for path in paths)).hexdigest()
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('step',choices=['prepare','test','release','publish']);p.add_argument('--review',action='store_true',help='Stage the reviewed fixture shapes before the small bake');args=p.parse_args()
 if args.step=='prepare':

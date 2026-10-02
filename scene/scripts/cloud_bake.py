@@ -36,9 +36,15 @@ if missing:
 
 print('CLOUD_GPU', json.dumps(devices), flush=True)
 started = time.monotonic()
-runpy.run_path(str(root / 'scene/scripts/bake_house_release.py'), run_name='__main__')
+target = os.environ.get('BAKE_TARGET', 'house')
+recipe = 'bake_den.py' if target == 'den' else 'bake_house_release.py'
+if target == 'hallway-style': recipe = 'bake_hallway_style.py'
+if target == 'house-atlases': recipe = 'bake_house_atlases.py'
+runpy.run_path(str(root / 'scene/scripts' / recipe), run_name='__main__')
 quality = os.environ.get('BAKE_QUALITY', 'test')
-out = root / 'scene/exports/house-release' / quality
+out = root / 'scene/renders/den-uv-bake' if target == 'den' else root / 'scene/exports/house-release' / quality
+if target == 'hallway-style': out = root / 'scene/renders/hallway-style'
+if target == 'house-atlases': out = root / 'scene/renders/house-atlases'
 (out / 'cloud-report.json').write_text(json.dumps({
     'blender': bpy.app.version_string,
     'backend': 'OPTIX',

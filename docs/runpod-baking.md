@@ -5,6 +5,13 @@ and texture folders. It runs the existing bake recipe with Blender 4.5.14 LTS an
 NVIDIA OptiX, verifies the result archive, then deletes its temporary pod.
 It never publishes or replaces current site assets.
 
+The optional `--target hallway-style` recipe bakes only the moonlit illustrated
+hallway experiment. It packages `house-release.blend`, the current hallway and
+structure GLBs/layout, Python scene scripts and project texture folders. Its
+verified outputs are `hallway-style.glb`, seven PNG/EXR atlases and reports.
+The local merge and ink scripts install these into separate experimental assets;
+the standard release models and projected den are preserved.
+
 ## Verified benchmark — October 1, 2026
 
 The full house bake completed on a Secure Cloud RTX A5000 using Blender 4.5.14
@@ -47,12 +54,33 @@ npm run cloud:bake -- --quality test --budget 2 --max-hourly 1 --max-minutes 60
 npm run cloud:bake -- --quality final --budget 2 --max-hourly 1 --max-minutes 60
 ```
 
-Both bake commands create a paid Secure Cloud RTX 4090 pod. The runner checks the
-current quote plus a conservative disk allowance, then verifies the allocated
-pod price. A quote can change between lookup and allocation; an over-limit pod
-is immediately deleted. Account credit and GPU availability are required.
-Use `--gpu 'NVIDIA GeForce RTX 5090'` or `--gpu 'NVIDIA RTX A5000'` when appropriate;
-the same price and runtime limits apply. The selected GPU never changes silently.
+`npm run cloud:bake` uses the automatic allocator. It tries Secure Cloud GPUs in
+this order: **RTX PRO 6000 Blackwell Workstation → RTX 5090 → RTX PRO 6000 Blackwell Server → RTX PRO 6000 Blackwell Max-Q**. Each candidate is tried once.
+Unavailable quotes and candidates outside the requested hourly/budget/runtime
+limits are skipped. If capacity disappears during creation, the runner checks
+that no pod was created before trying the next GPU. Every selection and skip is
+printed; the allocated GPU is recorded in the run's `state.json`.
+
+Customize the order or pin a single GPU:
+
+```sh
+npm run cloud:bake -- --target den --budget .50 --max-hourly 1 --max-minutes 30
+npm run cloud:bake -- --gpus 'NVIDIA GeForce RTX 4090' 'NVIDIA RTX A5000' --quality final
+npm run cloud:bake -- --gpu 'NVIDIA RTX A5000' --quality test
+```
+
+`--gpu` disables fallback. The original `python3 scripts/runpod_bake.py benchmark`
+command remains a single-GPU entry point; `auto` is the new fallback entry point.
+When all candidates are unavailable or ineligible, the command exits with the
+reason for each candidate. It does not loop indefinitely.
+
+The runner checks the current quote plus a conservative disk allowance, then
+verifies the allocated pod price. A missing price or a price above the quote or
+hourly limit causes deletion and an error. Account credit is required. Once any
+pod is allocated, startup, bake, and download failures stop the run after cleanup;
+they do not start another paid attempt. Network timeouts, unknown server errors,
+authentication failures, and failures to list or clean up pods also stop fallback.
+Consequently the budget is never reset across multiple paid bake attempts.
 
 Outputs, source-file hashes, logs, timing, and cleanup state are saved in
 `.runpod/<run-id>/`. Downloaded files are under `output/`; the run does not copy
@@ -64,7 +92,10 @@ meshes before using the normal local release/publish pipeline.
 The local process explicitly deletes its pod after success or failure and checks
 the pod list to confirm deletion. It records a unique pod name before creation
 and reconciles by name if creation returns an ambiguous network error. Never
-blindly retry a creation request. A new invocation refuses to start while an
+blindly retry a creation request. Only an explicit no-capacity response, followed
+by a successful pod-list check showing no matching pod, allows trying the next
+GPU. If a pod is found despite a rejection, it is deleted and the run stops.
+A new invocation refuses to start while an
 existing `jiggmin-bake-` pod exists.
 
 A second watchdog runs inside the cloud container. Its absolute deadline is
@@ -100,3 +131,50 @@ Runpod billing is authoritative over the runner's elapsed-time cost estimate.
 References: [Pod API](https://docs.runpod.io/api-reference/pods/POST/pods),
 [pricing](https://docs.runpod.io/pods/pricing),
 [deadline flag removal](https://github.com/runpod/runpodctl/pull/330).
+
+## Den UV-lighting experiment
+
+The den can use the same ephemeral GPU runner with its native illustrated scene:
+
+```sh
+python3 scripts/runpod_bake.py benchmark --target den --gpu 'NVIDIA RTX A5000' --budget .50 --max-hourly .40 --max-minutes 30
+```
+
+This target uploads the den source, scene scripts, and den textures. It returns
+`den-baked.glb`, the HDR and denoised lighting atlas, and reports under the run's
+`output/` directory. The default target remains `house`. Review the result before
+copying `den-baked.glb` to `web/assets/`; the local source preview enables it with
+`?denLighting=uv`. Omitting that parameter keeps the original projection.
+
+## Full-room atlas refresh
+
+`--target house-atlases` rebuilds the fixed surfaces in all five release models
+from native reflectance, preserving the projected den and live artwork/props.
+It uploads the Blender source, release models, authored repair bake inputs,
+source basement model/refit metadata, Python bake scripts, and project textures.
+The fallback pool prioritizes full Blackwell GPUs; it excludes MIG partitions
+and no longer falls back to the slower A5000 automatically.
+
+The recipe repairs source UV mapping (including signed object names and metre
+mapping for primitives without UVs), applies corrected hallway ownership to the
+window wall, and allocates per-room/surface atlases based on world surface area.
+Cellar window spill starts on the room side of its opaque backdrop/masonry,
+preventing a blocked, black bake. The reviewed cellar ceiling paint is retained.
+Irradiance and albedo are baked separately. Only irradiance is denoised, then
+multiplied by the untouched albedo in linear space before display grading.
+PNG and EXR masters remain lossless. Production applies quality-80 WebP once,
+keeps 18-bit atlas UV precision, and produces one shared asset set for all
+browsers. Per-atlas delivery limits are 1024 or 2048 pixels to bound phone
+texture memory; these are applied from the lossless masters before WebP
+encoding. There are no phone variants or viewport-dependent texture resizes.
+
+```sh
+python3 scripts/runpod_bake.py auto --target house-atlases --quality final --budget 5 --max-hourly 2.50 --max-minutes 90
+node scripts/assemble-house-atlases.mjs <verified-output>
+```
+
+The merger stages `scene/exports/house-release/atlas-refresh` for validation.
+It does not deploy or install the results automatically. `--prepare-only` and
+`--smoke` on `bake_house_atlases.py` provide a source audit and tiny local end-to-end
+validation before paid rendering. The user rejected the illustrated hallway
+experiment; this refresh uses the original materials and moonlit window rig.

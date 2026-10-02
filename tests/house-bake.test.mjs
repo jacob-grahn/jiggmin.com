@@ -26,7 +26,7 @@ test('window bake changes only fixed surface lighting, retaining every reviewed 
   for(const node of output.getRoot().listNodes().filter(n=>n.getMesh())){
    const original=sources.get(node.getExtras().house_bake_id);assert.ok(original,node.getName());
    assert.deepEqual(triangles(node),triangles(original),`${room}/${node.getName()} geometry changed`);
-   if(node.getExtras().house_window_bake){
+   if(node.getExtras().house_window_bake||node.getExtras().atlas_group){
     assert.ok(!node.getExtras().release_dynamic);assert.ok(!['door','ladder'].includes(node.getExtras().preview_kind));
     for(const p of node.getMesh().listPrimitives()){
      assert.ok(p.getMaterial().getEmissiveTexture());assert.ok(!p.getMaterial().getExtras().ceiling_paint,'preview ceiling grade was applied twice');
@@ -39,14 +39,14 @@ test('window bake changes only fixed surface lighting, retaining every reviewed 
      assert.deepEqual(a.getBaseColorFactor(),b.getBaseColorFactor(),node.getName());
      assert.deepEqual(a.getEmissiveFactor(),b.getEmissiveFactor(),node.getName());
      for(const slot of ['BaseColor','Emissive','Normal','Occlusion','MetallicRoughness']){
-      assert.deepEqual(a[`get${slot}Texture`]()?.getImage(),b[`get${slot}Texture`]()?.getImage(),`${node.getName()} ${slot} texture changed`);
+      assert.equal(createHash('sha256').update(a[`get${slot}Texture`]()?.getImage()??'').digest('hex'),createHash('sha256').update(b[`get${slot}Texture`]()?.getImage()??'').digest('hex'),`${node.getName()} ${slot} texture changed`);
      }
     }
    }
   }
  }
 });
-test('window bake retains the original room assets byte for byte',{skip:!layout.lightingBake},()=>{
+test('window bake retains the original room assets byte for byte',{skip:!layout.lightingBake||!!layout.atlasRefresh},()=>{
  for(const room of ['hallway','workshop'])assert.deepEqual(readFileSync(`${dir}/${room}.glb`),readFileSync(`scene/exports/house-release/bake-input/${room}.glb`));
  assert.equal(layout.assets.den,null);assert.deepEqual(layout.lights,[]);
 });
@@ -57,7 +57,7 @@ test('basement and attic fixture lightmaps retain the exact generated pixels',{s
   const doc=await io.read(`${dir}/${room}.glb`),nodes=doc.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().house_window_bake);
   for(const n of nodes)for(const p of n.getMesh().listPrimitives()){
    assert.ok(p.getAttribute('TEXCOORD_0'));
-   const atlas=readFileSync(`scene/exports/house-release/${layout.lightingBake.quality}/${n.getExtras().release_baked}.png`);
+   const atlas=readFileSync(layout.atlasRefresh&&n.getExtras().atlas_group?`${layout.atlasRefresh.resultDirectory}/${n.getExtras().atlas_group}.png`:`scene/exports/house-release/${layout.lightingBake.quality}/${n.getExtras().release_baked}.png`);
    assert.equal(hash(p.getMaterial().getEmissiveTexture().getImage()),hash(atlas),n.getName());
    assert.deepEqual(p.getMaterial().getEmissiveFactor(),[1,1,1]);
   }

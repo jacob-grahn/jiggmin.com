@@ -6,6 +6,7 @@ Use `status` for a read-only account check; `benchmark` creates a paid pod.
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 from pathlib import Path
@@ -20,7 +21,17 @@ ROOT = Path(__file__).resolve().parents[1]
 STATE_DIR = ROOT / '.runpod'
 API = 'https://rest.runpod.io/v1'
 GPU = 'NVIDIA GeForce RTX 4090'
-GPUS = [GPU, 'NVIDIA GeForce RTX 5090', 'NVIDIA RTX A5000']
+FAST_GPUS = ['NVIDIA RTX PRO 6000 Blackwell Workstation Edition', 'NVIDIA GeForce RTX 5090', 'NVIDIA RTX PRO 6000 Blackwell Server Edition', 'NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition']
+GPUS = FAST_GPUS + [GPU, 'NVIDIA RTX A5000']
+FALLBACK_GPUS = FAST_GPUS.copy()
+
+
+class GPUUnavailable(RuntimeError):
+    """A quote or explicit allocation response confirms no capacity."""
+
+
+class GPUIneligible(RuntimeError):
+    """A candidate cannot meet the caller's spending/runtime limits."""
 
 
 def sha256(path):
@@ -67,15 +78,23 @@ def request(url, token, method='GET', payload=None, upload=None, download=None, 
     if not 200 <= int(code) < 300:
         # Print only short top-level diagnostics, with tokens scrubbed. Never
         # dump responses, which may contain a submitted pod's environment.
+        unavailable = False
         try:
             error_data = json.loads(body)
             detail = error_data.get('error', error_data.get('message', ''))
+            unavailable = (url == API + '/pods' and method == 'POST' and int(code) in (400, 409, 500)
+                           and isinstance(detail, str) and detail.strip().lower() in {
+                               'create pod: there are no instances currently available',
+                               'there are no instances currently available',
+                           })
             if isinstance(detail, str) and len(detail) < 300:
                 detail = re.sub(r'rpa_[A-Za-z0-9]+', '[redacted]', detail.replace(token, '[redacted]'))
                 if not any(word in detail for word in ['BAKE_TOKEN', 'BAKE_RUNPOD_KEY', 'Authorization']):
                     print('Runpod API:', detail, file=sys.stderr)
         except (ValueError, AttributeError):
             pass
+        if unavailable:
+            raise GPUUnavailable('Selected GPU capacity disappeared during allocation')
         raise RuntimeError('Runpod HTTP ' + code)
     if download or not body:
         return None
@@ -124,15 +143,24 @@ def limits(hourly, max_hourly, budget, minutes):
     return int(seconds)
 
 
-def pack(destination):
+def pack(destination, target="house"):
+    if target not in {"house", "den", "hallway-style", "house-atlases"}:
+        raise ValueError("Unsupported bake target")
     files = [ROOT / 'scene/house-release.blend', ROOT / 'scene/basement-refit.json',
              ROOT / 'scene/exports/house-release/classification.json',
              ROOT / 'scene/exports/house/basement.glb']
+    if target == 'den':
+        files = [ROOT / 'scene/midnight-den-illustrated.blend']
+    elif target == 'house-atlases':
+        files += [ROOT / 'web/assets/house/release' / name for name in ['structure.glb', 'hallway.glb', 'workshop.glb', 'basement.glb', 'attic.glb', 'layout.json']]
+    elif target == 'hallway-style':
+        files = [ROOT / 'scene/house-release.blend'] + [ROOT / 'web/assets/house/release' / name for name in ['structure.glb', 'hallway.glb', 'layout.json']]
     files += sorted((ROOT / 'scene/scripts').glob('*.py'))
-    for directory in ['scene/exports/house-release/bake-input', 'scene/house-textures', 'scene/textures']:
+    directories = ['scene/textures'] if target == 'den' else ['scene/house-textures', 'scene/textures'] if target == 'hallway-style' else ['scene/exports/house-release/bake-input', 'scene/house-textures', 'scene/textures']
+    for directory in directories:
         files += sorted(path for path in (ROOT / directory).rglob('*') if path.is_file() and not path.name.startswith('.'))
     required = ['structure.glb', 'basement.glb', 'attic.glb', 'layout.json']
-    for name in required:
+    for name in required if target == 'house' else []:
         if not (ROOT / 'scene/exports/house-release/bake-input' / name).is_file():
             raise RuntimeError('Missing bake input: ' + name)
     for path in files:
@@ -144,20 +172,33 @@ def pack(destination):
     return {str(path.relative_to(ROOT)): sha256(path) for path in files}
 
 
-def unpack_result(bundle, destination):
+def unpack_result(bundle, destination, target="house"):
     destination.mkdir()
     with tarfile.open(bundle) as archive:
         members = archive.getmembers()
-        if sum(member.size for member in members) > 2_000_000_000:
+        if sum(member.size for member in members) > (6_000_000_000 if target == 'house-atlases' else 2_000_000_000):
             raise ValueError('Oversized result')
         for member in members:
             if not member.isfile() or Path(member.name).name != member.name or member.name in ('.', '..'):
                 raise ValueError('Unsafe result path')
         archive.extractall(destination, members=members, filter='data')
-    for name in ['bake-report.json', 'cloud-report.json', 'structure-lighting.glb',
-                 'basement-lighting.glb', 'attic-lighting.glb']:
+    required = ['report.json', 'cloud-report.json', 'den-baked.glb'] if target == 'den' else ['bake-report.json', 'cloud-report.json', 'structure-lighting.glb', 'basement-lighting.glb', 'attic-lighting.glb']
+    if target == 'house-atlases':
+        required = ['report.json', 'cloud-report.json', 'house-atlases.glb', 'source-audit.json']
+    if target == 'hallway-style':
+        required = ['report.json', 'cloud-report.json', 'hallway-style.glb']
+    for name in required:
         if not (destination / name).is_file():
             raise ValueError('Incomplete bake: missing ' + name)
+    if target in {'den', 'hallway-style', 'house-atlases'}:
+        report = json.loads((destination / 'report.json').read_text())
+        atlases = report.get('atlases', {'lighting': {}})
+        for atlas in atlases:
+            if not re.fullmatch(r'[a-z][a-z0-9-]*', atlas):
+                raise ValueError('Unsafe atlas name')
+            for suffix in ['.png', '.exr']:
+                if not (destination / (atlas + suffix)).is_file():
+                    raise ValueError('Incomplete bake: missing ' + atlas + suffix)
 
 
 def safe_pod(pod):
@@ -188,17 +229,20 @@ def benchmark(args, key):
         raise RuntimeError('An existing jiggmin bake pod needs cleanup; run status first')
     pricing = quote(key, args.gpu)
     if not (pricing.get('availability') or {}).get('uninterruptablePrice'):
-        raise RuntimeError('Selected Secure Cloud GPU currently unavailable; choose another GPU explicitly')
+        raise GPUUnavailable('Selected Secure Cloud GPU currently unavailable')
     # 40 GB container disk at $0.10/GB/month, rounded upward for the estimate.
     estimated_hourly = pricing['gpuHourly'] + 0.01
-    duration = limits(estimated_hourly, args.max_hourly, args.budget, args.max_minutes)
+    try:
+        duration = limits(estimated_hourly, args.max_hourly, args.budget, args.max_minutes)
+    except ValueError as error:
+        raise GPUIneligible(str(error)) from error
     if pricing['credit'] < min(args.budget, estimated_hourly):
         raise RuntimeError('Insufficient Runpod account credit')
     run_id = time.strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:6]
     run_dir = STATE_DIR / run_id
     run_dir.mkdir(mode=0o700)
     print('Packing scene and textures...', flush=True)
-    manifest = pack(run_dir / 'input.tar.gz')
+    manifest = pack(run_dir / 'input.tar.gz', args.target)
     (run_dir / 'input-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(json.dumps({'gpu': args.gpu, 'estimatedHourlyIncludingDisk': estimated_hourly,
                       'budget': args.budget, 'maximumMinutes': duration / 60,
@@ -209,33 +253,34 @@ def benchmark(args, key):
     token = secrets.token_urlsafe(32)
     state = {'name': name, 'runId': run_id, 'started': started, 'deadline': deadline,
              'estimatedHourly': estimated_hourly, 'quality': args.quality,
-             'budget': args.budget, 'podId': None, 'deleted': False}
+             'target': args.target, 'gpu': args.gpu, 'budget': args.budget, 'podId': None, 'deleted': False}
     state_path = run_dir / 'state.json'
 
     def save():
         state_path.write_text(json.dumps(state, indent=2) + '\n')
 
     save()
+    capacity_rejected = False
     try:
         pod = request(API + '/pods', key, 'POST', {
             'name': name, 'cloudType': 'SECURE', 'computeType': 'GPU',
             'gpuTypeIds': [args.gpu], 'gpuCount': 1, 'interruptible': False,
-            'minRAMPerGPU': 24, 'minVCPUPerGPU': 4,
+            'minRAMPerGPU': 32 if args.target == 'house-atlases' else 24, 'minVCPUPerGPU': 8 if args.target == 'house-atlases' else 4,
             'containerDiskInGb': 40, 'volumeInGb': 0,
             'imageName': 'python:3.11-slim-bookworm',
             'ports': ['8888/http'],
             'dockerEntrypoint': ['python3', '-u', '-c'],
             'dockerStartCmd': [(ROOT / 'scripts/runpod_worker.py').read_text()],
             'env': {'BAKE_TOKEN': token, 'BAKE_RUNPOD_KEY': key,
-                    'BAKE_DEADLINE': str(deadline), 'BAKE_QUALITY': args.quality,
+                    'BAKE_DEADLINE': str(deadline), 'BAKE_QUALITY': args.quality, 'BAKE_TARGET': args.target,
                     'NVIDIA_DRIVER_CAPABILITIES': 'compute,utility,graphics',
                     'NVIDIA_VISIBLE_DEVICES': 'all'},
         }, timeout=60)
         state['podId'] = pod['id']
         save()
         rates = [float(pod[field]) for field in ['costPerHr', 'adjustedCostPerHr'] if pod.get(field) is not None]
-        if not rates or max(rates) + 0.01 > args.max_hourly:
-            raise RuntimeError('Actual pod price missing or exceeds hourly limit')
+        if not rates or any(not math.isfinite(rate) or rate <= 0 for rate in rates) or max(rates) + 0.01 > min(args.max_hourly, estimated_hourly):
+            raise RuntimeError('Actual pod price missing or exceeds the quote/hourly limit')
         state['actualHourly'] = max(rates)
         save()
         print('Pod allocated:', pod['id'], 'at $' + str(max(rates)) + '/hour (plus disk)', flush=True)
@@ -283,15 +328,22 @@ def benchmark(args, key):
         request(url + '/result', token, download=run_dir / 'result.tar.gz', timeout=180)
         if sha256(run_dir / 'result.tar.gz') != health['sha256']:
             raise RuntimeError('Downloaded result checksum mismatch')
-        unpack_result(run_dir / 'result.tar.gz', run_dir / 'output')
+        unpack_result(run_dir / 'result.tar.gz', run_dir / 'output', args.target)
         state['report'] = health['report']
         print('Verified output:', run_dir / 'output', flush=True)
         print(json.dumps(health['report']), flush=True)
+    except GPUUnavailable:
+        capacity_rejected = True
+        state['allocationRejected'] = True
+        raise
     finally:
         # Creation is deliberately never retried. Reconcile ambiguous outcomes by
         # this invocation's unique name so a response timeout cannot orphan a pod.
         if not state['podId']:
             matches = [pod for pod in request(API + '/pods', key) if pod.get('name') == name]
+            if len(matches) > 1:
+                save()
+                raise RuntimeError('Multiple pods match this run; stopping for cleanup')
             if len(matches) == 1:
                 state['podId'] = matches[0]['id']
                 save()
@@ -302,21 +354,51 @@ def benchmark(args, key):
             state['estimatedCost'] = round((state['finished'] - started) / 3600 * (state.get('actualHourly', pricing['gpuHourly']) + 0.01), 4)
             print('Pod deletion confirmed. Estimated total: $' + str(state['estimatedCost']), flush=True)
         save()
+        if capacity_rejected and state['podId']:
+            raise RuntimeError('A pod existed despite capacity rejection; cleaned up and stopped')
+
+
+def automatic(args, key):
+    """Try each approved GPU once; only confirmed, unallocated failures fall through."""
+    # Invalid global limits must fail before making any account/API requests.
+    limits(.01, args.max_hourly, args.budget, args.max_minutes)
+    candidates = list(dict.fromkeys([args.gpu] if args.gpu else args.gpus))
+    failures = []
+    for gpu in candidates:
+        print('Trying GPU:', gpu, flush=True)
+        attempt = argparse.Namespace(**vars(args))
+        attempt.gpu = gpu
+        try:
+            return benchmark(attempt, key)
+        except (GPUUnavailable, GPUIneligible) as error:
+            reason = gpu + ': ' + str(error)
+            failures.append(reason)
+            print('Skipping ' + reason, flush=True)
+    raise RuntimeError('No GPU could be allocated within the limits. ' + '; '.join(failures))
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     sub.add_parser('status')
-    sub.add_parser('quote')
+    quote_parser = sub.add_parser('quote')
+    quote_parser.add_argument('--gpu', choices=GPUS, default=GPU)
     progress = sub.add_parser('progress')
     progress.add_argument('pod_id')
-    bake = sub.add_parser('benchmark')
-    bake.add_argument('--gpu', choices=GPUS, default=GPU)
-    bake.add_argument('--quality', choices=['test', 'final'], default='test')
-    bake.add_argument('--budget', type=float, default=2)
-    bake.add_argument('--max-hourly', type=float, default=1)
-    bake.add_argument('--max-minutes', type=float, default=60)
+    for command in ['benchmark', 'auto']:
+        bake = sub.add_parser(command, help='Try GPU alternatives automatically' if command == 'auto' else 'Bake on one specific GPU')
+        if command == 'auto':
+            selection = bake.add_mutually_exclusive_group()
+            selection.add_argument('--gpus', nargs='+', choices=GPUS, default=FALLBACK_GPUS,
+                                   help='Ordered GPU candidates (default: Blackwell workstation, 5090, Blackwell server, Blackwell Max-Q)')
+            selection.add_argument('--gpu', choices=GPUS, help='Use only this GPU; disables fallback')
+        else:
+            bake.add_argument('--gpu', choices=GPUS, default=GPU)
+        bake.add_argument('--target', choices=['house', 'den', 'hallway-style', 'house-atlases'], default='house')
+        bake.add_argument('--quality', choices=['test', 'final'], default='test')
+        bake.add_argument('--budget', type=float, default=2)
+        bake.add_argument('--max-hourly', type=float, default=1)
+        bake.add_argument('--max-minutes', type=float, default=60)
     remove = sub.add_parser('delete')
     remove.add_argument('pod_id')
     args = parser.parse_args()
@@ -324,7 +406,7 @@ def main():
     if args.command == 'status':
         print(json.dumps([safe_pod(pod) for pod in request(API + '/pods', key)], indent=2))
     elif args.command == 'quote':
-        print(json.dumps(quote(key), indent=2))
+        print(json.dumps(quote(key, args.gpu), indent=2))
     elif args.command == 'progress':
         pod = request(API + '/pods/' + args.pod_id, key)
         if not pod.get('name', '').startswith('jiggmin-bake-'):
@@ -344,6 +426,8 @@ def main():
             raise RuntimeError('Refusing to delete a pod outside this project')
         delete(key, args.pod_id)
         print('Pod deletion confirmed.')
+    elif args.command == 'auto':
+        automatic(args, key)
     else:
         benchmark(args, key)
 

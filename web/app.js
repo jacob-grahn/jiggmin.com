@@ -338,8 +338,10 @@ function screenTransform(){
 async function init(){
  const loader=new GLTFLoader();
  const json=async path=>{const r=await fetch(path);if(!r.ok)throw Error(`Could not load ${path}`);return r.json();};
+ const denLighting=new URLSearchParams(location.search).get('denLighting');
+ const denModel=denLighting==='transfer'?'/web/assets/den-transferred.glb':denLighting==='uv'?'/web/assets/den-baked.glb':'/web/assets/room.glb?v=painted-brick-1';
  const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel,propLighting,profiles]=await Promise.all([
-  json('/data/games.json?v=swf-compat-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync('/web/assets/room.glb?v=painted-brick-1'),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=painted-brick-1'),json('/web/assets/colliders.json?v=painted-brick-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=painted-brick-1'),json('/data/gameplay.json?v=swf-compat-1')
+  json('/data/games.json?v=swf-compat-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync(denModel),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=painted-brick-1'),json('/web/assets/colliders.json?v=painted-brick-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=painted-brick-1'),json('/data/gameplay.json?v=swf-compat-1')
  ]);
  games=manifest.games;for(const game of games){game.gameplay=profiles.games[game.id];if(!game.gameplay)throw Error(`Missing gameplay profile: ${game.id}`);}meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;

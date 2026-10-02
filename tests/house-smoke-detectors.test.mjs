@@ -39,7 +39,7 @@ test('three ceiling-mounted smoke detectors share an actual baked texture and ha
  const b=readFileSync(path),length=b.readUInt32LE(12),json=JSON.parse(b.subarray(20,20+length));assert.ok(!json.extensions?.KHR_lights_punctual);
  const report=JSON.parse(readFileSync('docs/house-plan/smoke-detector-bake-report.json'));assert.equal(report.bakedGLBHash,createHash('sha256').update(b).digest('hex'));assert.equal(report.samples,64);
  const layout=JSON.parse(readFileSync('web/assets/house/release/layout.json'));assert.ok(layout.fixedFixtures.startsWith('/'+path+'?v='));
- if(layout.reviewPreparation)assert.equal(report.houseSourceKey,layout.lightingBake.report.sourceKey,'detector occluders must match the published house bake');
+ if(layout.reviewPreparation)assert.equal(report.houseSourceKey,layout.atlasRefresh?.retainedFixtureSourceKey??layout.lightingBake.report.sourceKey,'detector occluders must match the published house bake');
 });
 test('detectors remain fixed scenery and never create physics props',async()=>{
  const b=readFileSync(path),length=b.readUInt32LE(12),doc=JSON.parse(b.subarray(20,20+length));doc.buffers[0].uri=`data:application/octet-stream;base64,${b.subarray(28+length).toString('base64')}`;

@@ -10,7 +10,7 @@ import {addBasementDetails,shadeBasementWindowSpills} from './basement-details.j
 // discovery behavior use the same modules as the original rooms.
 import * as THREE from 'three';
 import {GLTFLoader} from './model-loader.js';
-import {createMoonlitWindows,createMoonlitSky,MOONLIT_SKY_URL,WINDOW_GLASS_LAYER} from './house-window-sky.js?v=panorama-dim-1';
+import {createMoonlitWindows,createMoonlitSky,MOONLIT_SKY_URL,WINDOW_GLASS_LAYER} from './house-window-sky.js?v=panorama-dim-2';
 import {createContinuousDen,integrateDenOpening} from './house-den-continuity.js?v=house-reference-30';
 import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
 import {illustrateHouse} from './house-illustration.js';
@@ -56,7 +56,6 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  const loader=new GLTFLoader(),rooms=new Map(),reduced=matchMedia('(prefers-reduced-motion: reduce)');
  let layout,connections,loading,current,camera,revision=0,revealRevision=0,frame,finish,propFrame,propTime=0,active=false,targets=new Map();
  let continuousDen,sky,denProgress=0;
- const compactTextures=matchMedia('(max-width: 700px)').matches,resizedMaps=new WeakSet();
  const targetGeometry=new THREE.BoxGeometry(.7,1,.12),targetMaterial=new THREE.MeshBasicMaterial();
  const input=createHousePropInput(host,{getRoom:()=>current,getCamera:()=>camera,onActivate,wake,reduced});
  function wake(){if(!active||propFrame||document.hidden)return;propTime=performance.now();propFrame=requestAnimationFrame(updateProps);}
@@ -89,6 +88,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
   updateTargets();
  }}
  function resize(){input.cancel();const {width,height}=host.getBoundingClientRect();renderer.setSize(width,height,false);if(camera){resizeHouseCamera(camera,width/height);render();}}
+ function roomAsset(id){return layout.assets[id];}
  function viewFor(id){
   const v=layout.views[id==='hallway'?'hub':id],view=new THREE.PerspectiveCamera(v.fov,layout.aspect,.035,250);
   view.position.fromArray(v.position);view.lookAt(new THREE.Vector3(...v.target));view.userData.explorationLens={fov:v.fov,aspect:layout.aspect};return view;
@@ -109,14 +109,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
     }
     if(o.userData.release_baked){
      const map=m.emissiveMap??m.map;if(!map)throw Error('Missing house lightmap');
-     // Keep authored 4K bakes for desktop, but bound mobile GPU memory before
-     // the first upload. Canvas replacement preserves the texture's UV setup.
-     if(compactTextures&&!resizedMaps.has(map)){
-      const image=map.image,scale=Math.min(1,2048/Math.max(image.width,image.height));
-      if(scale<1){const canvas=document.createElement('canvas');canvas.width=Math.round(image.width*scale);canvas.height=Math.round(image.height*scale);const context=canvas.getContext('2d');context.drawImage(image,0,0,canvas.width,canvas.height);map.image=canvas;map.needsUpdate=true;}
-      resizedMaps.add(map);
-     }
      const material=new THREE.MeshBasicMaterial({map,side:THREE.DoubleSide,toneMapped:false});
+     map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
      if(m.userData.ceiling_paint){
       // Preview the new paint using the existing baked illumination. The saved
       // Blender material supplies the actual reflectance for the final bake.
@@ -164,7 +158,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
  async function load(){
   if(!loading)loading=(async()=>{
    const response=await fetch(layoutURL,{cache:'no-cache'});if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
-   const gltf=await loader.loadAsync(layout.assets.structure);
+   const gltf=await loader.loadAsync(debugParams.get('hallwayStyle')==='illustrated'?'/web/assets/house/hallway-style/structure.glb':debugParams.get('hallwayInk')==='transfer'?'/web/assets/house/hallway-ink/structure.glb':roomAsset('structure'));
    if(layout.fixedFixtures){const fixtures=await loader.loadAsync(layout.fixedFixtures);gltf.scene.add(fixtures.scene);}
    if(layout.hatchLighting){const reference=await loader.loadAsync(layout.hatchLighting);applyHatchLighting(gltf.scene,reference.scene);}
    integrateDenOpening(gltf.scene);materials(gltf.scene);
@@ -206,7 +200,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,collected=new
    const source=getDen?.();if(!source?.scene||!source.camera)throw Error('The live den must be ready before house travel');
    continuousDen=createContinuousDen(source,{floorMaterial:connections.floorMaterial});world.add(continuousDen.scene);rooms.set(id,{id,view:continuousDen.endpointCamera()});return;
   }
-  const gltf=id==='private-hall'?{scene:new THREE.Group()}:await loader.loadAsync(layout.assets[id]);
+  const gltf=id==='private-hall'?{scene:new THREE.Group()}:await loader.loadAsync(id==='hallway'&&debugParams.get('hallwayStyle')==='illustrated'?'/web/assets/house/hallway-style/hallway.glb':id==='hallway'&&debugParams.get('hallwayInk')==='transfer'?'/web/assets/house/hallway-ink/hallway.glb':roomAsset(id));
   if(ticket!==revision){const r=createRoomResources();r.capture(gltf.scene);r.dispose();return;}
   addRoom(id,gltf);
  }
