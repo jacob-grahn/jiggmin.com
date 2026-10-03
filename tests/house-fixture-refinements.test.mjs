@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
 import * as T from 'three';import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
-import {fixtureAnchors,turnOffCeilingFixtures,refineRoomFixtures} from '../web/house-fixture-refinements.js';
-import {replaceExteriorTrees} from '../web/house-exterior-trees.js';
+import {fixtureAnchors,turnOffCeilingFixtures,refineRoomFixtures} from '../scripts/house-source/house-fixture-refinements.js';
+import {replaceExteriorTrees} from '../scripts/house-source/house-exterior-trees.js';
 globalThis.ProgressEvent??=class{};
 const releaseDir=process.env.HOUSE_RELEASE_DIR??'web/assets/house/release';
 async function model(room){const b=readFileSync(`${releaseDir}/${room}.glb`),n=b.readUInt32LE(12),d=JSON.parse(b.subarray(20,20+n));d.buffers[0].uri=`data:application/octet-stream;base64,${b.subarray(28+n).toString('base64')}`;d.materials=[];for(const m of d.meshes)for(const p of m.primitives)delete p.material;delete d.images;delete d.textures;const root=(await new GLTFLoader().parseAsync(JSON.stringify(d),'')).scene;root.traverse(o=>{if(o.isMesh)o.material.side=T.DoubleSide;});root.updateMatrixWorld(true);return root;}
@@ -36,6 +36,6 @@ test('garage and mudroom fittings stay present with non-emissive dim materials',
  for(const name of ['Finish / Laundry light globe','Finish / Workshop overhead globe','Finish / Workshop overhead globe.001']){const o=named(root,name);assert.ok(o.visible);if(root.userData.review_fixtures_baked)assert.ok(o.userData.review_fixed_fixture);else{assert.equal(o.material.name,'Unlit ceiling fitting');assert.ok(o.material.isMeshBasicMaterial);}assert.equal(o.userData.houseOutlined,true);}
 });
 test('front workroom tree roots sit below the visible panorama floor',async()=>{
- const root=await model('structure'),grove=replaceExteriorTrees(root);assert.ok(grove.children.some(o=>o.position.x>10&&o.position.z<0));
+ const root=await model('structure'),grove=root.getObjectByName('Natural_exterior_grove');assert.ok(grove.children.some(o=>o.position.x>10&&o.position.z<0));
  for(const tree of grove.children)if(tree.position.x>10&&tree.position.z<0)assert.equal(tree.position.y,-2.7);
 });

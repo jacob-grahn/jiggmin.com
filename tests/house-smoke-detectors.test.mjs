@@ -13,8 +13,9 @@ const path='web/assets/house/release/smoke-detectors.glb';
 test('three ceiling-mounted smoke detectors share an actual baked texture and have no live lights',async()=>{
  const doc=await new NodeIO().registerExtensions(ALL_EXTENSIONS).read(path),nodes=doc.getRoot().listNodes().filter(n=>n.getMesh());
  assert.equal(nodes.length,3);assert.equal(doc.getRoot().listTextures().length,1);
- const shell=await new NodeIO().registerExtensions(ALL_EXTENSIONS).read('web/assets/house/release/structure.glb'),ceilings=new THREE.Group();
- for(const n of shell.getRoot().listNodes().filter(n=>n.getMesh()&&/^(Attic floor \/ hall ceiling|Garage ceiling|Main floor)/.test(n.getName())))for(const p of n.getMesh().listPrimitives()){
+ const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),ceilings=new THREE.Group();
+ const models=await Promise.all(['structure','basement'].map(room=>io.read(`web/assets/house/release/${room}.glb`)));
+ for(const n of models.flatMap(doc=>doc.getRoot().listNodes()).filter(n=>n.getMesh()&&/^(Attic floor \/ hall ceiling|Garage ceiling|Main floor|Basement ceiling)/.test(n.getName())))for(const p of n.getMesh().listPrimitives()){
   const g=new THREE.BufferGeometry(),a=p.getAttribute('POSITION');g.setAttribute('position',new THREE.BufferAttribute(a.getArray(),3));if(p.getIndices())g.setIndex(new THREE.BufferAttribute(p.getIndices().getArray(),1));
   const mesh=new THREE.Mesh(g,new THREE.MeshBasicMaterial({side:THREE.DoubleSide}));mesh.applyMatrix4(new THREE.Matrix4().fromArray(n.getWorldMatrix()));ceilings.add(mesh);
  }
@@ -22,10 +23,10 @@ test('three ceiling-mounted smoke detectors share an actual baked texture and ha
  const positions={hallway:[10.3,2.6,7.55],garage:[14.8,2.6,1.5],basement:[3.36,-.2,2.4]};
  for(const node of nodes){
   const e=node.getExtras();assert.equal(e.bake_connection,true);assert.equal(e.release_dynamic,false);assert.equal(e.release_baked,'smoke-detectors');assert.equal(e.preview_kind,'fixture');assert.ok(!e.hotspot);
-  const point=new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().fromArray(node.getWorldMatrix()));assert.ok(point.distanceTo(new THREE.Vector3(...positions[e.house_smoke_detector]))<1e-5);
+  const matrix=new THREE.Matrix4().fromArray(node.getWorldMatrix()),point=new THREE.Vector3().setFromMatrixPosition(matrix),nominal=new THREE.Vector3(...positions[e.house_smoke_detector]);assert.ok(Math.hypot(point.x-nominal.x,point.z-nominal.z)<1e-5);assert.ok(Math.abs(point.y-nominal.y)<.04);
   for(const [x,z] of [[0,0],[.05,0],[-.05,0],[0,.05],[0,-.05]]){
-   const origin=point.clone().add(new THREE.Vector3(x,-.2,z)),hit=new THREE.Raycaster(origin,new THREE.Vector3(0,1,0),0,.3).intersectObject(ceilings,true)[0];
-   assert.ok(hit&&Math.abs(hit.point.y-point.y)<1e-5,`${e.house_smoke_detector}: mounting flange floats or crosses the ceiling`);
+   const contact=new THREE.Vector3(x,0,z).applyMatrix4(matrix),origin=contact.clone().add(new THREE.Vector3(0,-.2,0)),hit=new THREE.Raycaster(origin,new THREE.Vector3(0,1,0),0,.3).intersectObject(ceilings,true)[0];
+   assert.ok(hit&&Math.abs(hit.point.y-contact.y)<1e-5,`${e.house_smoke_detector}: mounting flange floats or crosses the ceiling`);
   }
   for(const p of node.getMesh().listPrimitives()){
    const uv=p.getAttribute('TEXCOORD_0'),texture=p.getMaterial().getEmissiveTexture();assert.ok(uv);assert.ok(texture);

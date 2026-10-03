@@ -9,7 +9,7 @@ import {createRoute} from '../web/house-layout.js';
 if(!globalThis.ProgressEvent)globalThis.ProgressEvent=class{constructor(type,values){Object.assign(this,{type},values);}};
 const dir=process.env.HOUSE_RELEASE_DIR??'web/assets/house/release';
 function document(room){const bytes=readFileSync(`${dir}/${room}.glb`),n=bytes.readUInt32LE(12);return {bytes,n,doc:JSON.parse(bytes.subarray(20,20+n))};}
-async function model(room){const {bytes,n,doc}=document(room);doc.buffers[0].uri=`data:application/octet-stream;base64,${bytes.subarray(28+n).toString('base64')}`;doc.materials=[];for(const m of doc.meshes)for(const p of m.primitives)delete p.material;delete doc.images;delete doc.textures;delete doc.extensionsUsed;delete doc.extensionsRequired;return (await new GLTFLoader().parseAsync(JSON.stringify(doc),'')).scene;}
+async function model(room){const {bytes,n,doc}=document(room);doc.buffers[0].uri=`data:application/octet-stream;base64,${bytes.subarray(28+n).toString('base64')}`;for(const node of doc.nodes)if(node.mesh!==undefined&&doc.meshes[node.mesh].primitives.every(p=>doc.materials[p.material]?.extensions?.KHR_materials_unlit))node.extras={...node.extras,authoredUnlit:true};doc.materials=[];for(const m of doc.meshes)for(const p of m.primitives)delete p.material;delete doc.images;delete doc.textures;delete doc.extensionsUsed;delete doc.extensionsRequired;return (await new GLTFLoader().parseAsync(JSON.stringify(doc),'')).scene;}
 test('release retains every discoverable prop and keeps it out of static lightmaps',async()=>{
  const notes=JSON.parse(readFileSync('data/house-notes.json')).notes;
  for(const room of ['hallway','workshop','basement','attic']){
@@ -27,14 +27,14 @@ test('release shell retains its selected style, independent doors and connected 
  const {doc}=document('structure'),nodes=doc.nodes;
  const layout=JSON.parse(readFileSync(`${dir}/layout.json`));
  if(layout.style==='original'){
-  assert.ok(nodes.every(n=>!n.mesh||n.extras?.style_source==='original-room-palette'));
+  assert.ok(nodes.every(n=>!n.mesh||n.extras?.style_source==='original-room-palette'||n.extras?.house_authored_reflectance));
   assert.ok(!nodes.some(n=>n.extras?.release_baked&&!n.extras?.workshop_plywood&&!n.extras?.workshop_window_frame&&!n.extras?.house_window_bake));
   if(layout.lightingBake){
    assert.equal(layout.lightingBake.source,'original-window-rig');
    assert.equal(layout.lightingBake.report.lighting.exposure,-1.3);
    assert.equal(layout.lightingBake.report.lighting.saturation,1.2);
    assert.equal(layout.lightingBake.report.lighting.liveWindowLights,false);
-   for(const n of nodes.filter(n=>n.extras?.house_window_bake))assert.ok(!['door','ladder'].includes(n.extras.preview_kind),'animated geometry was baked');
+   for(const n of nodes.filter(n=>n.extras?.house_window_bake&&n.name!=='Attic hatch'))assert.ok(!['door','ladder'].includes(n.extras.preview_kind),'animated geometry was baked');
   }
   assert.equal(layout.assets.den,null);assert.deepEqual(layout.lights,[]);
  }else assert.ok(nodes.some(n=>n.extras?.release_baked));
@@ -72,7 +72,7 @@ test('all fixed release geometry is baked, including the exterior and authored c
   const fixed=room==='structure'?meshes:groupHouseProps(root,world).staticMeshes;
   for(const mesh of fixed){
    if(['door','ladder'].includes(mesh.userData.preview_kind)||/Garden_beyond_window|glass/i.test(mesh.name))continue;
-   assert.ok(mesh.userData.release_baked,`${room}/${mesh.name}: fixed mesh still uses live lighting`);
+   assert.ok(mesh.userData.release_baked||mesh.userData.authoredUnlit,`${room}/${mesh.name}: fixed mesh still uses live lighting`);
   }
  }
 });
@@ -85,6 +85,6 @@ test('night refinement removes the suspended cloth and hallway lamps while the h
  const handle=structure.nodes.filter(n=>n.extras?.hatch_handle);assert.equal(handle.length,3);
  for(const n of handle){assert.equal(n.extras.door_id,'attic');assert.ok(n.extras.release_dynamic);}
  const panel=structure.nodes.find(n=>n.name==='Attic hatch');
- for(const p of structure.meshes[panel.mesh].primitives){const m=structure.materials[p.material];assert.ok(m.pbrMetallicRoughness.baseColorTexture);assert.equal(m.name,'Rough wood painted white');}
+ for(const p of structure.meshes[panel.mesh].primitives){const m=structure.materials[p.material];assert.ok(m.emissiveTexture||m.pbrMetallicRoughness.baseColorTexture);assert.ok(m.emissiveTexture||m.name==='Rough wood painted white');}
  assert.ok(!readFileSync('web/house.js','utf8').includes('Look right'));
 });

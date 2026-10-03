@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {copyToDocument} from '@gltf-transform/functions';
 import {editMesh} from './refit-room-models.mjs';
-import {subtractWindowPrism} from '../web/house-window-openings.js';
+import {subtractWindowPrism} from './house-source/house-window-openings.js';
 export const PLYWOOD_PANELS=[
  {name:'Workshop plywood rear',source:'Garage raw rear sheathing',center:[14.5,1.225,-.13],size:[4.86,2.75,.06],opening:{center:[14.45,1.625,-.13],size:[2.3,1.25],normal:[0,0,1],right:[1,0,0]}},
  {name:'Workshop plywood left',source:'Unfinished side sheathing',center:[12.07,1.225,3.3],size:[.06,2.75,7],opening:{center:[12.07,1.075,5.6],size:[1,2.15],normal:[1,0,0],right:[0,0,1]}},

@@ -5,7 +5,7 @@ import {NodeIO} from '@gltf-transform/core';
 import {createHash} from 'node:crypto';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import * as THREE from 'three';
-import {windowExteriorFrame} from '../web/house-window-exterior.js';
+import {windowExteriorFrame} from '../scripts/house-source/house-window-exterior.js';
 const dir=process.env.HOUSE_RELEASE_DIR??'web/assets/house/release',layout=JSON.parse(readFileSync(`${dir}/layout.json`));
 function triangles(node){
  const result=new Set(),world=new THREE.Matrix4().fromArray(node.getWorldMatrix());
@@ -27,7 +27,7 @@ test('window bake changes only fixed surface lighting, retaining every reviewed 
    const original=sources.get(node.getExtras().house_bake_id);assert.ok(original,node.getName());
    assert.deepEqual(triangles(node),triangles(original),`${room}/${node.getName()} geometry changed`);
    if(node.getExtras().house_window_bake||node.getExtras().atlas_group){
-    assert.ok(!node.getExtras().release_dynamic);assert.ok(!['door','ladder'].includes(node.getExtras().preview_kind));
+    if(node.getName()==='Attic hatch'){assert.equal(node.getExtras().door_id,'attic');assert.ok(node.getExtras().release_dynamic);}else{assert.ok(!node.getExtras().release_dynamic);assert.ok(!['door','ladder'].includes(node.getExtras().preview_kind));}
     for(const p of node.getMesh().listPrimitives()){
      assert.ok(p.getMaterial().getEmissiveTexture());assert.ok(!p.getMaterial().getExtras().ceiling_paint,'preview ceiling grade was applied twice');
     }

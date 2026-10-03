@@ -4,7 +4,6 @@ import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
 import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
 import {collectHouseStructureColliders,createHouseProps} from '../web/house-props.js';
-import {tidyHouseProps} from '../web/house-prop-cleanup.js';
 globalThis.ProgressEvent??=class{};
 async function model(room){
  const b=readFileSync(`web/assets/house/release/${room}.glb`),n=b.readUInt32LE(12),d=JSON.parse(b.subarray(20,20+n));
@@ -13,7 +12,7 @@ async function model(room){
  return (await new GLTFLoader().parseAsync(JSON.stringify(d),'')).scene;
 }
 test('production hallway throws collide with the visible right and left house walls',async()=>{
- const structure=await model('structure'),root=await model('hallway'),world=new THREE.Scene();world.add(root);tidyHouseProps(root,'hallway');
+ const structure=await model('structure'),root=await model('hallway'),world=new THREE.Scene();world.add(root);
  const structureColliders=collectHouseStructureColliders(structure);
  const {physics}=createHouseProps(root,world,{floorY:0,roomBounds:[4.8,6.8,12,12],structureColliders});
  // Isolate the walls from hanging pictures and other detachable decorations.
@@ -35,7 +34,7 @@ test('production hallway throws collide with the visible right and left house wa
 });
 
 test('production hallway throws hit the ceiling panels without filling the attic hatch',async()=>{
- const structure=await model('structure'),root=await model('hallway'),world=new THREE.Scene();world.add(root);tidyHouseProps(root,'hallway');
+ const structure=await model('structure'),root=await model('hallway'),world=new THREE.Scene();world.add(root);
  const structureColliders=collectHouseStructureColliders(structure);
  const {physics}=createHouseProps(root,world,{floorY:0,roomBounds:[4.8,6.8,12,12],structureColliders});
  for(const {body} of physics.items.values())physics.world.removeBody(body);
@@ -50,6 +49,6 @@ test('production hallway throws hit the ceiling panels without filling the attic
   physics.world.removeBody(body);
  }
  const ceiling=structureColliders.filter(c=>c.name.startsWith('Attic floor / hall ceiling'));
- assert.equal(ceiling.length,8);
+ assert.equal(ceiling.length,10);
  assert.ok(!ceiling.some(c=>c.bounds.containsPoint(new THREE.Vector3(9.3,2.7,7.55))),'the moving hatch opening must stay clear');
 });

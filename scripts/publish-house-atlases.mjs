@@ -13,7 +13,7 @@ for(const path of ['scene/house-release.blend','scene/scripts/bake_house_atlases
 for(const room of ['structure','hallway','workshop','basement','attic']){
  await copyFile(`${dir}/${room}.glb`,`${out}/${room}.glb`);layout.assets[room]=layout.assets[room].replace('/'+dir+'/', '/'+out+'/');
 }
-for(const key of ['denFloorReference','fixedFixtures','hatchLighting'])if(layout[key]){
+for(const key of ['denFloorReference','fixedFixtures'])if(layout[key]){
  const name=layout[key].split('?')[0].split('/').pop();await copyFile(`${dir}/${name}`,`${out}/${name}`);layout[key]=layout[key].replace('/'+dir+'/', '/'+out+'/');
 }
 await writeFile(`${out}/layout.json`,JSON.stringify(layout,null,2)+'\n');

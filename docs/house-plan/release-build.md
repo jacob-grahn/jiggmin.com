@@ -52,10 +52,12 @@ reference before snapshotting. It removes the hall mouldings, attaches the cella
 pipe and adds its ceiling bend and brackets, attaches the attic junction and bulb
 cord/socket, moves the two attic cartons forward, and gives the garage and mudroom
 fittings unlit reflectance. Those fixtures receive their own baked lighting, and
-the baked scene flag prevents the browser from rebuilding them. Other room
-furnishings retain their original textures; movable-clutter cleanup and grouping
-still use the shared runtime helpers. Static smoke detectors retain their separate
-shared production atlas.
+the browser loads their finished meshes directly. Other room furnishings retain
+their original textures. Clutter cleanup runs during source preparation; only
+physics grouping remains at runtime. The full release command also rebuilds the
+smoke detectors against the current source, retaining their separate shared atlas.
+Their mounting positions and orientation are derived from the actual ceiling
+surfaces, including the den floor’s small authored slope above the basement.
 
 Publication defaults to the completed original-window final bake when present.
 `node scripts/publish-house-release.mjs --reference` or
@@ -135,145 +137,14 @@ warnings or errors. Final captures: [hallway](night-refinement-captures/hallway.
 [basement](night-refinement-captures/basement.jpg), and
 [attic](night-refinement-captures/attic.jpg).
 
-## Trim correction — October 1, 2026
+## Static source preparation — October 2, 2026
 
-The thin ceiling mouldings, door surrounds and window framing had conspicuous
-mottling in their baked lighting. `filter-house-trim.mjs` now filters each board
-face independently in linear light after assembly, preserving the broad baked
-illumination gradient. Non-trim UV texels, including their bilinear sampling
-footprint, are explicitly protected and checked for byte-identical decoded pixel
-values. Original room atlases, animated doors, artwork and the live den asset are
-unchanged. This adds no runtime lighting, texture uploads or rendering work.
+Permanent geometry, prop placement, window openings, exterior scenery, and floor
+artwork are authored by `scripts/prepare-house-static.mjs` before baking.
+`stage-house-review.mjs` authors the fixed fixtures. The browser only handles
+interaction, camera travel, glass compositing, and room resource lifetimes.
 
-The original trim repair removed 31 exactly coincident skirting/moulding boards.
-That duplication is now fixed upstream: stages 2, 6 and 7 had each generated trim
-for shared walls 02 and 04. `house_trim.py` gives each wall one finishing-pass
-owner, and the saved `house-plan-preview.blend` and staged structure export have
-been repaired once. Authoring/export/bake checks now reject duplicates instead of
-silently deleting geometry. The filter processes 170 fixed boards across five
-existing atlases. The unfiltered structure is retained beside the final
-bake as `structure-unfiltered.glb`, and `trimFiltering` in the bake report records
-input/output hashes, filtered object IDs and filter revision.
-Publication checks the filter revision. The pass runs automatically after bake
-assembly and can be repeated without another Blender bake:
-
-```sh
-node scripts/filter-house-trim.mjs final
-npm run release:house:publish
-```
-
-Regression checks cover smoothing without flattening the lighting gradient,
-protection of neighboring texture islands, non-mutating duplicate validation
-with different triangle diagonals, and unique ownership across finishing stages. The hallway comparison is in `trim-repair-captures/`.
-
-The corrected final bake is published locally and the normal hallway preview has
-been refreshed. All 190 tests pass. The five travel routes remain clear in both
-directions, and entrance targets remain visible at 16:10, 16:9, 4:3 and portrait.
-
-The upstream repair backups and verification records are in
-`scene/exports/house-release/trim-source-repair/`. All retained staged geometry
-and texture bytes were checked unchanged; all five corrected atlas images remain
-byte-identical to the preceding preview. The completed bake’s
-`house-release.blend` and `bake-input/` remain its original immutable input
-snapshots, so its source fingerprint stays valid. The next prepare/test run
-snapshots the repaired authoring scene. Reassembling the old raw bake (which
-still contains duplicated boards) is intentionally rejected by validation.
-No further lighting bake was needed for this source repair.
-
-## Hallway ceiling and ceiling-trim follow-up — October 1, 2026
-
-The first trim filter excluded the ceiling planes, and its small smoothing radius
-left broad patches on the ceiling mouldings. The completed bake also predates the
-upstream duplicate-board repair. A targeted 256-sample, 4096-pixel bake replaced
-lighting for six hallway ceiling slabs and 36 ceiling mouldings, excluding the
-31 documented coincident copies. It took 713.91 seconds on four CPU threads.
-This was a partial lighting update: geometry, UV packing and room assets stayed
-unchanged. Its recipe snapshot, HDR/PNG outputs and source fingerprint are in
-`scene/exports/house-release/ceiling-repair/`; `ceilingRepair` in the bake report
-records its provenance and protected atlas patching.
-
-Higher sampling alone did not remove all visible edge mottling. The existing
-face-isolated texture filter now smooths the six ceiling undersides in two
-dimensions and uses a larger radius/gutter for the hall's ceiling mouldings.
-Other faces, including the upper attic-floor surfaces, retain their existing
-pixels. Whole-room original assets, geometry and UVs were verified unchanged;
-`ceiling-repair/verification.json` records the protected-pixel comparison.
-No renderer lighting, texture-sampling or outline changes remain. The correction
-uses the existing atlases and adds no runtime maps or draw calls.
-
-All 192 tests pass. Before/after hallway captures are in
-`docs/house-plan/ceiling-repair-captures/`. The corrected bake is published locally
-and the normal preview is open at the hallway. New complete bakes automatically
-use the expanded face filter after assembly; duplicate trim continues to be
-rejected upstream rather than removed by export code.
-
-
-## Reviewed fixture production bake — October 1, 2026
-
-The reviewed geometry was staged before the new production bake, including the
-wall-mounted basement pipe and ceiling bend, brackets, attic bulb and roof cord,
-junction fittings, forward cartons, unlit garage/mudroom fittings, and removal of
-the hall ceiling mouldings. The shared smoke-detector atlas was freshly baked
-against the same input geometry. Runtime cleanup retains the earlier loose-paper,
-cloth, rope, robot grouping, panorama, ground, tree and cream-ceiling refinements.
-
-The 8-sample 512 px test bake passed geometry, fixture and route checks. The full
-64-sample production bake completed in 2,949.5 seconds (about 49.2 minutes),
-covering 785 fixed meshes in 10 atlases: 4096 px for the hall, 2048 px for the
-other groups. Three static detectors share a separate 1024 px atlas at 64 samples.
-The source fingerprint is `5ce9c63d81e3e82f33bbf330e007fc0931fb27315d19bff2bcab65ef257ecc69`.
-
-Assembly preserves nearly black lighting maps instead of allowing texture pruning
-to approximate them as constant colors. Tests compare the basement and attic
-fixture atlas bytes with the generated PNGs, preserve every reviewed triangle,
-and retain the original textures on untouched attic furnishings. The normal
-`release:house:test` command now stages the reviewed fixtures before snapshotting.
-
-The complete release is published locally. The production build and all 208 tests
-pass. All five walking routes are clear in both directions, including the wider
-basement arrival curve, and room targets pass all four tested viewport shapes.
-Production review captures are in `review-release-captures/`.
-
-## Ceiling and hatch lighting in the production site — October 1, 2026
-
-Removed the flat cream runtime overrides so the hallway ceiling retains its
-painted finish and baked window illumination. Hall ceiling mouldings remain
-hidden when loading an older export.
-
-The moving attic hatch now uses a separate 512 px, 64-sample closed-position
-lightmap with painted-wood UVs. Its geometry, hinge, door metadata and animation
-remain intact; its reference lighting moves with the rigid hatch and adds no live
-lights. The bake shares the full release's source fingerprint. Reproduce it with
-`node scripts/bake-attic-hatch.mjs`; subsequent publication preserves the
-supplemental asset through `includeFixedFixtures`.
-
-The actual production site is served from `dist` at `http://127.0.0.1:8000/`,
-using normal house navigation without the fixture test controls.
-The rebuilt production site and all 210 tests pass, including retained hatch
-geometry, hinge transforms, baked shading and atlas provenance checks.
-
-## Shared hallway wall collision — October 1, 2026
-
-Room prop physics now includes nearby wall sections from the shared house
-structure. Previously the visible right hallway wall lived outside the room's
-physics model, allowing thrown props to pass through it. Wall colliders are
-captured before render batching, preserving individual door/window openings,
-then filtered by each room's bounds and elevation. Regression probes against
-both actual hallway walls verify impact and prevent crossing the visible faces.
-The production rebuild and all 211 tests pass.
-
-## Hallway resource lifetime — October 1, 2026
-
-The hallway contents now unload after arriving in another room. Travel loads
-the origin, destination and connecting hallway, then removes every room except
-the destination and disposes its owned textures, geometry and materials. A return
-trip reloads the hallway before animation starts. Re-entering the current room
-does not load the hallway unnecessarily. `data-house-loaded-rooms` on the house
-host exposes the current room set for preview verification.
-The production rebuild and all 211 tests pass. Production browser checks show
-only `workshop`, `basement` or `attic` loaded after their respective arrivals;
-return trips reload the hallway and remove the departing room.
-
-The 360-degree outside panorama now uses two thirds of its previous shader
-brightness. The adjustment reuses the existing image and preserves the separate
-atmospheric halo and baked room lighting.
+The former trim/ceiling pixel-filter and ceiling-patch scripts have been retired.
+Cycles lighting and its standard denoising pass produce the final lightmaps;
+assembly no longer blurs selected UV islands. Duplicate trim is rejected by
+`scripts/house-source/validate-trim.mjs` and fixed in the authoring scene.

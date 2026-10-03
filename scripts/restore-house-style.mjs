@@ -1,4 +1,5 @@
-import {assertUniqueTrim} from './filter-house-trim.mjs';
+import {splitSourceCeilings} from './split-house-ceiling-source.mjs';
+import {assertUniqueTrim} from './house-source/validate-trim.mjs';
 import {includeFixedFixtures} from './house-fixed-fixtures.mjs';
 // Preserve approved placement while reusing the original room shading and UVs.
 import * as THREE from 'three';
@@ -7,7 +8,7 @@ import {refitRoomNode,editMesh} from './refit-room-models.mjs';
 import {addPlywoodBacking} from './workshop-plywood.mjs';
 import {refineBasement,refineHallAndExterior} from './house-night-refinements.mjs';
 import {clearWorkshopOpenings,addWorkshopWindowFraming,paintCeilings,addBasementWindowReveals} from './house-finishes.mjs';
-import {subtractWindowPrism} from '../web/house-window-openings.js';
+import {subtractWindowPrism} from './house-source/house-window-openings.js';
 import {NodeIO} from '@gltf-transform/core';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import {copyToDocument,prune,unpartition,dedup} from '@gltf-transform/functions';
@@ -153,7 +154,7 @@ for(const node of structure.getRoot().listNodes().filter(n=>/stair side enclosur
 const originalWorkshop=await io.read('web/assets/house/workshop-baked.glb');
 addPlywoodBacking(structure,originalWorkshop);clearWorkshopOpenings(structure);addWorkshopWindowFraming(structure,originalWorkshop);paintCeilings(structure);
 await refineHallAndExterior(structure,hall);
-await structure.transform(dedup(),prune(),unpartition());
+splitSourceCeilings(structure);await structure.transform(dedup(),prune(),unpartition());
 for(const node of structure.getRoot().listNodes()){
  const fixedWindow=node.getExtras().preview_kind==='window'&&!/glass/i.test(node.getName());
  node.setExtras({...node.getExtras(),...(fixedWindow?{release_dynamic:false,house_window_receiver:true}:{}),style_source:'original-room-palette'});
@@ -180,4 +181,5 @@ layout.routes.den=[layout.views.hub.position,[5.55,1.65,7.55],[5.55,1.65,layout.
 writeFileSync(`${out}/layout.json`,JSON.stringify(includeFixedFixtures(layout),null,2)+'\n');
 writeFileSync('docs/house-plan/style-restoration.json',JSON.stringify(report,null,2)+'\n');console.log(report);
 
+await (await import('./prepare-house-static.mjs')).prepareHouseStatic(out);
 await (await import('./split-house-structure.mjs')).splitHouseStructure({directory:out});

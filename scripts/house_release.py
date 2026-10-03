@@ -7,7 +7,7 @@ def run(args,**kwargs):subprocess.run(args,cwd=ROOT,check=True,**kwargs)
 def blender(source,script,*args):
  logs=ROOT/'scene/renders/house-release';logs.mkdir(parents=True,exist_ok=True)
  log=logs/(Path(script).stem+('-test' if '--test' in args else '')+'.log')
- command=[BLENDER,'-b',str(ROOT/source),'--threads','4','--python-exit-code','1','--python',str(ROOT/script),'--',*args]
+ command=[BLENDER,'-b',str(ROOT/source),'--threads',os.environ.get('HOUSE_BAKE_THREADS','4'),'--python-exit-code','1','--python',str(ROOT/script),'--',*args]
  print(f'Running {Path(script).name}; full log: {log}',flush=True)
  with log.open('w') as output:
   process=subprocess.Popen(command,cwd=ROOT,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
@@ -32,13 +32,14 @@ elif args.step in ['test','release']:
   if args.review:
    out='scene/exports/house-release/review-reference';(ROOT/out).mkdir(parents=True,exist_ok=True);env={**os.environ,'HOUSE_REFERENCE_OUT':out}
    run(['node','scripts/restore-house-style.mjs'],env=env);run(['node','scripts/stage-house-review.mjs']);run(['node','scripts/prepare-house-bake-input.mjs'],env=env)
-  else:run(['node','scripts/restore-house-style.mjs']);run(['node','scripts/prepare-house-bake-input.mjs'])
+  else:run(['node','scripts/restore-house-style.mjs']);run(['node','scripts/stage-house-review.mjs','web/assets/house/release']);run(['node','scripts/prepare-house-bake-input.mjs'])
  else:
   report=json.loads((ROOT/'scene/exports/house-release/test/bake-report.json').read_text())
   if report.get('sourceKey')!=source_key():raise SystemExit('Run release:house:test for the current geometry and lighting before the expensive release bake.')
  quality='test' if args.step=='test' else 'final'
  blender('scene/house-release.blend','scene/scripts/bake_house_release.py','--'+args.step)
  run(['node','scripts/assemble-house-bake.mjs',quality]);check(quality)
+ if args.step=='release':run(['node','scripts/bake-smoke-detectors.mjs'])
 else:
  run(['node','scripts/publish-house-release.mjs'])
  run(['node','--test','tests/house-release.test.mjs','tests/house-style.test.mjs','tests/house-bake.test.mjs'])

@@ -49,12 +49,26 @@ test('catalog labels are compressed within the label bounds without changing the
 });
 
 test('both production room loaders share self-hosted Draco decoding',()=>{
- for(const file of ['app.js','house-renderer.js','house-release-renderer.js'])assert.match(readFileSync('dist/web/'+file,'utf8'),/from '\.\/model-loader\.js'/);
+ for(const file of ['app.js','house-release-renderer.js'])assert.match(readFileSync('dist/web/'+file,'utf8'),/from '\.\/model-loader\.js'/);
  const loader=readFileSync('dist/web/model-loader.js','utf8');
  assert.match(loader,/setDecoderPath\('\/web\/vendor\/draco\/'\)/);
  assert.doesNotMatch(loader,/node_modules|https?:/);
  for(const file of ['draco_decoder.wasm','draco_wasm_wrapper.js','draco_decoder.js']){
   assert.ok(statSync('dist/web/vendor/draco/'+file).size>1000);
   assert.equal(hash(readFileSync('dist/web/vendor/draco/'+file)),hash(readFileSync('node_modules/three/examples/jsm/libs/draco/gltf/'+file)));
+ }
+});
+
+test('retained original room lightmaps obey the shared phone delivery cap',async()=>{
+ for(const room of ['hallway','workshop','basement','attic']){
+  const bytes=readFileSync(`dist/web/assets/house/release/${room}.glb`),doc=gltf(bytes),start=28+bytes.readUInt32LE(12),images=new Set();
+  for(const n of doc.nodes.filter(n=>String(n.extras?.release_baked??'').startsWith('original-'))){
+   for(const p of doc.meshes[n.mesh]?.primitives??[]){
+    const index=doc.materials[p.material]?.emissiveTexture?.index;if(index===undefined)continue;
+    const t=doc.textures[index];images.add(t.extensions?.EXT_texture_webp?.source??t.source);
+   }
+  }
+  assert.ok(images.size>0,room);
+  for(const i of images){const view=doc.bufferViews[doc.images[i].bufferView],meta=await sharp(bytes.subarray(start+(view.byteOffset??0),start+(view.byteOffset??0)+view.byteLength)).metadata();assert.ok(Math.max(meta.width,meta.height)<=1024,`${room} retained an oversized lightmap`);}
  }
 });

@@ -1,6 +1,7 @@
 """Small ceiling-mounted detectors, in house coordinates. No lights or dynamics."""
 import bpy, math
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 
 PLACEMENTS = [('hallway', (10.3, 2.6, 7.55)), ('garage', (14.8, 2.6, 1.5)), ('basement', (3.36, -.2, 2.4))]
 
@@ -12,6 +13,13 @@ def create_smoke_detectors(scene):
  plastic=material('Smoke detector warm white plastic',(.72,.69,.62))
  dark=material('Smoke detector recessed vents',(.018,.021,.024))
  green=material('Smoke detector status lens',(.025,.15,.035))
+ # Mount to the actual visible underside, including small authored floor slopes.
+ # Hidden native duplicates must not override the prepared source geometry.
+ bpy.context.view_layer.update()
+ ceilings=[]
+ for surface in scene.objects:
+  if surface.type!='MESH' or surface.hide_render or not surface.name.startswith(('Attic floor / hall ceiling','Garage ceiling','Main floor','Basement ceiling')):continue
+  ceilings.append(BVHTree.FromPolygons([surface.matrix_world@v.co for v in surface.data.vertices],[list(p.vertices) for p in surface.data.polygons]))
  result=[]
  for room,position in PLACEMENTS:
   vertices=[];faces=[];slots=[]
@@ -36,7 +44,12 @@ def create_smoke_detectors(scene):
   for m in [plastic,dark,green]:mesh.materials.append(m)
   for p,slot in zip(mesh.polygons,slots):p.material_index=slot
   obj=bpy.data.objects.new('Smoke detector / '+room,mesh);scene.collection.objects.link(obj)
-  obj.location=(position[0],-position[2],position[1])
+  origin=Vector((position[0],-position[2],position[1]-.4))
+  hits=[hit for tree in ceilings if (hit:=tree.ray_cast(origin,Vector((0,0,1)),.8))[0] is not None]
+  if not hits:raise RuntimeError('Missing ceiling above smoke detector: '+room)
+  point,normal,_,_=min(hits,key=lambda hit:hit[3])
+  if normal.z>0:normal.negate()
+  obj.location=point;obj.rotation_mode='QUATERNION';obj.rotation_quaternion=(-normal).to_track_quat('Z','Y')
   obj['preview_kind']='fixture';obj['release_room']='structure';obj['bake_connection']=True;obj['release_dynamic']=False
   obj['house_smoke_detector']=room;obj['house_authored_reflectance']=True;obj['house_fixed_receiver']=True;obj['houseOutlined']=True
   obj['house_bake_source']=obj.name;obj['house_bake_id']='smoke-detector:'+room;obj['style_source']='original-room-palette'

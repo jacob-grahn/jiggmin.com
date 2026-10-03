@@ -4,6 +4,8 @@ Original den and room atlases stay intact. Never overwrite an editable .blend.
 import bpy,json,sys,time,hashlib,re
 from pathlib import Path
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
+from mathutils.geometry import barycentric_transform
 sys.path.insert(0,str(Path(__file__).parent))
 from basement_model_refit import import_source,refit
 from house_bake_lighting import configure
@@ -13,20 +15,20 @@ INPUT=ROOT/'scene/exports/house-release/bake-input';OUT=ROOT/('scene/exports/hou
 S=bpy.context.scene;start=time.monotonic();native=list(S.objects)
 classification=json.loads((ROOT/'scene/exports/house-release/classification.json').read_text())
 canonical=lambda s:''.join(c.lower() for c in s if c.isalnum())
-native_by_name={canonical(o.name):o for o in native if o.type=='MESH'}
+native_by_name={canonical(o.get('source_object',o.name)):o for o in native if o.type=='MESH'}
 cream=bpy.data.materials['Light cream ceiling']
 for o in native:
  if o.type=='MESH':
   room=o.get('release_room');movable=canonical(o.name) in {canonical(n) for n in classification.get(room,{}).get('movable',[])}
-  o.hide_render=room=='structure' or movable or bool(o.get('release_dynamic'))
+  o.hide_render=room=='structure' or movable or bool(o.get('release_dynamic')) or bool(re.match(r'^(Garden beyond window|Rainy garden through hallway)',o.get('source_object',o.name)))
  # Native ceilings are replaced by the exact reviewed ceiling meshes below.
- if o.type=='MESH' and o.get('release_room')=='basement' and o.get('ceiling_paint'):o.hide_render=True
+ if o.type=='MESH' and o.get('release_room')=='basement' and (o.get('ceiling_paint') or re.match(r'^(Basement painted masonry|Concrete slab|Basement ceiling)',o.get('source_object',o.name))):o.hide_render=True
 # Restore cellar reflectance for its frame/reveal bake, plus real opaque wall
 # occluders. Its original furnished-room lightmaps still remain untouched.
 basement_sources=import_source(ROOT/'scene/exports/house/basement.glb');refit(basement_sources);bpy.context.view_layer.update()
 basement_by_name={canonical(o.get('source_object',o.name)):o for o in basement_sources if o.type=='MESH'}
 for o in basement_sources:
- o.hide_render=not(o.type=='MESH' and o.get('refit_assembly')=='envelope' and not o.get('source_object','').startswith('Basement ceiling'))
+ o.hide_render=True # Reflectance references only; the edited input owns all occluders.
 objects=[];static={}
 review=json.loads((INPUT/'layout.json').read_text()).get('reviewPreparation',{})
 removed={canonical(n) for names in review.get('removed',{}).values() for n in names}
@@ -39,13 +41,13 @@ for room in ['structure','basement','attic']:
   objects.append(o);name=o.get('house_bake_source',o.name);o['release_room']=room
   window_receiver=bool(o.get('house_window_receiver')) or (room=='basement' and bool(re.match(r'^(Window (jamb|rail|cross|transom)|Deep sill)',name)))
   if window_receiver:o['house_window_receiver']=True
-  fixed=(room=='structure' and not o.get('release_dynamic') and o.get('preview_kind') not in ['door','ladder'] and (o.get('preview_kind')!='window' or window_receiver)) or (room=='basement' and (bool(o.get('ceiling_paint')) or window_receiver or bool(o.get('house_fixed_receiver')))) or (room=='attic' and bool(o.get('review_fixed_fixture')))
+  fixed=(room=='structure' and name=='Attic hatch') or (room=='structure' and not o.get('release_dynamic') and o.get('preview_kind') not in ['door','ladder'] and (o.get('preview_kind')!='window' or window_receiver)) or (room=='basement' and (bool(o.get('ceiling_paint')) or window_receiver or bool(o.get('house_fixed_receiver')))) or (room=='attic' and bool(o.get('review_fixed_fixture')))
   if not fixed:
    o.hide_render=True;continue
   o.data=o.data.copy()
   original=(basement_by_name.get(canonical('Deep sill' if o.get('house_window_reveal') else name)) if room=='basement' else native_by_name.get(canonical(name)))
-  if o.get('review_fixed_fixture'):
-   for previous in [original,native_by_name.get(canonical(name)),basement_by_name.get(canonical(name))]:
+  if original: # Every edited receiver replaces its native occluder, including frames.
+   for previous in [original,*[n for n in native if canonical(n.get('source_object',n.name))==canonical(name)],basement_by_name.get(canonical(name))]:
     if previous:previous.hide_render=True
   # Use original reflectance, never feed an already lit atlas into another bake.
   for i,material in enumerate(list(o.data.materials)):
@@ -55,22 +57,26 @@ for room in ['structure','basement','attic']:
     replacement=next((m for m in original.data.materials if m and re.sub(r'\.\d{3}$','',m.name)==re.sub(r'\.\d{3}$','',material.name)),original.data.materials[min(i,len(original.data.materials)-1)])
    else:raise RuntimeError('No original material for '+name)
    o.data.materials[i]=replacement
-  # Imported emission UVs are not source UVs. Restore plywood/frame wood UVs
-  # from the native mesh at the same world-space corner when available.
-  if original and (o.get('workshop_plywood') or o.get('workshop_window_frame') or window_receiver and not o.get('house_window_reveal')) and original.data.uv_layers.active:
-   uv=o.data.uv_layers.active or o.data.uv_layers.new(name='Source UV');lookup={}
-   for p in original.data.polygons:
-    for li in p.loop_indices:
-     v=original.matrix_world@original.data.vertices[original.data.loops[li].vertex_index].co
-     lookup[tuple(round(c,4) for c in v)]=tuple(original.data.uv_layers.active.data[li].uv)
-   for li,loop in enumerate(o.data.loops):
-    v=o.matrix_world@o.data.vertices[loop.vertex_index].co;key=tuple(round(c,4) for c in v)
-    if key in lookup:uv.data[li].uv=lookup[key]
+  # Restore source reflectance UVs on edited receivers. New window-edge vertices
+  # interpolate the original triangle mapping rather than sampling old lightmaps.
+  if original and not o.get('house_authored_reflectance') and (o.get('house_fixed_receiver') or o.get('workshop_plywood') or o.get('workshop_window_frame') or window_receiver) and original.data.uv_layers.active:
+   original.data.calc_loop_triangles();triangles=list(original.data.loop_triangles)
+   points=[original.matrix_world@v.co for v in original.data.vertices]
+   tree=BVHTree.FromPolygons(points,[t.vertices for t in triangles],all_triangles=True)
+   source_uv=original.data.uv_layers.active
+   uv=o.data.uv_layers.active or o.data.uv_layers.new(name='Source UV')
+   for polygon in o.data.polygons:
+    for li in polygon.loop_indices:
+     world=o.matrix_world@o.data.vertices[o.data.loops[li].vertex_index].co
+     point,_,index,distance=tree.find_nearest(world)
+     if point is None:raise RuntimeError('Missing source UV surface: '+name)
+     triangle=triangles[index];coords=[Vector((*source_uv.data[i].uv,0)) for i in triangle.loops]
+     uv.data[li].uv=barycentric_transform(point,*[points[i] for i in triangle.vertices],*coords).xy
   # A copied mesh's evaluated bound_box can be stale until the dependency graph
   # updates. Use its owned vertices so each room gets its own texel budget.
   points=[o.matrix_world@v.co for v in o.data.vertices]
   center=Vector(tuple((min(p[i] for p in points)+max(p[i] for p in points))/2 for i in range(3)))
-  group='attic-fixtures' if room=='attic' else ('basement-windows' if window_receiver else 'basement-details' if o.get('house_fixed_receiver') else 'basement-ceiling') if room=='basement' else structural_group(name,o.get('preview_kind'),points)
+  group='attic-hatch-closed' if room=='structure' and name=='Attic hatch' else 'attic-fixtures' if room=='attic' else ('basement-windows' if window_receiver else 'basement-details' if o.get('house_fixed_receiver') else 'basement-ceiling') if room=='basement' else structural_group(name,o.get('preview_kind'),points)
   static.setdefault(group,[]).append(o)
 lighting=configure(S);S.cycles.samples=8 if test else 64;S.cycles.use_denoising=True
 S.render.bake.use_pass_direct=True;S.render.bake.use_pass_indirect=True;S.render.bake.use_pass_color=True;S.render.bake.margin=4 if test else 12
@@ -131,7 +137,7 @@ for group,parts in static.items():
   coords=[tuple(x.uv) for x in mesh.uv_layers['Lighting UV'].data[lo:hi]]
   uv=o.data.uv_layers.get('Lighting UV') or o.data.uv_layers.new(name='Lighting UV')
   for d,v in zip(uv.data,coords):d.uv=v
-  o.hide_render=False
+  o.hide_render=bool(o.get('release_dynamic'))
  bpy.data.objects.remove(helper,do_unlink=True)
  report['atlases'][group]={'objects':len(parts),'resolution':size}
 for o in objects:

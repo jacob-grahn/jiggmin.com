@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
 import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
-import {tidyHouseProps} from '../web/house-prop-cleanup.js';
 import {createHouseProps} from '../web/house-props.js';
 import {batchHouseMeshes} from '../web/house-render-batches.js';
 import {createHiddenScraps} from '../web/house-scraps.js';
@@ -17,7 +16,7 @@ async function model(room){
 }
 test('release clutter cleanup settles laundry and removes loose sheets and shelf cloth',async()=>{
  for(const room of ['hallway','workshop','basement','attic']){
-  const root=await model(room);tidyHouseProps(root,room);root.updateMatrixWorld(true);
+  const root=await model(room);root.updateMatrixWorld(true);
   const meshes=[];root.traverse(o=>{if(o.isMesh)meshes.push(o);});
   assert.ok(!meshes.some(o=>/^(Blank_loose_paper|Small_plain_packing_slip|Unmarked_rolled_paper)/.test(o.name)));
   if(room!=='basement')continue;
@@ -31,7 +30,7 @@ test('release clutter cleanup settles laundry and removes loose sheets and shelf
  }
 });
 test('attic robot remains one physics body, including panel and all four wheels',async()=>{
- const root=await model('attic'),world=new THREE.Scene();world.add(root);tidyHouseProps(root,'attic');
+ const root=await model('attic'),world=new THREE.Scene();world.add(root);
  const system=createHouseProps(root,world,{floorY:2.8}),robot=system.props.find(p=>p.title==='Rough model farm robot'||p.root.children.some(m=>m.name==='Rough_model_farm_robot'));
  assert.ok(robot);assert.equal(robot.mode,'throw');assert.equal(robot.root.children.filter(m=>/^Model_robot_wheel/.test(m.name)).length,4);assert.ok(robot.root.children.some(m=>m.name==='Tiny_robot_solar_panel'));
  illustrateHouse([robot.root]);batchHouseMeshes(robot.root);
@@ -61,7 +60,7 @@ test('journal notes stay out of the room scenery until discovered',()=>{
 test('cleanup and batching retain all journal discovery targets in the release rooms',async()=>{
  const notes=JSON.parse(readFileSync('data/house-notes.json')).notes;
  for(const room of ['hallway','workshop','basement','attic']){
-  const root=await model(room),world=new THREE.Scene();world.add(root);tidyHouseProps(root,room);const system=createHouseProps(root,world,{floorY:room==='basement'?-4:room==='attic'?2.8:0});
+  const root=await model(room),world=new THREE.Scene();world.add(root);const system=createHouseProps(root,world,{floorY:room==='basement'?-4:room==='attic'?2.8:0});
   for(const id of new Set(notes.filter(n=>n.room===room).map(n=>n.hotspot)))assert.ok(system.props.some(p=>p.hotspot===id),`${room}: missing ${id}`);
   illustrateHouse([root,...system.props.map(p=>p.root)]);batchHouseMeshes(root,{staticCells:true});
   for(const prop of system.props){batchHouseMeshes(prop.root);assert.ok(prop.root.children.some(o=>o.isMesh&&!o.userData.houseInk&&o.userData.houseProp===prop));}

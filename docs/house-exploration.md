@@ -25,7 +25,7 @@ The den's rendering/physics updates pause while exploration is open, and any run
 
 `data/house-notes.json` holds room descriptions, notes, and locked-door messages. Multiple notes can share an object hotspot. Stable note IDs preserve discoveries when copy changes.
 
-`scene/scripts/build_house_rooms.py` authors the Blender scenes and rendered room plates. `scene/scripts/export_house_models.py` exports browser GLBs, authored cameras, and world-space interaction anchors without rendering stills. Run it with Blender in background mode after changing room geometry. `scene/exports/house/` holds the unbaked authoring models, reference renders, and bake reports. These are not deployed. `web/assets/house/` holds the baked runtime models and interaction/layout metadata. `web/house-renderer.js` supplies browser lighting, door pivots, camera travel, cancellation, and model caching. Blender procedural materials export with their authored base colors; image textures remain embedded. `scene/scripts/build_connected_house.py` writes the shared `layout.json`; run it with Blender to also assemble all five rooms and the connecting geometry into `scene/house-connected.blend`. This local authoring file is ignored, like the other Blender sources. Runtime GLBs are kept as separate assets but placed together using the same layout. The den retains its original renderer for games.
+`scene/scripts/build_house_rooms.py` authors the Blender scenes and rendered room plates. `scene/scripts/export_house_models.py` exports browser GLBs, authored cameras, and world-space interaction anchors without rendering stills. Run it with Blender in background mode after changing room geometry. `scene/exports/house/` holds the unbaked authoring models, reference renders, and bake reports. These are not deployed. `web/assets/house/` holds the baked runtime models and interaction/layout metadata. `web/house-release-renderer.js` supplies browser lighting, door pivots, camera travel, cancellation, and model caching. Blender procedural materials export with their authored base colors; image textures remain embedded. `scene/scripts/build_connected_house.py` writes the shared `layout.json`; run it with Blender to also assemble all five rooms and the connecting geometry into `scene/house-connected.blend`. This local authoring file is ignored, like the other Blender sources. Runtime GLBs are kept as separate assets but placed together using the same layout. The den and house exploration share one renderer.
 
 The full supplied plate photo stays local and is ignored at `docs/references/kindergarten-plate.jpg`. The cropped authoring texture at `scene/house-textures/plate-photo.jpg` is versioned for rebuilds; neither is downloaded on homepage load.
 
@@ -48,7 +48,7 @@ Procedural texture intermediates are regenerated under `scene/house-textures/sur
 
 The workshop, attic, and basement use window-only UV lighting bakes; practical fixtures stay switched off. Rebuild with `node scene/scripts/prepare_ROOM_bake.mjs` followed by Blender running `scene/scripts/bake_ROOM.py`. The attic floor is clipped at the hallway ceiling and the basement stair enclosure at the left doorway, including during travel. Billiard balls use spherical physics shapes; other household props retain their existing shapes.
 
-The basement floor also receives deterministic concrete grain, branching cracks, paint splashes, and a white tape body outline from `web/basement-details.js`. These marks follow the slab's local coordinates and modulate its existing baked light. The fixed drain has a dark inset, metal rim, and seven grate bars. Ceiling joists touch the ceiling, the pendant stem reaches its canopy, and the rear pipe clears the window frames. `scene/scripts/fit_basement_fixtures.mjs` applies these target heights to existing GLBs without repacking their lighting UVs; the authoring source uses the same heights for future exports.
+The basement floor also receives deterministic concrete grain, branching cracks, paint splashes, and a white tape body outline from `scripts/house-source/basement-floor-art.js`. These marks are exported as a source material and receive baked lighting with the slab. The fixed drain has a dark inset, metal rim, and seven grate bars. Ceiling joists touch the ceiling, the pendant stem reaches its canopy, and the rear pipe clears the window frames. `scene/scripts/fit_basement_fixtures.mjs` applies these target heights to existing GLBs without repacking their lighting UVs; the authoring source uses the same heights for future exports.
 
 ## Room-owned structure and texture streaming
 
@@ -56,4 +56,32 @@ The basement floor also receives deterministic concrete grain, branching cracks,
 
 The hallway shell contains the closed boundary doors, attic hatch, and exterior scenery. It stays loaded during exploration, alongside at most one branch shell. The stairs, landing, stringers, guardrails, and stair enclosure belong to the basement and load before descent. The workshop owns the garage slab despite its historical stair-atlas label. The attic owns the folding ladder. Room-specific smoke detectors travel with their rooms; the hatch lightmap stays in the hall.
 
-Meshes retain their world transforms and geometry. Textures referenced only by other rooms are omitted. Where a bake atlas crosses a room boundary, the generator copies the relevant pixel rectangle with padding and remaps that room's UVs, without rebaking. On departure, room-owned geometry, materials, textures, and decoded bitmaps are disposed; cancelled asynchronous shell loads cannot reattach.
+Meshes retain their world transforms and geometry. The source generator authors separate den and hallway ceiling sections at world x = 4.8. Source preparation also splits legacy spanning panels before baking. Streaming only packages the resulting surfaces; it never cuts baked geometry. Existing baked panels were converted once with their original UV mapping preserved. Textures referenced only by other rooms are omitted. Where a bake atlas crosses a room boundary, the generator copies the relevant pixel rectangle with padding and remaps that room's UVs, without rebaking. On departure, room-owned geometry, materials, textures, and decoded bitmaps are disposed; cancelled asynchronous shell loads cannot reattach.
+
+
+## Static model preparation
+
+Permanent fixes are applied in `scripts/prepare-house-static.mjs`, called during
+reference restoration and bake-input preparation. Source-only geometry helpers
+live under `scripts/house-source/`. They author the den opening, remove redundant
+surfaces and unwanted props, settle laundry, create the cable coil, cut basement
+window apertures, and export exterior trees. The floor artwork is a deterministic
+PNG material with planar source UVs, generated before Cycles runs.
+
+The fixed-fixture staging pass authors pipes, bulb/socket/wire geometry and carton
+placement before lighting. Cellar lights sit outside the actual apertures; edited
+receiver vertices recover source material UVs before baking. The hatch receives
+its own closed-pose lightmap in the normal bake and stays hidden from other bake
+targets so its moving shadow is not painted onto the hall. The browser no longer
+cuts openings, moves/removes decoration, generates trees or floor textures, tints
+ceilings, masks basement light spills, or swaps hatch reference geometry.
+
+The browser retains camera-dependent den projection, sky rendering, transparent
+glass compositing, ink outlines, interaction/physics, door/ladder animation,
+render batching and room resource disposal. These are presentation or interactive
+behavior rather than permanent model repairs. The obsolete pre-release renderer
+and targeted post-bake ceiling/trim painting tools have been removed.
+
+Retained original furnishing lightmaps use the same 1024-pixel delivery cap as
+other small baked groups. Source masters and separate artwork images retain their
+resolution; compression applies the cap when building the runtime assets.

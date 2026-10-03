@@ -1,18 +1,11 @@
-import {createStructureStore} from './house-structure-store.js?v=room-shells-1';
-import {fixtureAnchors,turnOffCeilingFixtures,refineRoomFixtures} from './house-fixture-refinements.js?v=fixture-refinement-3';
+import {createStructureStore} from './house-structure-store.js?v=source-models-1';
 import {batchHouseMeshes} from './house-render-batches.js?v=prop-cleanup-1';
-import {tidyHouseProps} from './house-prop-cleanup.js?v=prop-cleanup-1';
-import {finishHallSurfaces} from './house-hall-finishes.js?v=hall-lighting-2';
-import {applyHatchLighting} from './house-hatch-lighting.js?v=hatch-lighting-1';
-import {replaceExteriorTrees} from './house-exterior-trees.js?v=house-reference-38';
-import {hideExteriorGround} from './house-exterior-ground.js';
-import {addBasementDetails,shadeBasementWindowSpills} from './basement-details.js';
 // Production renderer for the approved, assembled house. Prop interaction and
 // discovery behavior use the same modules as the original rooms.
 import * as THREE from 'three';
 import {GLTFLoader} from './model-loader.js';
-import {createMoonlitWindows,createMoonlitSky,MOONLIT_SKY_URL,WINDOW_GLASS_LAYER} from './house-window-sky.js?v=panorama-dim-2';
-import {createContinuousDen,integrateDenOpening} from './house-den-continuity.js?v=house-reference-30';
+import {configureWindowGlass,createMoonlitSky,MOONLIT_SKY_URL,WINDOW_GLASS_LAYER} from './house-window-sky.js?v=source-models-1';
+import {createContinuousDen} from './house-den-continuity.js?v=source-models-1';
 import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
 import {illustrateHouse} from './house-illustration.js';
 import {createRoomResources} from './house-resources.js';
@@ -25,7 +18,7 @@ import {createRoute} from './house-layout.js?v=house-reference-38';
 import {resizeHouseCamera} from './house-camera.js';
 import {travelPose,travelDuration} from './house-travel.js?v=house-reference-38';
 import {doorMotion,ladderMotion} from './house-access.js';
-export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unloadDen,loadBasementCartridges,collected=new Set(),layoutURL='/web/assets/house/release/layout.json?v=room-shells-1'}={}) {
+export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unloadDen,loadBasementCartridges,collected=new Set(),layoutURL='/web/assets/house/release/layout.json?v=source-models-1'}={}) {
  const debugParams=new URLSearchParams(location.search),slowValue=debugParams.get('slowHouseTravel');
  // Slow motion must never encode PNGs during travel. Captures are manual only.
  const captureEnabled=debugParams.get('captureHouseTravel')==='1';
@@ -117,13 +110,6 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
      const map=m.emissiveMap??m.map;if(!map)throw Error('Missing house lightmap');
      const material=new THREE.MeshBasicMaterial({map,side:THREE.DoubleSide,toneMapped:false});
      map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
-     if(m.userData.ceiling_paint){
-      // Preview the new paint using the existing baked illumination. The saved
-      // Blender material supplies the actual reflectance for the final bake.
-      const paint=new THREE.Color(...m.userData.ceiling_paint);
-      material.onBeforeCompile=shader=>{shader.uniforms.ceilingPaint={value:paint};shader.fragmentShader='uniform vec3 ceilingPaint;\n'+shader.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n diffuseColor.rgb=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722))*ceilingPaint*2.8;');};
-      material.customProgramCacheKey=()=> 'cream-ceiling-reference-1';
-     }
      return material;
     }
     if(m.transparent)o.castShadow=false;
@@ -133,27 +119,19 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
   });
  }
  function addRoom(id,gltf){
-  tidyHouseProps(gltf.scene,id);materials(gltf.scene);world.add(gltf.scene);
-  if(id==='basement'){
-   const assembly=gltf.scene.getObjectByName('Refitted_basement_assembly')??gltf.scene.getObjectByName('Original_basement_assembly'),matrix=assembly.matrix.clone();
-   assembly.matrix.identity();assembly.matrix.decompose(assembly.position,assembly.quaternion,assembly.scale);assembly.updateMatrixWorld(true);
-   const details=addBasementDetails(gltf.scene);if(details.drain)details.drain.position.set(1.86,.009,.108);
-   assembly.matrix.copy(matrix);matrix.decompose(assembly.position,assembly.quaternion,assembly.scale);assembly.updateMatrixWorld(true);
-  }
+  materials(gltf.scene);world.add(gltf.scene);
   if(id==='basement')for(const cartridge of createBasementCartridges(gltf.archive??[])){
    cartridge.position.add(new THREE.Vector3(6.53,-4,3.29));gltf.scene.add(cartridge);
   }
-  refineRoomFixtures(gltf.scene,id,{structure:connections.group,...connections.fixtureAnchors});
   const resources=createRoomResources();resources.capture(gltf.scene);const view=viewFor(id);
   const props=id==='den'||id==='private-hall'?{props:[],cancel(){},update(){return {};}}:createHouseProps(gltf.scene,world,{floorY:id==='basement'?-4:id==='attic'?2.8:0,roomBounds:id==='workshop'?[12,0,17,7]:id==='hallway'?[4.8,6.8,12,12]:[0,0,12,12],structureColliders:connections.structureColliders});
-  const windows=id==='basement'?createMoonlitWindows(gltf.scene,sky,view.position):null;
-  if(windows){world.add(windows.exterior);shadeBasementWindowSpills(gltf.scene,windows.frames);}
+  const glass=id==='basement'?configureWindowGlass(gltf.scene):[];
   const scraps=createHiddenScraps(props.props,view,world,collected);
-  const roots=[gltf.scene,...(windows?[windows.exterior]:[]),...props.props.map(p=>p.root),...Array.from(scraps.values(),s=>s.mesh)];illustrateHouse(roots);roots.forEach(root=>resources.capture(root));
+  const roots=[gltf.scene,...props.props.map(p=>p.root),...Array.from(scraps.values(),s=>s.mesh)];illustrateHouse(roots);roots.forEach(root=>resources.capture(root));
   assignRoomLighting(roots,id==='private-hall'?'hallway':id);
   if(!debugParams.has('unbatched')){batchHouseMeshes(gltf.scene,{staticCells:true});for(const prop of props.props)batchHouseMeshes(prop.root);}
   roots.forEach(root=>resources.capture(root));
-  windows?.glass.forEach(mesh=>mesh.layers.set(WINDOW_GLASS_LAYER));
+  glass.forEach(mesh=>mesh.layers.set(WINDOW_GLASS_LAYER));
   rooms.set(id,{id,scene:world,resources,roots,model:gltf.scene,view,doors:new Map(),props,scraps,pickRoots:[connections.group,gltf.scene,...props.props.map(p=>p.root)]});
  }
  function unloadRoom(id,{releaseDen=true}={}){
@@ -165,7 +143,6 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
   if(!connections)return;
   connections.mechanisms=[...structures.entries.values()].flatMap(s=>s.mechanisms);
   connections.structureColliders=[...structures.entries.values()].flatMap(s=>s.colliders);
-  connections.fixtureAnchors={supports:[...structures.entries.values()].flatMap(s=>s.anchors.supports)};
   connections.floorMaterial=structures.entries.get('den')?.floorMaterial;
  }
  const structures=createStructureStore({
@@ -174,10 +151,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    const resources=createRoomResources();let group;
    try{
     const gltf=await loader.loadAsync(url);group=gltf.scene;resources.capture(group);
-    if(id==='hallway'&&layout.hatchLighting){const reference=await loader.loadAsync(layout.hatchLighting);resources.capture(reference.scene);applyHatchLighting(group,reference.scene);}
-    integrateDenOpening(group);materials(group);turnOffCeilingFixtures(group);
-    finishHallSurfaces(group);if(id==='hallway')replaceExteriorTrees(group);hideExteriorGround(group);
-    const colliders=collectHouseStructureColliders(group),anchors=fixtureAnchors(group),mechanisms=[];
+    materials(group);
+    const colliders=collectHouseStructureColliders(group),mechanisms=[];
     group.updateMatrixWorld(true);
     group.traverse(o=>{if(!o.isMesh||!['door','ladder'].includes(o.userData.preview_kind))return;
      o.updateMatrix();mechanisms.push({mesh:o,rest:o.matrix.clone()});o.matrixAutoUpdate=false;
@@ -186,7 +161,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
     if(!debugParams.has('unbatched'))batchHouseMeshes(group,{staticCells:true});resources.capture(group);
     let floorMaterial;
     if(id==='den'&&layout.denFloorReference){const reference=await loader.loadAsync(layout.denFloorReference);resources.capture(reference.scene);reference.scene.traverse(o=>{if(o.isMesh&&o.material.map)floorMaterial=o.material;});}
-    return {group,resources,mechanisms,colliders,anchors,floorMaterial};
+    return {group,resources,mechanisms,colliders,floorMaterial};
    }catch(error){if(group)resources.capture(group);resources.dispose({closeImages:true});throw error;}
   },
   dispose(shell){shell.group.removeFromParent();shell.resources.dispose({closeImages:true});renderer.renderLists.dispose();}
@@ -200,7 +175,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
   if(!loading)loading=(async()=>{
    const response=await fetch(layoutURL,{cache:'no-cache'});if(!response.ok)throw Error('House layout unavailable');layout=await response.json();
    const group=new THREE.Group();world.add(group);
-   connections={group,mechanisms:[],structureColliders:[],fixtureAnchors:{supports:[]}};
+   connections={group,mechanisms:[],structureColliders:[]};
    // The hall is the only shared shell; all branch architecture is room-owned.
    await ensureStructure('hallway');
    sky=await new THREE.TextureLoader().loadAsync(MOONLIT_SKY_URL);world.add(createMoonlitSky(sky));

@@ -3,27 +3,35 @@
   "samples": 64,
   "atlases": {
     "structure-den": {
-      "objects": 45,
+      "objects": 30,
       "resolution": 2048
     },
     "structure-hall": {
-      "objects": 233,
+      "objects": 255,
       "resolution": 4096
-    },
-    "structure-garage": {
-      "objects": 97,
-      "resolution": 2048
     },
     "structure-attic": {
       "objects": 133,
       "resolution": 2048
     },
+    "attic-hatch-closed": {
+      "objects": 1,
+      "resolution": 2048
+    },
     "structure-exterior": {
-      "objects": 152,
+      "objects": 42,
+      "resolution": 2048
+    },
+    "structure-garage": {
+      "objects": 81,
       "resolution": 2048
     },
     "structure-stairs": {
       "objects": 63,
+      "resolution": 2048
+    },
+    "basement-details": {
+      "objects": 24,
       "resolution": 2048
     },
     "basement-ceiling": {
@@ -32,10 +40,6 @@
     },
     "basement-windows": {
       "objects": 33,
-      "resolution": 2048
-    },
-    "basement-details": {
-      "objects": 20,
       "resolution": 2048
     },
     "attic-fixtures": {
@@ -53,7 +57,8 @@
     "atticExposure": -0.7,
     "saturation": 1.2,
     "lighting": "blue windows and exterior moon backlight",
-    "windowRevision": 3,
+    "windowRevision": 5,
+    "cellarEmitters": "outside authored wall openings",
     "apertureEmitters": "outside, rectangular, lowered hall sources",
     "liveWindowLights": false
   },
@@ -64,8 +69,8 @@
     "basement furnishings",
     "attic furnishings"
   ],
-  "sourceKey": "5ce9c63d81e3e82f33bbf330e007fc0931fb27315d19bff2bcab65ef257ecc69",
-  "inputKey": "15c5f3d5ff9ccf13f8933f98e44db46c46a520b10b7be63366df067cf7cd9b39",
+  "sourceKey": "6d225e92050cb627202c8250692fdb98365c30c9d4ec9db631acb28242f88713",
+  "inputKey": "04bde5c634fde86df3e568a936976a82873217dff87f47b556e5022f70eb4dc1",
   "reviewPreparation": {
     "removed": {
       "structure": [
@@ -144,184 +149,5 @@
       ]
     }
   },
-  "seconds": 2949.5,
-  "trimFiltering": {
-    "algorithm": "linear-light filtering within each board face and hallway ceiling underside; protected untargeted texels",
-    "scriptHash": "0f6a4a8ee18d4b48691bc2cbd67444f66e6f7841294bf09a9b01013326fcb048",
-    "inputStructureHash": "61a70c633792e2d522960179dec62f0f97badec9d533bcccec23515b3a986998",
-    "outputStructureHash": "f174a46b5b37f3254f8e4ccb5c4ab5cb5d8f3e1300d9b5d701c6e798de4b1f7f",
-    "filteredNodes": [
-      "structure:225",
-      "structure:226",
-      "structure:227",
-      "structure:228",
-      "structure:229",
-      "structure:230",
-      "structure:231",
-      "structure:232",
-      "structure:233",
-      "structure:234",
-      "structure:235",
-      "structure:236",
-      "structure:237",
-      "structure:238",
-      "structure:239",
-      "structure:240",
-      "structure:241",
-      "structure:242",
-      "structure:243",
-      "structure:244",
-      "structure:245",
-      "structure:246",
-      "structure:247",
-      "structure:248",
-      "structure:250",
-      "structure:251",
-      "structure:252",
-      "structure:254",
-      "structure:255",
-      "structure:256",
-      "structure:258",
-      "structure:259",
-      "structure:260",
-      "structure:262",
-      "structure:263",
-      "structure:264",
-      "structure:265",
-      "structure:266",
-      "structure:267",
-      "structure:269",
-      "structure:270",
-      "structure:271",
-      "structure:272",
-      "structure:273",
-      "structure:274",
-      "structure:330",
-      "structure:335",
-      "structure:336",
-      "structure:337",
-      "structure:346",
-      "structure:347",
-      "structure:348",
-      "structure:349",
-      "structure:375",
-      "structure:376",
-      "structure:377",
-      "structure:378",
-      "structure:379",
-      "structure:380",
-      "structure:381",
-      "structure:382",
-      "structure:407",
-      "structure:408",
-      "structure:414",
-      "structure:415",
-      "structure:416",
-      "structure:417",
-      "structure:418",
-      "structure:419",
-      "structure:421",
-      "structure:422",
-      "structure:423",
-      "structure:424",
-      "structure:425",
-      "structure:426",
-      "structure:542",
-      "structure:543",
-      "structure:544",
-      "structure:545",
-      "structure:546",
-      "structure:547",
-      "structure:549",
-      "structure:550",
-      "structure:551",
-      "structure:552",
-      "structure:553",
-      "structure:554",
-      "structure:577",
-      "structure:578",
-      "structure:579",
-      "structure:580",
-      "structure:581",
-      "structure:582",
-      "structure:583",
-      "structure:659",
-      "structure:660",
-      "structure:661",
-      "structure:662",
-      "structure:663",
-      "structure:664",
-      "structure:665",
-      "structure:666",
-      "structure:667",
-      "structure:668",
-      "structure:669",
-      "structure:670",
-      "structure:671",
-      "structure:673",
-      "structure:674",
-      "structure:675",
-      "structure:677",
-      "structure:678",
-      "structure:679",
-      "structure:681",
-      "structure:682",
-      "structure:683",
-      "structure:685",
-      "structure:686",
-      "structure:687",
-      "structure:689",
-      "structure:690",
-      "structure:691",
-      "structure:692",
-      "structure:693",
-      "structure:694",
-      "structure:756",
-      "structure:757"
-    ],
-    "filteredCeilings": [
-      "structure:97",
-      "structure:100",
-      "structure:101",
-      "structure:102",
-      "structure:103",
-      "structure:104"
-    ],
-    "smoothedCeilingTrim": [
-      "structure:235",
-      "structure:237"
-    ],
-    "atlases": [
-      {
-        "name": "structure-den",
-        "faces": 54,
-        "inputHash": "52066768608a66b830058c12dd822ddc34dd3e0e78c58dccd040f2ad6b7eed51",
-        "outputHash": "854b86e7258b61547e79909ff7f5138957fd52f25b393d0e1d42a470ece6bf07"
-      },
-      {
-        "name": "structure-hall",
-        "faces": 444,
-        "inputHash": "5568ab2cc863e7b1a01090a4bd90078fa0c35335dc79289a2b20ae0386edbb19",
-        "outputHash": "069da41692b848c10aee4793edb5d43be926f961850adee31ff8ddd66e00ca99"
-      },
-      {
-        "name": "structure-garage",
-        "faces": 180,
-        "inputHash": "0b6e16a2206c680ef40dcaa99774222ffa3407816b22c3e29404934942d9513f",
-        "outputHash": "833028f95531c9337349aa5627a06956a96d58d5a10dc1a23015eb7c29210986"
-      },
-      {
-        "name": "structure-attic",
-        "faces": 84,
-        "inputHash": "d15066ea462616880b6eef68ab1692cf5cf49e64c6a56fe9d82f44d65c9f8b4f",
-        "outputHash": "0d936e82272d42124c9668d064fe2c683568d3f98902ef697adfc1c7d138439a"
-      },
-      {
-        "name": "structure-stairs",
-        "faces": 6,
-        "inputHash": "577588830b60532df8e060b3db0b87995bc1475e2deb463b298432662ba1cc7a",
-        "outputHash": "7baf60435b62703fde2c4e74e6e3c5fd384e13772d8b3cd53c590945bfe683b4"
-      }
-    ]
-  }
+  "seconds": 2510.4
 }

@@ -6,13 +6,15 @@ def build_spec():
  plan=json.loads((ROOT/'docs/house-plan/proposed-layout.json').read_text());parts=[]
  def box(name,center,size,kind='shell',material='wall',**extra):
   parts.append(dict(name=name,center=center,size=size,kind=kind,material=material,**extra))
- def slab(name,b,y,kind='floor',holes=()):
+ def slab(name,b,y,kind='floor',holes=(),room_boundary=False):
   x,z,X,Z=b
   xs=sorted({x,X,*[v for h in holes for v in (h[0],h[2])]});zs=sorted({z,Z,*[v for h in holes for v in (h[1],h[3])]})
   for a,A in zip(xs,xs[1:]):
    for b,B in zip(zs,zs[1:]):
     if any(h[0]<(a+A)/2<h[2] and h[1]<(b+B)/2<h[3] for h in holes):continue
-    box(name,[(a+A)/2,y-.10,(b+B)/2],[A-a,.20,B-b],kind,'floor')
+    edges=[a,4.8,A] if room_boundary and a<4.8<A and (b+B)/2>6.5 else [a,A]
+    for left,right in zip(edges,edges[1:]):
+     box(name,[(left+right)/2,y-.10,(b+B)/2],[right-left,.20,B-b],kind,'floor')
  def wall(name,b,y=0,h=2.6,openings=None,material='wall'):
   x,z,X,Z=b;along_x=z==Z;start,end=(x,X)if along_x else(z,Z);fixed=z if along_x else x
   cuts=[]
@@ -38,7 +40,7 @@ def build_spec():
  for n,b in enumerate(mainwalls):wall(f'Proposed wall {n:02}',b,openings=openings)
  for b in [(12,-.2,17,-.2),(17,-.2,17,6.8),(12,6.8,17,6.8),(12,-.2,12,0)]:wall('Garage exterior',b,-.15,2.75,openings)
  hatch=plan['vertical_connections']['attic_hatch']['bounds_xz'];hatch_dx=hatch[0]-7.7;stair=[9.25,9.05,11.85,11.85]
- slab('Main floor',[0,0,12,12],0,holes=[stair]);slab('Attic floor / hall ceiling',[0,0,12,12],2.8,'ceiling',holes=[hatch]);slab('Garage slab',[12,-.2,17,6.8],-.15);slab('Garage ceiling',[12,-.2,17,6.8],2.8,'roof');slab('Basement slab',[0,0,12,12],-4)
+ slab('Main floor',[0,0,12,12],0,holes=[stair]);slab('Attic floor / hall ceiling',[0,0,12,12],2.8,'ceiling',holes=[hatch],room_boundary=True);slab('Garage slab',[12,-.2,17,6.8],-.15);slab('Garage ceiling',[12,-.2,17,6.8],2.8,'roof');slab('Basement slab',[0,0,12,12],-4)
  cellar_windows=[(0,2,0,3.5,3.1,3.7),(0,8,0,9.5,3.1,3.7),(8,0,9.5,0,3.1,3.7)]
  for b in mainwalls[:4]:wall('Basement masonry',b,-4,3.8,cellar_windows,material='masonry')
  wall('Cellar front closure',(0,12,12,12),-4,3.8,material='masonry')

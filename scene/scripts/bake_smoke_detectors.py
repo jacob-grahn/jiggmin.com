@@ -50,6 +50,6 @@ bpy.ops.object.select_all(action='DESELECT')
 for o in detectors:o.select_set(True)
 bpy.context.view_layer.objects.active=detectors[0]
 bpy.ops.export_scene.gltf(filepath=str(out/'baked.glb'),use_selection=True,export_format='GLB',export_extras=True,export_lights=False,export_cameras=False,export_animations=False)
-occluder_sources=[ROOT/'scene/house-release.blend',*[INPUT/f'{room}.glb' for room in ['structure','basement','attic']],source,ROOT/'scene/scripts/house_bake_lighting.py']
+occluder_sources=[ROOT/'scene/house-release.blend',*[INPUT/f'{room}.glb' for room in ['structure','basement','attic']],source,ROOT/'scene/scripts/house_bake_lighting.py',ROOT/'scene/scripts/house_bake_groups.py']
 report={'samples':64,'resolution':1024,'lighting':lighting,'placements':PLACEMENTS,'seconds':round(time.monotonic()-start,2),'houseSourceKey':hashlib.sha256(b''.join(p.read_bytes() for p in occluder_sources)).hexdigest(),'recipeHash':hashlib.sha256(Path(__file__).read_bytes()+(ROOT/'scene/scripts/house_smoke_detectors.py').read_bytes()).hexdigest(),'sourceGLBHash':hashlib.sha256((out/'source.glb').read_bytes()).hexdigest(),'bakedGLBHash':hashlib.sha256((out/'baked.glb').read_bytes()).hexdigest()}
 (out/'bake-report.json').write_text(json.dumps(report,indent=2)+'\n');print('SMOKE_DETECTOR_BAKE_COMPLETE',report,flush=True)

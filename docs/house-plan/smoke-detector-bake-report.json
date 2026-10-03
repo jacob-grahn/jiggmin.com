@@ -9,7 +9,8 @@
     "atticExposure": -0.7,
     "saturation": 1.2,
     "lighting": "blue windows and exterior moon backlight",
-    "windowRevision": 3,
+    "windowRevision": 5,
+    "cellarEmitters": "outside authored wall openings",
     "apertureEmitters": "outside, rectangular, lowered hall sources",
     "liveWindowLights": false,
     "fixtureBounceFill": {
@@ -44,9 +45,9 @@
       ]
     ]
   ],
-  "seconds": 218.32,
-  "houseSourceKey": "5ce9c63d81e3e82f33bbf330e007fc0931fb27315d19bff2bcab65ef257ecc69",
-  "recipeHash": "2587e566f9dc8034220213bd894c49bd60448c5a594246c5b291a488c831d813",
-  "sourceGLBHash": "1ad80e9e074c7f9cb914ca3f5886073ada07e6243207b9f91bad5b361f04d3f6",
-  "bakedGLBHash": "ba8e80290785cf1056ba602ff31219730af8f2fe5fc3f67a67f5985869495fe9"
+  "seconds": 50.25,
+  "houseSourceKey": "6d225e92050cb627202c8250692fdb98365c30c9d4ec9db631acb28242f88713",
+  "recipeHash": "52b4a30da28b5d010063ef7425973cddd4a87714ecd7c76dc286a7cbb1d4220a",
+  "sourceGLBHash": "880602af076d5cd1e343f224b399422aa4f12f39d9a7f23e0d365d7dddae18eb",
+  "bakedGLBHash": "7eecb4a05c5785ea1e9679cec3a0aca7bcc200960c1a669c51a2fc3b09c615db"
 }

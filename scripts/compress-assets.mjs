@@ -89,7 +89,7 @@ for(const preset of presets){
       // Resize from lossless masters before the only lossy encoding step.
       const limits=new Map();
       for(const node of document.getRoot().listNodes()){
-        const cap=node.getExtras().atlas_delivery_max;if(!cap)continue;
+        const extras=node.getExtras(),cap=extras.atlas_delivery_max??(String(extras.release_baked??'').startsWith('original-')?1024:null);if(!cap)continue;
         for(const p of node.getMesh()?.listPrimitives()??[]){
           const texture=p.getMaterial()?.getEmissiveTexture();
           if(texture)limits.set(texture,Math.max(cap,limits.get(texture)??0));

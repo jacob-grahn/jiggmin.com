@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {NodeIO} from '@gltf-transform/core';
+import {NodeIO,Document} from '@gltf-transform/core';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import sharp from 'sharp';
+import * as THREE from 'three';
+import {clipCeilingMesh,splitSourceCeilings} from '../scripts/split-house-ceiling-source.mjs';
 import {shellOwner,SHELL_ROOMS} from '../scripts/split-house-structure.mjs';
 import {createStructureStore} from '../web/house-structure-store.js';
 const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
@@ -76,4 +78,47 @@ test('shells finishing after cancellation are disposed and cannot reattach',asyn
  let finish;const disposed=[];const store=createStructureStore({load:id=>new Promise(resolve=>{finish=()=>resolve({id});}),dispose:s=>disposed.push(s.id)});
  const request=store.ensure('basement'),done=store.dispose();finish();assert.equal(await request,null);await done;
  assert.equal(store.entries.size,0);assert.deepEqual(disposed,['basement']);assert.equal(await store.ensure('attic'),null);
+});
+
+test('ceiling cuts interpolate baked UVs and preserve total surface area',()=>{
+ let area=0;
+ for(const room of ['den','hallway']){
+  const doc=new Document(),buffer=doc.createBuffer(),mesh=doc.createMesh();
+  const attribute=(type,values)=>doc.createAccessor().setType(type).setArray(new Float32Array(values)).setBuffer(buffer);
+  mesh.addPrimitive(doc.createPrimitive().setAttribute('POSITION',attribute('VEC3',[0,0,0,2,0,0,0,2,0])).setAttribute('TEXCOORD_0',attribute('VEC2',[0,0,1,0,0,1])));
+  clipCeilingMesh(doc,mesh,new THREE.Matrix4().makeTranslation(3.8,0,0).toArray(),room);
+  const p=mesh.listPrimitives()[0],position=p.getAttribute('POSITION'),uv=p.getAttribute('TEXCOORD_0');
+  for(let i=0;i<position.getCount();i++){
+   const [x,y]=position.getElement(i,[]),[u,v]=uv.getElement(i,[]);
+   assert.ok(Math.abs(u-x/2)<1e-6&&Math.abs(v-y/2)<1e-6,'baked UV mapping changed');
+   assert.ok(room==='den'?x<=1.000001:x>=.999999);
+  }
+  for(let i=0;i<position.getCount();i+=3){const [a,b,c]=[0,1,2].map(j=>new THREE.Vector3().fromArray(position.getElement(i+j,[])));area+=b.sub(a).cross(c.sub(a)).length()/2;}
+ }
+ assert.ok(Math.abs(area-2)<1e-6,'cut lost or duplicated surface area');
+});
+
+test('source ceiling sections belong wholly to one room before streaming',()=>{
+ let den=0,hall=0;
+ for(const n of master.getRoot().listNodes().filter(n=>n.getMesh()&&n.getName().startsWith('Attic floor / hall ceiling'))){
+  const matrix=new THREE.Matrix4().fromArray(n.getWorldMatrix()),points=[];
+  for(const p of n.getMesh().listPrimitives()){
+   const a=p.getAttribute('POSITION');for(let i=0;i<a.getCount();i++)points.push(new THREE.Vector3().fromArray(a.getElement(i,[])).applyMatrix4(matrix));
+  }
+  const bounds=new THREE.Box3().setFromPoints(points);if(bounds.getCenter(new THREE.Vector3()).z<=6.5)continue;
+  assert.ok(bounds.max.x<=4.800001||bounds.min.x>=4.799999,`${n.getName()} spans both rooms`);
+  const room=bounds.max.x<=4.800001?'den':'hallway';room==='den'?den++:hall++;
+  if(n.getExtras().source_shell_room)assert.equal(n.getExtras().source_shell_room,room);
+ }
+ assert.ok(den>=2&&hall>=2);assert.equal(splitSourceCeilings(master),0,'source preparation must be idempotent');
+});
+test('legacy source preparation produces separate bake surfaces and retains reflectance identity',()=>{
+ const doc=new Document(),buffer=doc.createBuffer(),scene=doc.createScene(),name='Attic floor / hall ceiling.001';
+ const position=doc.createAccessor().setType('VEC3').setArray(new Float32Array([0,2.6,8,8,2.6,8,0,2.6,10])).setBuffer(buffer);
+ scene.addChild(doc.createNode(name).setMesh(doc.createMesh().addPrimitive(doc.createPrimitive().setAttribute('POSITION',position))));
+ assert.equal(splitSourceCeilings(doc),1);
+ const nodes=scene.listChildren();assert.equal(nodes.length,2);
+ assert.deepEqual(nodes.map(n=>n.getExtras().source_shell_room).sort(),['den','hallway']);
+ for(const n of nodes)assert.equal(n.getExtras().source_ceiling_object,name);
+ assert.notEqual(nodes[0].getMesh(),nodes[1].getMesh());assert.equal(splitSourceCeilings(doc),0);
 });

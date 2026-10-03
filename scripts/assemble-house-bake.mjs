@@ -4,7 +4,6 @@ import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import {copyToDocument,prune,unpartition,dedup} from '@gltf-transform/functions';
 import {readFileSync,writeFileSync,copyFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {filterHouseTrimBake} from './filter-house-trim.mjs';
 const quality=process.argv[2]??'final';if(!['test','final'].includes(quality))throw Error('Expected test or final');
 const dir=`scene/exports/house-release/${quality}`,input='scene/exports/house-release/bake-input',io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
 const report=JSON.parse(readFileSync(`${dir}/bake-report.json`));
@@ -27,9 +26,11 @@ for(const room of ['structure','basement','attic']){
   // and material only. Reject changes before exposing a different layout.
   const a=node.getWorldMatrix(),b=patch.getWorldMatrix();if(a.some((v,i)=>Math.abs(v-b[i])>1e-4))throw Error(`Bake moved ${room}/${node.getName()}`);
   const mapping=copyToDocument(doc,baked,[patch.getMesh()]);node.setMesh(mapping.get(patch.getMesh()));
-  node.setExtras({...node.getExtras(),release_baked:patch.getExtras().release_baked,house_window_bake:true,...(patch.getExtras().house_window_receiver?{house_window_receiver:true}:{} )});count++;
+  const extras={...node.getExtras()};delete extras.source_rebake_required;
+  node.setExtras({...extras,release_baked:patch.getExtras().release_baked,atlas_delivery_max:['structure-hall','structure-garage','basement-details'].includes(patch.getExtras().release_baked)?2048:1024,house_window_bake:true,...(patch.getExtras().house_window_receiver?{house_window_receiver:true}:{} )});count++;
  }
  if(count!==patches.size)throw Error(`Unmatched ${room} bake meshes: ${count}/${patches.size}`);
+ for(const n of doc.getRoot().listNodes())if(n.getMesh()&&(n.getExtras().source_rebake_required||n.getMesh().listPrimitives().some(p=>p.getMaterial()?.getExtras().ceiling_paint)))throw Error(`Unbaked source repair: ${room}/${n.getName()}`);
  // Retain near-black baked maps: pruning can approximate them as one color.
  await doc.transform(dedup(),prune({keepSolidTextures:true}),unpartition());await io.write(`${dir}/${room}.glb`,doc);console.log('LIGHTING_OVERLAY',room,count);
 }
@@ -38,4 +39,3 @@ const layout=JSON.parse(readFileSync(`${input}/layout.json`));layout.lightingBak
 layout.denFloorReference=`/${dir}/den-floor-reference.glb`;
 for(const room of ['structure','hallway','workshop','basement','attic']){const hash=createHash('sha256').update(readFileSync(`${dir}/${room}.glb`)).digest('hex').slice(0,12);layout.assets[room]=`/${dir}/${room}.glb?v=${hash}`;}
 writeFileSync(`${dir}/layout.json`,JSON.stringify(layout,null,2)+'\n');
-await filterHouseTrimBake(dir);

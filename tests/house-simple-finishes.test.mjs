@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {finishHallSurfaces} from '../web/house-hall-finishes.js';
-import {createNaturalTree,replaceExteriorTrees} from '../web/house-exterior-trees.js';
+import {finishHallSurfaces} from '../scripts/house-source/house-hall-finishes.js';
+import {createNaturalTree,replaceExteriorTrees} from '../scripts/house-source/house-exterior-trees.js';
 
 test('ceiling lightmaps and painted hatch wood remain visible while hall mouldings stay hidden',()=>{
  const root=new THREE.Group(),map=new THREE.Texture(),material=new THREE.MeshBasicMaterial({map});

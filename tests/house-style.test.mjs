@@ -1,3 +1,4 @@
+import {integrateDenOpening} from '../scripts/house-source/den-opening.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -5,7 +6,7 @@ import {readFileSync} from 'node:fs';
 import {NodeIO} from '@gltf-transform/core';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import * as THREE from 'three';
-import {createContinuousDen,DEN_PLACEMENT,DEN_SOURCE_TO_WORLD,DEN_UNITS_TO_METRES,integrateDenOpening} from '../web/house-den-continuity.js';
+import {createContinuousDen,DEN_PLACEMENT,DEN_SOURCE_TO_WORLD,DEN_UNITS_TO_METRES} from '../web/house-den-continuity.js';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 test('restored room textures come from the original artwork and lighting atlases',async()=>{
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
@@ -19,7 +20,7 @@ test('restored room textures come from the original artwork and lighting atlases
    for(const p of node.getMesh().listPrimitives())paintedLighting.add(hash(p.getMaterial().getEmissiveTexture().getImage()));
   }
   for(const texture of restored.getRoot().listTextures())assert.ok(originals.has(hash(texture.getImage()))||paintedLighting.has(hash(texture.getImage())),`${room}: newly substituted artwork texture`);
-  for(const node of restored.getRoot().listNodes().filter(n=>n.getMesh()))assert.ok(node.getExtras().style_source);
+  for(const node of restored.getRoot().listNodes().filter(n=>n.getMesh()))assert.ok(node.getExtras().style_source||node.getExtras().house_authored_reflectance);
  }
 });
 test('live den travel uses a rigid camera and preserves the original seated projection',()=>{
@@ -118,7 +119,7 @@ test('basement is fitted as geometry while every furnishing retains its original
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),original=await io.read('web/assets/house/basement-baked.glb'),placed=await io.read('web/assets/house/release/basement.glb');
  const originals=new Map(original.getRoot().listNodes().filter(n=>n.getMesh()).map(n=>[n.getName(),n]));
  const assembly=placed.getRoot().listNodes().find(n=>n.getName()==='Refitted basement assembly');assert.deepEqual(assembly.getScale(),[1,1,1]);
- for(const node of placed.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().refit_assembly!=='envelope'&&!n.getExtras().house_fixed_detail&&!n.getExtras().review_fixed_fixture)){
+ for(const node of placed.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().refit_assembly!=='envelope'&&!n.getExtras().house_fixed_detail&&!n.getExtras().review_fixed_fixture&&!n.getExtras().house_authored_reflectance)){
   const source=originals.get(node.getExtras().source_object);assert.ok(source,node.getName());
   const a=node.getWorldMatrix(),b=source.getWorldMatrix();
   for(const i of [0,1,2,4,5,6,8,9,10])assert.ok(Math.abs(a[i]-b[i])<1e-6,`${node.getName()} stretched`);
@@ -141,7 +142,7 @@ test('all other furniture keeps original size and orientation after removing roo
   const source=await io.read(`web/assets/house/${room}-baked.glb`),doc=await io.read(`web/assets/house/release/${room}.glb`);
   const originals=new Map(source.getRoot().listNodes().filter(n=>n.getMesh()).map(n=>[n.getName(),n]));
   const rotation=new THREE.Matrix4().makeRotationY(room==='hallway'?Math.PI/2:0);
-  for(const node of doc.getRoot().listNodes().filter(n=>n.getMesh()&&!n.getExtras().review_fixed_fixture)){
+  for(const node of doc.getRoot().listNodes().filter(n=>n.getMesh()&&!n.getExtras().review_fixed_fixture&&!n.getExtras().house_authored_reflectance)){
    assert.equal(node.getExtras().model_refit,room,node.getName());
    const expected=rotation.clone().multiply(new THREE.Matrix4().fromArray(originals.get(node.getExtras().style_source).getWorldMatrix())),actual=node.getWorldMatrix();
    for(const i of [0,1,2,4,5,6,8,9,10])assert.ok(Math.abs(actual[i]-expected.elements[i])<1e-6,`${room}/${node.getName()} retains fitting scale`);
@@ -197,7 +198,7 @@ test('ceilings use cream paint without repainting the attic floor or exterior ro
   const normalMatrix=new THREE.Matrix3().getNormalMatrix(new THREE.Matrix4().fromArray(n.getWorldMatrix()));
   for(const p of n.getMesh().listPrimitives()){
    const normals=p.getAttribute('NORMAL'),indices=p.getIndices(),cream=p.getMaterial().getName()==='Light cream ceiling';
-   for(let i=0;i<indices.getCount();i+=3){const normal=new THREE.Vector3(...normals.getElement(indices.getScalar(i),[])).applyMatrix3(normalMatrix).normalize();assert.equal(cream,normal.y<-.5);}
+   for(let i=0;i<(indices?.getCount()??normals.getCount());i+=3){const normal=new THREE.Vector3(...normals.getElement(indices?indices.getScalar(i):i,[])).applyMatrix3(normalMatrix).normalize();assert.equal(cream,normal.y<-.5);}
   }
  }
  const ceiling=cellar.getRoot().listNodes().find(n=>n.getName()==='Basement ceiling');assert.equal(ceiling.getExtras().ceiling_paint,'light cream');

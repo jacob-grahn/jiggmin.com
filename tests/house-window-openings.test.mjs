@@ -4,8 +4,9 @@ import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
 import {NodeIO} from '@gltf-transform/core';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
-import {subtractWindowPrism,isWindowStructure} from '../web/house-window-openings.js';
-import {createMoonlitWindows} from '../web/house-window-sky.js';
+import {subtractWindowPrism,isWindowStructure} from '../scripts/house-source/house-window-openings.js';
+import {windowExteriorFrame} from '../scripts/house-source/house-window-exterior.js';
+import {cutWindowOpenings} from '../scripts/house-source/house-window-openings.js';
 import {roomMatrix} from '../web/house-layout.js';
 
 const material=new THREE.MeshBasicMaterial({side:THREE.DoubleSide});
@@ -48,7 +49,7 @@ test('All eight baked window positions have unobstructed physical apertures afte
   const camera=doc.getRoot().listNodes().find(n=>n.getCamera());
   const eye=new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().fromArray(camera.getWorldMatrix())).applyMatrix4(transform);
   if(layout.rooms[room].viewPosition)eye.fromArray(layout.rooms[room].viewPosition);
-  const result=createMoonlitWindows(root,new THREE.Texture(),eye);assert.equal(result.count,count,room);
+  const windows=root.children.filter(m=>/^(Rainy garden through hallway|Garden beyond window)/.test(m.name));const frames=windows.map(m=>{const f=windowExteriorFrame(m);if(f.normal.dot(eye.clone().sub(f.center))>0){f.normal.negate();f.right.negate();}f.size.addScalar(-.04);return f;});const result={count:windows.length,frames,cutMeshes:cutWindowOpenings(root,frames)};assert.equal(result.count,count,room);
   assert.ok(result.cutMeshes.length>0,`${room} wall geometry changed`);
   const walls=root.children.filter(m=>isWindowStructure(m.name));
   for(const frame of result.frames)for(const x of [-.3,0,.3])for(const y of [-.3,0,.3]){

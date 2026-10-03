@@ -26,7 +26,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,ensureDen,un
   nav.inert=true;nav.setAttribute('aria-hidden','true');
   loading=(async()=>{
    await fadeNavigation(nav,false);
-   if(!instance){const [module]=await Promise.all([import('./house.js?v=room-shells-1'),styles()]);instance=await module.createHouse({getDen,ensureDen,unloadDen,loadBasementCartridges,onCollectBonus,
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=source-models-1'),styles()]);instance=await module.createHouse({getDen,ensureDen,unloadDen,loadBasementCartridges,onCollectBonus,
     onOpen(){active=true;update();onOpen?.();},
     onExit(){active=false;update();onExit?.();if(origin?.isConnected&&ready&&!playing)origin.focus();},
    });}

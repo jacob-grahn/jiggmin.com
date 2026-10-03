@@ -36,7 +36,7 @@ assert.equal(count,replacements.size);
 layout.atlasRefresh={...report,resultDirectory:result,masterFormat:'PNG',webFormat:'WebP quality 80',den:'original projection',delivery:'One shared asset set; 1024/2048px atlas limits, WebP quality 80',retainedFixtureSourceKey:layout.atlasRefresh?.retainedFixtureSourceKey??layout.lightingBake?.report?.sourceKey};
 // Retain the established window-rig contract with the new bake provenance.
 layout.lightingBake={quality:'final',source:'original-window-rig',report};
-for(const field of ['denFloorReference','fixedFixtures','hatchLighting'])if(layout[field]){
+for(const field of ['denFloorReference','fixedFixtures'])if(layout[field]){
  const file=layout[field].split('?')[0].split('/').pop();await copyFile(`${input}/${file}`,`${out}/${file}`);const hash=createHash('sha256').update(await readFile(`${out}/${file}`)).digest('hex').slice(0,12);layout[field]=`/${out}/${file}?v=${hash}`;
 }
 await writeFile(`${out}/layout.json`,JSON.stringify(layout,null,2)+'\n');

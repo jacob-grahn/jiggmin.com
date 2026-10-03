@@ -1,6 +1,4 @@
 import * as THREE from 'three';
-import {windowExteriorFrame,createWindowTrees} from './house-window-exterior.js?v=house-reference-31';
-import {cutWindowOpenings} from './house-window-openings.js';
 
 export const MOONLIT_SKY_URL='/web/assets/house/windows/night-forest.webp';
 export const WINDOW_GLASS_LAYER=6;
@@ -42,41 +40,12 @@ export function createMoonlitSky(sky){
  mesh.name='Shared moonlit sky';mesh.frustumCulled=false;mesh.renderOrder=-1000;return mesh;
 }
 
-export function createMoonlitWindows(model,sky,eye){
- sky.colorSpace=THREE.SRGBColorSpace;sky.mapping=THREE.EquirectangularReflectionMapping;
- const windows=[];model.updateMatrixWorld(true);
- model.traverse(mesh=>{
-  if(mesh.isMesh&&/^(Rainy garden through hallway|Garden beyond window)/.test(mesh.name.replaceAll('_',' ')))windows.push(mesh);
- });
- const frames=windows.map(mesh=>{
-  const frame=windowExteriorFrame(mesh);
-  // Point outward, away from the room's authored camera. No assumptions about
-  // Blender's plane winding or the rotation of a room in the connected house.
-  if(eye&&frame.normal.dot(eye.clone().sub(frame.center))>0){frame.normal.negate();frame.right.negate();}
-  frame.size.addScalar(-.04);return frame;
- });
- const cutMeshes=cutWindowOpenings(model,frames);
- const exterior=new THREE.Group();exterior.name='Physical window exteriors';
+// Glass compositing is view-dependent; openings and scenery are already authored.
+export function configureWindowGlass(model){
  const glass=[];
- windows.forEach((mesh,i)=>{
-  const source=Array.isArray(mesh.material)?mesh.material[0]:mesh.material;
-  mesh.material=new THREE.MeshBasicMaterial({name:'Clear window glass',color:0x192532,
-   transparent:true,opacity:.025,toneMapped:false,
-   depthWrite:false,side:THREE.DoubleSide,clippingPlanes:source.clippingPlanes});
+ model.traverse(mesh=>{
+  if(!mesh.isMesh||!/^(Rainy garden through hallway|Garden beyond window)/.test(mesh.name.replaceAll('_',' ')))return;
+  mesh.material=new THREE.MeshBasicMaterial({name:'Clear window glass',color:0x192532,transparent:true,opacity:.025,toneMapped:false,depthWrite:false,side:THREE.DoubleSide});
   mesh.userData.houseOutlined=true;mesh.userData.windowGlass=true;glass.push(mesh);
-  const frame=frames[i];exterior.add(createWindowTrees(frame));
-  if(model.getObjectByName(`Baked window reveal ${i} left`)||model.getObjectByName(`Baked_window_reveal_${i}_left`))return;
-  // Cap the newly cut edges with an actual wooden reveal. Its inner edges sit
-  // just beyond the aperture, underneath the existing frame and sill.
-  const reveal=new THREE.Group();reveal.position.copy(frame.center);
-  reveal.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(frame.right,new THREE.Vector3(0,1,0),frame.normal));
-  const w=frame.size.x,h=frame.size.y,depth=.96,t=.06;
-  const material=new THREE.MeshBasicMaterial({name:'Window reveal wood',color:0x202b32,toneMapped:false});
-  for(const [x,y,sx,sy] of [[-(w+t)/2,0,t,h+2*t],[(w+t)/2,0,t,h+2*t],[0,-(h+t)/2,w,t],[0,(h+t)/2,w,t]]){
-   const part=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,depth),material);
-   part.position.set(x,y,depth/2-.16);part.name='Window opening reveal';part.userData.houseOutlined=true;reveal.add(part);
-  }
-  exterior.add(reveal);
- });
- return {count:windows.length,exterior,glass,frames,cutMeshes};
+ });return glass;
 }

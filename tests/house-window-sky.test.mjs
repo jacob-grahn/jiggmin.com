@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {createMoonlitWindows,createMoonlitSky} from '../web/house-window-sky.js';
+import {configureWindowGlass,createMoonlitSky} from '../web/house-window-sky.js';
 
 test('Exterior frames preserve physical dimensions and upright branches in transformed rooms',async()=>{
- const {windowExteriorFrame}=await import('../web/house-window-exterior.js');
+ const {windowExteriorFrame}=await import('../scripts/house-source/house-window-exterior.js');
  const root=new THREE.Group();root.position.set(6,-4,1.8);root.rotation.y=-Math.PI/2;
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.8,.65));mesh.position.set(-2.2,2.95,3.29);root.add(mesh);
  const frame=windowExteriorFrame(mesh);
@@ -14,24 +14,11 @@ test('Exterior frames preserve physical dimensions and upright branches in trans
  assert.ok(Math.abs(frame.normal.length()-1)<1e-6);
 });
 
-test('Window glass is transparent, retains clipping, and has no exterior image shader',()=>{
- const root=new THREE.Group(),plane=new THREE.Plane(),source=new THREE.MeshBasicMaterial({clippingPlanes:[plane]});
- const window=new THREE.Mesh(new THREE.PlaneGeometry(2,1.5),source);window.name='Garden beyond window';root.add(window);
- const other=new THREE.Mesh(new THREE.BoxGeometry(),source);other.name='Window jamb';root.add(other);
- const result=createMoonlitWindows(root,new THREE.Texture(),new THREE.Vector3(0,0,2));
- assert.equal(result.count,1);assert.equal(window.material.transparent,true);assert.equal(window.material.depthWrite,false);
- assert.ok(window.material.opacity<.1);assert.equal(window.material.map,null);assert.equal(window.material.clippingPlanes[0],plane);
- assert.equal(other.material,source);assert.equal(result.frames[0].normal.z,-1);
- result.exterior.updateMatrixWorld(true);
- const trees=[];result.exterior.traverse(o=>{if(/bare branches|leafy tree/.test(o.name))trees.push(o);});
- assert.equal(trees.length,2);
- const frame=result.frames[0];
- for(const depth of [-.12,.1,.65]){
-  const ray=new THREE.Raycaster(frame.center.clone().addScaledVector(frame.normal,depth),new THREE.Vector3(0,-1,0),0,1);
-  assert.ok(ray.intersectObject(result.exterior,true).some(hit=>hit.object.name==='Window opening reveal'),'bottom reveal must seal the full wall depth');
- }
-
- for(const tree of trees){assert.ok(tree.geometry.attributes.position.count>30);assert.equal(tree.material.transparent,false);assert.equal(tree.material.color.getHex(),0);}
+test('window setup configures glass without generating geometry',()=>{
+ const root=new THREE.Group(),window=new THREE.Mesh(new THREE.PlaneGeometry(2,1.5));window.name='Garden beyond window';root.add(window);
+ const geometry=window.geometry,glass=configureWindowGlass(root);
+ assert.equal(glass.length,1);assert.equal(root.children.length,1);assert.equal(window.geometry,geometry);
+ assert.equal(window.material.transparent,true);assert.equal(window.material.depthWrite,false);assert.ok(window.material.opacity<.1);
 });
 
 test('Sky is a separate enclosing environment with no depth writes',()=>{

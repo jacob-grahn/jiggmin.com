@@ -26,3 +26,9 @@ test('new structural shell leaves actual door and hatch apertures',()=>{
   assert.equal(hits.length,0,`${id}: ${hits.map(h=>h.object.name)}`);
  }
 });
+
+test('source ceiling is authored separately across the den and hallway boundary',()=>{
+ const panels=spec.parts.filter(p=>p.name==='Attic floor / hall ceiling'&&p.center[2]>6.5);
+ assert.ok(panels.length);
+ for(const p of panels){const lo=p.center[0]-p.size[0]/2,hi=p.center[0]+p.size[0]/2;assert.ok(hi<=4.800001||lo>=4.799999,'source panel spans both rooms');}
+});

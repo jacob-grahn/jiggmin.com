@@ -11,6 +11,7 @@ import {Box3,Vector3,Matrix4} from 'three';
 
 export const SHELL_ROOMS=['hallway','den','workshop','basement','attic'];
 export function shellOwner(name,e={},bounds){
+ if(e.source_shell_room)return e.source_shell_room;
  // Boundary doors/hatch stay with the hall so closed entrances never disappear.
  if(e.preview_kind==='door')return e.door_id==='vehicle'?'workshop':'hallway';
  if(e.preview_kind==='ladder')return 'attic';
@@ -39,7 +40,7 @@ const local=url=>url.split('?')[0].replace(/^\//,'');
 function inheritedExtras(node){const chain=[];for(let n=node;n;n=n.getParentNode())chain.unshift(n.getExtras());return Object.assign({},...chain);}
 export async function splitHouseStructure({directory='web/assets/house/release'}={}){
  const layoutPath=`${directory}/layout.json`,layout=JSON.parse(await readFile(layoutPath));
- const paths=[`${directory}/structure.glb`,...['fixedFixtures','hatchLighting','denFloorReference'].filter(k=>layout[k]).map(k=>local(layout[k]))];
+ const paths=[`${directory}/structure.glb`,...['fixedFixtures','denFloorReference'].filter(k=>layout[k]).map(k=>local(layout[k]))];
  const key=hash(Buffer.concat([await readFile(fileURLToPath(import.meta.url)),...await Promise.all(paths.map(p=>readFile(p)))]));
  if(layout.structureStreaming?.sourceKey===key&&await Promise.all(SHELL_ROOMS.map(id=>readFile(`${directory}/structure/${id}.glb`).then(b=>hash(b)===layout.structureStreaming.rooms[id].sha256,()=>false))).then(v=>v.every(Boolean)))return layout.structureStreaming;
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),master=await io.read(paths[0]);
@@ -53,8 +54,8 @@ export async function splitHouseStructure({directory='web/assets/house/release'}
    bounds=new Box3();const matrix=new Matrix4().fromArray(node.getWorldMatrix());
    for(const p of node.getMesh().listPrimitives()){const a=p.getAttribute('POSITION');for(let i=0;i<a.getCount();i++)bounds.expandByPoint(new Vector3().fromArray(a.getElement(i,[])).applyMatrix4(matrix));}
   }
-  const owner=shellOwner(node.getName(),extras,bounds);assignments.set(node,owner);
-  for(const p of node.getMesh().listPrimitives())for(const t of texturesOf(p.getMaterial())){const owners=textureOwners.get(t)??new Set();owners.add(owner);textureOwners.set(t,owners);}
+  const owners=[shellOwner(node.getName(),extras,bounds)];assignments.set(node,owners);
+  for(const p of node.getMesh().listPrimitives())for(const t of texturesOf(p.getMaterial())){const rooms=textureOwners.get(t)??new Set();owners.forEach(owner=>rooms.add(owner));textureOwners.set(t,rooms);}
  }
  const manifest={version:1,sourceKey:key,rooms:{}};layout.structureAssets={};
  await mkdir(`${directory}/structure`,{recursive:true});
@@ -63,7 +64,7 @@ export async function splitHouseStructure({directory='web/assets/house/release'}
   scene.setExtras({...master.getRoot().listScenes()[0]?.getExtras(),shell_room:room});
   const sharedTextures=new Set();let count=0;
   for(const source of sources){
-   const nodes=source.getRoot().listNodes().filter(n=>assignments.get(n)===room);
+   const nodes=source.getRoot().listNodes().filter(n=>assignments.get(n)?.includes(room));
    const copied=copyToDocument(doc,source,nodes.map(n=>n.getMesh()));
    for(const node of nodes){
     const mesh=copied.get(node.getMesh());

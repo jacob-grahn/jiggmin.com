@@ -1,17 +1,17 @@
 // Apply the reviewed fixture geometry before Cycles packs new lighting UVs.
-// Movable clutter still uses the shared runtime cleanup and grouping modules.
+// Source-only fixture authoring; no browser fallback is required.
 import {NodeIO} from '@gltf-transform/core';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import {prune,unpartition} from '@gltf-transform/functions';
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import * as THREE from 'three';
 import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
-import {fixtureAnchors,turnOffCeilingFixtures,refineRoomFixtures} from '../web/house-fixture-refinements.js';
-import {assertUniqueTrim} from './filter-house-trim.mjs';
+import {fixtureAnchors,turnOffCeilingFixtures,refineRoomFixtures} from './house-source/house-fixture-refinements.js';
+import {assertUniqueTrim} from './house-source/validate-trim.mjs';
 globalThis.ProgressEvent??=class{};
-const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),out='scene/exports/house-release/review-reference',models=new Map(),report={removed:{},fixed:{}};
+const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),out=process.argv[2]??'scene/exports/house-release/review-reference',models=new Map(),report={removed:{},fixed:{}};
 for(const room of ['structure','basement','attic']){
- const doc=await io.read(`${out}/${room}.glb`),nodes=doc.getRoot().listNodes();nodes.forEach((n,i)=>n.setExtras({...n.getExtras(),house_review_node:i,house_bake_source:n.getName()}));
+ const doc=await io.read(`${out}/${room}.glb`),nodes=doc.getRoot().listNodes();nodes.forEach((n,i)=>n.setExtras({...n.getExtras(),house_review_node:i,house_bake_source:n.getExtras().source_ceiling_object??n.getName()}));
  const bytes=Buffer.from(await io.writeBinary(doc)),length=bytes.readUInt32LE(12),json=JSON.parse(bytes.subarray(20,20+length));
  json.buffers[0].uri=`data:application/octet-stream;base64,${bytes.subarray(28+length).toString('base64')}`;
  json.materials=[];for(const m of json.meshes)for(const p of m.primitives)delete p.material;delete json.images;delete json.textures;

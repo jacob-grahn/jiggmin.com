@@ -4,8 +4,8 @@ import {readFileSync} from 'node:fs';
 import {copyToDocument} from '@gltf-transform/functions';
 import {editMesh} from './refit-room-models.mjs';
 import {PLYWOOD_PANELS} from './workshop-plywood.mjs';
-import {subtractWindowPrism} from '../web/house-window-openings.js';
-import {windowExteriorFrame} from '../web/house-window-exterior.js';
+import {subtractWindowPrism} from './house-source/house-window-openings.js';
+import {windowExteriorFrame} from './house-source/house-window-exterior.js';
 export const FINISHES=JSON.parse(readFileSync(new URL('../scene/house-finishes.json',import.meta.url)));
 const names={POSITION:'position',NORMAL:'normal',TEXCOORD_0:'uv',TEXCOORD_1:'uv1'};
 // The cellar's thick wall reveals previously existed only as unlit runtime caps.
@@ -78,7 +78,7 @@ export function addWorkshopWindowFraming(doc,source){
  }
 }
 export function paintCeilings(doc){
- const paint=doc.createMaterial(FINISHES.ceiling.name).setBaseColorFactor([...FINISHES.ceiling.linear_rgb,1]).setRoughnessFactor(FINISHES.ceiling.roughness).setDoubleSided(true);
+ const paint=doc.createMaterial(FINISHES.ceiling.name).setBaseColorFactor([...FINISHES.ceiling.linear_rgb,1]).setRoughnessFactor(FINISHES.ceiling.roughness).setMetallicFactor(0).setDoubleSided(true);
  for(const node of doc.getRoot().listNodes().filter(n=>n.getMesh())){
   const name=node.getExtras().source_object??node.getName();
   if(!/ceiling|Main pitched roof|Garage pitched roof|^Attic hatch$/i.test(name)||/light|lamp|canopy|fixture|stem/i.test(name))continue;

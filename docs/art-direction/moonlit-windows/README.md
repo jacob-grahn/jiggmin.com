@@ -9,15 +9,11 @@ Original generation prompt (superseded by the comic-book revision below):
 Use case: stylized-concept. Asset type: one seamless 360-degree equirectangular environment panorama, 2:1 aspect ratio, for a moonlit sky seen through small windows of a moody illustrated house. The image will wrap around the house: each window reveals only a tiny angular portion, NOT an entire landscape. Extremely restrained composition. Horizon exactly halfway down. Upper half: spacious muted slate-blue night sky, soft sparse cloud bands, stronger silver-blue moonlight, one small luminous moon with a broad soft cool halo at horizontal position 70%, vertical position 25%. Lower half: nearly featureless deep navy ground fading to ink darkness. Only a few widely spaced dark spruce crowns near the horizon, less than 12% image height; no dense forest, no nearby vegetation, no grass blades, no ferns, no paths, no mountains, no buildings, no water. Palette: ink navy #071321, dark blue #10263d, slate blue #38597b, brighter silver-blue #7898b7 limited to moon halo and thin clouds. Hand-painted simple shapes and soft restrained texture matching an illustrated nighttime game, not photographic. Readable moonlit sky, quiet eerie atmosphere. No window frames, no glass or rain speckles, no interiors, no text, no borders. Left and right edges must join seamlessly, no collage or panels.
 
 Implementation: the panorama is on one enclosing sky mesh, rendered behind the
-house. Eight real apertures are cut from the loaded room geometry by
-`web/house-window-openings.js`. Triangle clipping interpolates all vertex
-attributes, preserving the baked lighting UVs. The cuts happen once at room load;
-the authored GLBs and Blender files retain their original geometry. Rebuilt room
-assets receive the same cuts automatically. No window-mask shader remains.
-
-Frames and rain geometry remain in place. Separate transparent glass has a faint
-environment reflection; ordinary 3D branches and pines stand outside the openings.
-The den is excluded. The panorama does not change the existing baked room lighting.
+house. Permanent apertures and nearby scenery are authored before lighting in
+`scripts/prepare-house-static.mjs`, using helpers in `scripts/house-source/`.
+The exported models contain their openings; loading a room no longer clips walls.
+Frames and rain geometry remain in place. Glass transparency and the shared sky
+remain runtime presentation behavior. The den is excluded.
 
 ## Comic-book revision
 
@@ -31,7 +27,7 @@ Validation: run the build and window-sky tests after replacing the asset. Room-o
 
 ## Glass and nearby silhouettes
 
-`web/house-window-exterior.js` builds merged low-poly branch and pine meshes,
+`scripts/house-source/house-window-exterior.js` builds merged low-poly branch and pine meshes,
 centered 0.85 and 2.8 world units beyond each opening. Perspective supplies their
 parallax. They share the same depth buffer as the walls and are disposed with
 their room. Wooden reveal meshes cover the edges of the cut wall surfaces.
