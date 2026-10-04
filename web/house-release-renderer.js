@@ -20,7 +20,7 @@ import {travelPose,travelDuration} from './house-travel.js?v=house-reference-38'
 import {doorMotion,ladderMotion} from './house-access.js';
 export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unloadDen,loadBasementCartridges,collected=new Set(),layoutURL='/web/assets/house/release/layout.json?v=source-models-1'}={}) {
  const debugParams=new URLSearchParams(location.search),slowValue=debugParams.get('slowHouseTravel');
- // Slow motion must never encode PNGs during travel. Captures are manual only.
+ // Copy diagnostic frames during travel; defer PNG encoding until the burst ends.
  const captureEnabled=debugParams.get('captureHouseTravel')==='1';
  const debugTravel=slowValue!==null||captureEnabled;
  const slowFactor=THREE.MathUtils.clamp(Number(slowValue)||1,1,20);
@@ -34,6 +34,27 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
  }
  configureRenderer();renderer.domElement.id='';renderer.domElement.classList.add('house-canvas');host.prepend(renderer.domElement);
  const saveFrame=captureEnabled?document.createElement('button'):null;
+ const saveBurst=captureEnabled?document.createElement('button'):null;
+ let burstArmed=false,burstFrames=[];
+ const burstAt=THREE.MathUtils.clamp(Number(debugParams.get('captureHouseBurstAt')??.1),0,.95);
+ function captureBurstFrame(branch,t,reverse){
+  if(!burstArmed||t<burstAt)return;
+  const canvas=document.createElement('canvas');canvas.width=renderer.domElement.width;canvas.height=renderer.domElement.height;
+  canvas.getContext('2d').drawImage(renderer.domElement,0,0);
+  burstFrames.push({canvas,name:`${branch}-${reverse?'out':'in'}-${t.toFixed(6)}-${burstFrames.length}.png`});
+  if(burstFrames.length<4)return;
+  burstArmed=false;const frames=burstFrames;burstFrames=[];
+  setTimeout(async()=>{
+   try{
+    for(const {canvas,name} of frames){
+     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+     const response=await fetch('/_house_capture',{method:'POST',headers:{'Content-Type':'image/png','X-House-Frame':name},body:blob});
+     if(!response.ok)throw Error('Capture failed');
+    }
+    saveBurst.textContent='Saved 4 consecutive frames';
+   }catch{saveBurst.textContent='Burst capture failed';}
+  },0);
+ }
  const captureFrame=()=>{
   render();const canvas=document.createElement('canvas');canvas.width=renderer.domElement.width;canvas.height=renderer.domElement.height;
   const context=canvas.getContext('2d');context.drawImage(renderer.domElement,0,0);
@@ -47,6 +68,9 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
   saveFrame.type='button';saveFrame.textContent='Save travel frame';saveFrame.setAttribute('aria-label','Save travel frame');
   Object.assign(saveFrame.style,{position:'absolute',top:'8px',right:'8px',zIndex:'10',padding:'6px 9px',background:'#17232d',color:'#fff',border:'1px solid #8092a0'});
   saveFrame.addEventListener('click',captureFrame);host.append(saveFrame);
+  saveBurst.type='button';saveBurst.textContent='Capture next 4 movement frames';
+  saveBurst.style.cssText=saveFrame.style.cssText;saveBurst.style.top='46px';
+  saveBurst.addEventListener('click',()=>{burstFrames=[];burstArmed=true;saveBurst.textContent='Armed: next 4 movement frames';});host.append(saveBurst);
  }
  const world=new THREE.Scene();renderer.setClearColor('#10191e');
  const ambient=new THREE.HemisphereLight(0xadc8de,0x58412b,.45);for(const layer of [0,1,2,3,4])ambient.layers.enable(layer);world.add(ambient);
@@ -127,7 +151,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
   const props=id==='den'||id==='private-hall'?{props:[],cancel(){},update(){return {};}}:createHouseProps(gltf.scene,world,{floorY:id==='basement'?-4:id==='attic'?2.8:0,roomBounds:id==='workshop'?[12,0,17,7]:id==='hallway'?[4.8,6.8,12,12]:[0,0,12,12],structureColliders:connections.structureColliders});
   const glass=id==='basement'?configureWindowGlass(gltf.scene):[];
   const scraps=createHiddenScraps(props.props,view,world,collected);
-  const roots=[gltf.scene,...props.props.map(p=>p.root),...Array.from(scraps.values(),s=>s.mesh)];illustrateHouse(roots);roots.forEach(root=>resources.capture(root));
+  const roots=[gltf.scene,...props.props.map(p=>p.root),...Array.from(scraps.values(),s=>s.mesh)];illustrateHouse(roots,{outlines:!debugParams.has('noHouseInk')});roots.forEach(root=>resources.capture(root));
   assignRoomLighting(roots,id==='private-hall'?'hallway':id);
   if(!debugParams.has('unbatched')){batchHouseMeshes(gltf.scene,{staticCells:true});for(const prop of props.props)batchHouseMeshes(prop.root);}
   roots.forEach(root=>resources.capture(root));
@@ -157,7 +181,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
     group.traverse(o=>{if(!o.isMesh||!['door','ladder'].includes(o.userData.preview_kind))return;
      o.updateMatrix();mechanisms.push({mesh:o,rest:o.matrix.clone()});o.matrixAutoUpdate=false;
     });
-    illustrateHouse([group]);resources.capture(group);
+    illustrateHouse([group],{outlines:!debugParams.has('noHouseInk')});resources.capture(group);
     if(!debugParams.has('unbatched'))batchHouseMeshes(group,{staticCells:true});resources.capture(group);
     let floorMaterial;
     if(id==='den'&&layout.denFloorReference){const reference=await loader.loadAsync(layout.denFloorReference);resources.capture(reference.scene);reference.scene.traverse(o=>{if(o.isMesh&&o.material.map)floorMaterial=o.material;});}
@@ -256,6 +280,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
      camera.projectionMatrix.elements[8]=endpoint.projectionMatrix.elements[8]*denProgress;camera.projectionMatrix.elements[9]=endpoint.projectionMatrix.elements[9]*denProgress;camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
     }
     camera.matrixWorldNeedsUpdate=true;access(branch,p);render();
+    captureBurstFrame(branch,t,reverse);
     if(t<1)frame=requestAnimationFrame(step);else{finish=null;resolve();}
    };frame=requestAnimationFrame(step);
   });
@@ -305,7 +330,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    const resources=createRoomResources();resources.capture(cartridge);
    if(!valid()){resources.dispose();return null;}
    cartridge.position.copy(start);cartridge.quaternion.copy(camera.quaternion);
-   world.add(cartridge);room.roots.push(cartridge);illustrateHouse([cartridge]);room.resources.capture(cartridge);
+   world.add(cartridge);room.roots.push(cartridge);illustrateHouse([cartridge],{outlines:!debugParams.has('noHouseInk')});room.resources.capture(cartridge);
   }
   if(!valid())return null;scrap.mesh.visible=true;
   end.addScaledVector(camera.position.clone().sub(end).normalize(),bonusId ? .75 : .4);end.y+=bonusId ? .45 : .25;
@@ -378,6 +403,6 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    return result;
   },
   bindTargets(value){targets=value;updateTargets();},activateProp(prop){input.activate(prop);},
-  async dispose(){cancel();input.dispose();await loading?.catch(()=>{});await structures.dispose();const resources=createRoomResources();resources.capture(world);resources.dispose({closeImages:true});world.clear();connections=null;sky=null;loading=null;targetGeometry.dispose();targetMaterial.dispose();renderer.renderLists.dispose();saveFrame?.remove();}
+  async dispose(){cancel();input.dispose();await loading?.catch(()=>{});await structures.dispose();const resources=createRoomResources();resources.capture(world);resources.dispose({closeImages:true});world.clear();connections=null;sky=null;loading=null;targetGeometry.dispose();targetMaterial.dispose();renderer.renderLists.dispose();saveFrame?.remove();saveBurst?.remove();}
  };
 }

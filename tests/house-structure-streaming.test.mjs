@@ -28,26 +28,42 @@ test('every authored shell mesh has exactly one room owner and keeps its world t
   }
  }
 });
-test('stairs, landing, guards and stringers belong to the basement; garage slab stays in workshop',()=>{
+test('basement stairs and attic landings keep their room owners; garage slab stays in workshop',()=>{
  let count=0;
  for(const [room,doc] of parts)for(const n of doc.getRoot().listNodes()){
-  const e=n.getExtras();if(e.preview_kind==='stair'||(/stair|flight|landing|stringer/i.test(n.getName())&&e.preview_kind!=='door')){assert.equal(room,'basement',n.getName());count++;}
+  const e=n.getExtras();if(e.preview_kind==='stair'||(/stair|flight|landing|stringer/i.test(n.getName())&&e.preview_kind!=='door'&&!/^Finish \/ stairs (casing|head|jamb|threshold)(?:\.\d+)?$/.test(n.getName()))){
+   const expected=/attic/i.test(n.getName())?'attic':'basement';
+   assert.equal(room,expected,n.getName());if(expected==='basement')count++;
+  }
   if(n.getName()==='Garage slab')assert.equal(room,'workshop');
  }
  assert.ok(count>=49);assert.equal(shellOwner('Finish / Half landing',{preview_kind:'stair'}),'basement');
+});
+test('cellar entrance frame belongs to the hallway in the delivered shell',()=>{
+ for(const name of ['Finish / stairs casing','Finish / stairs casing.001','Finish / stairs head','Finish / stairs threshold']){
+  const source=master.getRoot().listNodes().find(n=>n.getName()===name);assert.ok(source,name);
+  assert.equal(shellOwner(name,source.getExtras()),'hallway');
+  assert.ok(parts.get('hallway').getRoot().listNodes().some(n=>n.getName()===name),name);
+  assert.ok(!parts.get('basement').getRoot().listNodes().some(n=>n.getName()===name),name);
+ }
 });
 test('hall package excludes other rooms’ complete atlases',()=>{
  const textures=parts.get('hallway').getRoot().listTextures();
  for(const t of textures)assert.ok(!/^structure-(attic|den|garage|stairs)/.test(t.getName()),t.getName());
 });
-test('cropped cross-room lightmaps preserve original texture coordinates and pixel values',async()=>{
+test('streamed lightmaps preserve original texture coordinates and pixel values',async()=>{
  const originals=new Map(master.getRoot().listNodes().filter(n=>n.getMesh()).map(n=>[n.getName(),n]));let checked=0;
- const decode=new Map();const pixels=async texture=>{if(!decode.has(texture))decode.set(texture,sharp(texture.getImage()).ensureAlpha().raw().toBuffer({resolveWithObject:true}));return decode.get(texture);};
+ const decode=new Map(),fullTextures=new Set();const pixels=async texture=>{if(!decode.has(texture))decode.set(texture,sharp(texture.getImage()).ensureAlpha().raw().toBuffer({resolveWithObject:true}));return decode.get(texture);};
  for(const doc of parts.values())for(const n of doc.getRoot().listNodes()){
   const original=originals.get(n.getName());if(!original)continue;
   const a=original.getMesh().listPrimitives(),b=n.getMesh().listPrimitives();
   for(let pi=0;pi<a.length;pi++){
-   const ta=a[pi].getMaterial()?.getEmissiveTexture(),tb=b[pi].getMaterial()?.getEmissiveTexture();if(!ta||!tb||ta.getName()===tb.getName())continue;
+   const ta=a[pi].getMaterial()?.getEmissiveTexture(),tb=b[pi].getMaterial()?.getEmissiveTexture();if(!ta||!tb)continue;
+   if(ta.getName()===tb.getName()){
+    assert.deepEqual(b[pi].getAttribute('TEXCOORD_0').getArray(),a[pi].getAttribute('TEXCOORD_0').getArray(),n.getName());
+    if(!fullTextures.has(tb)){assert.deepEqual(tb.getImage(),ta.getImage(),n.getName());fullTextures.add(tb);}
+    checked++;continue;
+   }
    const source=await pixels(ta),crop=await pixels(tb),uvA=a[pi].getAttribute('TEXCOORD_0'),uvB=b[pi].getAttribute('TEXCOORD_0');
    // Pixel-space displacement is a constant integer crop origin for every UV.
    const firstA=uvA.getElement(0,[]),firstB=uvB.getElement(0,[]);

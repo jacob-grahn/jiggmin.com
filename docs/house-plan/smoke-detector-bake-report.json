@@ -49,5 +49,6 @@
   "houseSourceKey": "6d225e92050cb627202c8250692fdb98365c30c9d4ec9db631acb28242f88713",
   "recipeHash": "52b4a30da28b5d010063ef7425973cddd4a87714ecd7c76dc286a7cbb1d4220a",
   "sourceGLBHash": "880602af076d5cd1e343f224b399422aa4f12f39d9a7f23e0d365d7dddae18eb",
-  "bakedGLBHash": "7eecb4a05c5785ea1e9679cec3a0aca7bcc200960c1a669c51a2fc3b09c615db"
+  "bakedGLBHash": "563e7d84c4ac766468df1597d643cabc4bcd99a8f03daadb94a482fe7663c250",
+  "mountingRepair": "Basement flange aligned to split cellar slab underside; baked texture unchanged"
 }

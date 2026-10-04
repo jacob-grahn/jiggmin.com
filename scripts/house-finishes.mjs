@@ -81,6 +81,7 @@ export function paintCeilings(doc){
  const paint=doc.createMaterial(FINISHES.ceiling.name).setBaseColorFactor([...FINISHES.ceiling.linear_rgb,1]).setRoughnessFactor(FINISHES.ceiling.roughness).setMetallicFactor(0).setDoubleSided(true);
  for(const node of doc.getRoot().listNodes().filter(n=>n.getMesh())){
   const name=node.getExtras().source_object??node.getName();
+  if(/^(Cellar slab underside|Attic slab upper) \/ /.test(name))continue;
   if(!/ceiling|Main pitched roof|Garage pitched roof|^Attic hatch$/i.test(name)||/light|lamp|canopy|fixture|stem/i.test(name))continue;
   const mesh=node.getMesh().clone();node.setMesh(mesh);const split=/floor \/ hall ceiling|pitched roof/i.test(name),normalMatrix=new THREE.Matrix3().getNormalMatrix(new THREE.Matrix4().fromArray(node.getWorldMatrix()));
   for(const old of [...mesh.listPrimitives()]){

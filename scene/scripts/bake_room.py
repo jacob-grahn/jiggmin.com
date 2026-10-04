@@ -4,6 +4,9 @@ Use the room-specific preparation and bake entry points. Original assets are unt
 import bpy,json,math,sys
 from pathlib import Path
 from mathutils import Vector,Matrix
+sys.path.insert(0,str(Path(__file__).parent))
+from house_source_uv import author_source_uv,bind_source_uv
+from house_bake_uv_guard import validate_objects
 R=Path(__file__).resolve().parents[2]
 EXPORTS=R/'scene/exports/house';EXPORTS.mkdir(parents=True,exist_ok=True)
 room=globals().get('ROOM','hallway')
@@ -75,14 +78,11 @@ for o in static:
   key=(m,ceiling_surface(o))
   if key not in bake_materials:bake_materials[key]=m.copy()
   o.data.materials[i]=bake_materials[key]
+ author_source_uv(o)
  if not o.data.uv_layers:o.data.uv_layers.new(name='Source UV')
  o.data.uv_layers.active.name='Source UV'
- for m in o.data.materials:
-  if not m or not m.use_nodes:continue
-  for node in list(m.node_tree.nodes):
-   if node.type=='UVMAP':node.uv_map='Source UV'
-   if node.type=='TEX_IMAGE' and not node.inputs['Vector'].is_linked:
-    uv=m.node_tree.nodes.new('ShaderNodeUVMap');uv.uv_map='Source UV';m.node_tree.links.new(uv.outputs['UV'],node.inputs['Vector'])
+ for m in o.data.materials:bind_source_uv(m)
+validate_objects(static,{o:'authored' for o in static})
 # Combine only a temporary bake mesh, preserving original objects for picking and physics.
 bpy.context.view_layer.update();vertices=[];faces=[];uvs=[];material_indices=[];smooth=[];materials=[];offsets={}
 for o in static:

@@ -5,6 +5,9 @@ The original scene and projected plates are never overwritten.
 import bpy,json,re,sys
 from pathlib import Path
 from mathutils import Matrix,Vector
+sys.path.insert(0,str(Path(__file__).parent))
+from house_source_uv import author_source_uv,bind_source_uv
+from house_bake_uv_guard import validate_objects
 R=Path(__file__).resolve().parents[2];S=bpy.context.scene
 out=R/'scene/renders/den-uv-bake';out.mkdir(parents=True,exist_ok=True)
 roots=[o for o in S.objects if o.get('role') in {'draggable_cartridge','mobile_controller','controller_cable'}]
@@ -24,13 +27,11 @@ for o in originals:
  elif o.get('reactive'):key=o['reactive']
  else:key='architecture' if re.search(r'wall|floor|baseboard|window|curtain|ceiling|doorway',o.name,re.I) else 'furniture'
  obj=bpy.data.objects.new('UV '+o.name,mesh);S.collection.objects.link(obj);obj.matrix_world=o.matrix_world.copy();groups.setdefault(key,[]).append(obj)
+ author_source_uv(obj)
  if not mesh.uv_layers:mesh.uv_layers.new(name='Source UV')
  mesh.uv_layers.active.name='Source UV'
- for mat in mesh.materials:
-  if not mat or not mat.use_nodes:continue
-  for node in list(mat.node_tree.nodes):
-   if node.type=='TEX_IMAGE' and not node.inputs['Vector'].is_linked:
-    uv=mat.node_tree.nodes.new('ShaderNodeUVMap');uv.uv_map='Source UV';mat.node_tree.links.new(uv.outputs['UV'],node.inputs['Vector'])
+ for mat in mesh.materials:bind_source_uv(mat)
+validate_objects([o for pieces in groups.values() for o in pieces],{o:'authored' for pieces in groups.values() for o in pieces})
 for o in originals:
  if o.type not in {'LIGHT','CAMERA'}:o.hide_render=True
 exports={};images={};records={}

@@ -27,7 +27,7 @@ for(const room of ['structure','basement','attic']){
   const a=node.getWorldMatrix(),b=patch.getWorldMatrix();if(a.some((v,i)=>Math.abs(v-b[i])>1e-4))throw Error(`Bake moved ${room}/${node.getName()}`);
   const mapping=copyToDocument(doc,baked,[patch.getMesh()]);node.setMesh(mapping.get(patch.getMesh()));
   const extras={...node.getExtras()};delete extras.source_rebake_required;
-  node.setExtras({...extras,release_baked:patch.getExtras().release_baked,atlas_delivery_max:['structure-hall','structure-garage','basement-details'].includes(patch.getExtras().release_baked)?2048:1024,house_window_bake:true,...(patch.getExtras().house_window_receiver?{house_window_receiver:true}:{} )});count++;
+  node.setExtras({...extras,release_baked:patch.getExtras().release_baked,atlas_delivery_max:['structure-hall','hall-ceilings','structure-garage','basement-details'].includes(patch.getExtras().release_baked)?2048:1024,atlas_lossless:false,house_window_bake:true,...(patch.getExtras().house_window_receiver?{house_window_receiver:true}:{} )});count++;
  }
  if(count!==patches.size)throw Error(`Unmatched ${room} bake meshes: ${count}/${patches.size}`);
  for(const n of doc.getRoot().listNodes())if(n.getMesh()&&(n.getExtras().source_rebake_required||n.getMesh().listPrimitives().some(p=>p.getMaterial()?.getExtras().ceiling_paint)))throw Error(`Unbaked source repair: ${room}/${n.getName()}`);

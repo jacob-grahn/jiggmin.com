@@ -16,6 +16,7 @@ import {BALANCED, PRESETS, ROOM_IMAGES, LABEL_BOUNDS} from './asset-compression.
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const {values}=parseArgs({options:{
   production:{type:'boolean',default:false},output:{type:'string'},
+  'atlas-masters':{type:'boolean',default:false},
   quality:{type:'string'}, 'position-bits':{type:'string'},
   'normal-bits':{type:'string'}, 'uv-bits':{type:'string'},
   'max-texture-size':{type:'string'},
@@ -25,7 +26,8 @@ const output=resolve(root,values.output??(production?'dist/web/assets':'scene/co
 const sourceAssets=resolve(root,'web/assets');
 assert.ok(output!==sourceAssets&&!sourceAssets.startsWith(output+'/'),'Output must not overwrite source assets');
 assert.ok(!output.startsWith(sourceAssets+'/'),'Output must not be inside source assets');
-const custom=Object.keys(values).some(key=>!['production','output'].includes(key));
+const atlasMasters=values['atlas-masters'];
+const custom=Object.keys(values).some(key=>!['production','output','atlas-masters'].includes(key));
 if(production&&custom)throw Error('Production always uses the shared Balanced preset; use comparison mode for experiments.');
 function integer(key,fallback,min,max){
   const n=Number(values[key]??fallback);
@@ -73,7 +75,7 @@ function inspectGeometry(document){
 }
 await mkdir(output,{recursive:true});
 for(const preset of presets){
-  const report={...preset,labelBounds:LABEL_BOUNDS,assets:[],urls:{},originalBytes:0,bytes:0,gzipBytes:0};
+  const report={...preset,atlasMasters,labelBounds:LABEL_BOUNDS,assets:[],urls:{},originalBytes:0,bytes:0,gzipBytes:0};
   for(const source of [...models,...images,...labels]){
     const relative=source.replace(/^web\/assets\//,'').replace(/\.png$/,'.webp');
     const target=production?resolve(output,relative):resolve(output,preset.id,relative);
@@ -95,6 +97,7 @@ for(const preset of presets){
           if(texture)limits.set(texture,Math.max(cap,limits.get(texture)??0));
         }
       }
+      if(!atlasMasters){
       for(const [texture,cap] of limits){
         const pixels=await sharp(texture.getImage()).resize({width:cap,height:cap,fit:'inside',withoutEnlargement:true}).png().toBuffer();
         texture.setImage(pixels).setMimeType('image/png');
@@ -103,7 +106,9 @@ for(const preset of presets){
         slots:/^(baseColorTexture|emissiveTexture)$/,
         quality:preset.quality,effort:60,
         ...(preset.maxTextureSize?{resize:[preset.maxTextureSize,preset.maxTextureSize]}:{}),
-      }),draco({method:'sequential',encodeSpeed:5,decodeSpeed:5,
+      }));
+      }
+      await document.transform(draco({method:'sequential',encodeSpeed:5,decodeSpeed:5,
         quantizePosition:preset.positionBits,quantizeNormal:preset.normalBits,
         quantizeTexcoord:hasAtlas?Math.max(18,preset.uvBits):preset.uvBits,quantizationVolume:'mesh'}));
       await io.write(target,document);

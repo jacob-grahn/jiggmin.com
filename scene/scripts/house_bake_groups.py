@@ -1,6 +1,25 @@
 """Room allocation for structural bakes, in Blender world coordinates."""
+import re
+
+def room_atlas_group(group,name):
+    if name.startswith('Cellar slab underside / '):return 'basement-slab-ceilings'
+    if name.startswith('Attic slab upper / '):return 'attic-floor'
+    if name=='Garage slab':return 'structure-garage'
+    group=hallway_atlas_group(group,name)
+    if group=='structure-hall' and re.search(r'\b(stair|flight|landing|stringer)\b',name,re.I):return 'structure-stairs'
+    return group
+
+def hallway_atlas_group(group, name):
+    """Reserve a separate atlas for small hallway joinery, away from walls/floors."""
+    if group in {'structure-hall', 'hall-trim'} and name.startswith('Finish / '):
+        if any(word in name.lower() for word in (' casing', ' head', ' threshold', 'skirting', ' jamb', ' rail', ' sill', ' mullion', 'hatch liner')):
+            return 'hall-trim'
+    return group
 
 def structural_group(name, kind, points):
+    if name.startswith('Cellar slab underside / '):return 'basement-slab-ceilings'
+    if name.startswith('Attic slab upper / '):return 'attic-floor'
+    if name=='Garage slab':return 'structure-garage'
     lo = tuple(min(p[i] for p in points) for i in range(3))
     hi = tuple(max(p[i] for p in points) for i in range(3))
     center = tuple((a + b) / 2 for a, b in zip(lo, hi))
@@ -8,6 +27,7 @@ def structural_group(name, kind, points):
         return 'structure-exterior'
     if center[2] > 2.75:
         return 'structure-attic'
+    if re.match(r'^Finish / [Ss]tair(?: |$)',name):return 'structure-stairs'
     if center[2] < -.2:
         return 'structure-stairs'
     # The hall's east window wall straddles x=12. Its center is on the

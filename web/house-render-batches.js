@@ -26,7 +26,7 @@ export function batchHouseMeshes(root,{staticCells=false}={}){
   const position=new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3());
   const cell=staticCells?position.toArray().map(n=>Math.floor(n/3)).join(','):'';
   const signature=JSON.stringify([m.type,maps,m.color?.getHex(),m.emissive?.getHex(),m.emissiveIntensity,m.roughness,m.metalness,m.normalScale?.toArray(),m.side,m.toneMapped,m.depthWrite,m.depthTest,key,
-   m.clippingPlanes?.map(p=>[...p.normal.toArray(),p.constant]),mesh.layers.mask,Boolean(mesh.userData.houseInk),cell,Object.entries(mesh.geometry.attributes).sort(([a],[b])=>a.localeCompare(b)).map(([name,a])=>[name,a.itemSize,a.normalized,(a.array??a.data.array).constructor.name])]);
+   m.polygonOffset,m.polygonOffsetFactor,m.polygonOffsetUnits,m.clippingPlanes?.map(p=>[...p.normal.toArray(),p.constant]),mesh.layers.mask,Boolean(mesh.userData.houseInk),cell,Object.entries(mesh.geometry.attributes).sort(([a],[b])=>a.localeCompare(b)).map(([name,a])=>[name,a.itemSize,a.normalized,(a.array??a.data.array).constructor.name])]);
   const list=groups.get(signature)??[];list.push(mesh);groups.set(signature,list);
  });
  let removed=0;

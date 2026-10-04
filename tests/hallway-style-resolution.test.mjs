@@ -6,7 +6,7 @@ import draco3d from 'draco3dgltf';
 import sharp from 'sharp';
 import {existsSync} from 'node:fs';
 
-test('illustrated hallway keeps seven surface atlases and texture dimensions through the build',{
+test('illustrated hallway keeps seven surface atlas groups and WebP textures through the build',{
  skip:!existsSync('web/assets/house/hallway-style/structure.glb')?'Full-resolution experimental bake not installed':false,
 },async()=>{
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'draco3d.decoder':await draco3d.createDecoderModule()});
@@ -21,7 +21,6 @@ test('illustrated hallway keeps seven surface atlases and texture dimensions thr
     const m=primitive.getMaterial(),n=other.getMesh().listPrimitives()[i].getMaterial();
     for(const slot of ['getEmissiveTexture','getBaseColorTexture']){
     const t=m[slot]();if(!t||checked.has(t))continue;checked.add(t);const u=n[slot]();
-    assert.deepEqual(t.getSize(),u.getSize(),node.getName()+': dimensions');
     assert.equal(u.getMimeType(),'image/webp');compared++;
     const group=node.getExtras().hallway_style_group;if(group)groups.set(group,t.getSize());
     }

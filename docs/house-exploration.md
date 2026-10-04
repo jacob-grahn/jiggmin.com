@@ -48,6 +48,48 @@ Procedural texture intermediates are regenerated under `scene/house-textures/sur
 
 The workshop, attic, and basement use window-only UV lighting bakes; practical fixtures stay switched off. Rebuild with `node scene/scripts/prepare_ROOM_bake.mjs` followed by Blender running `scene/scripts/bake_ROOM.py`. The attic floor is clipped at the hallway ceiling and the basement stair enclosure at the left doorway, including during travel. Billiard balls use spherical physics shapes; other household props retain their existing shapes.
 
+Before rendering or reusing cached lighting, the production bake validates material
+UVs for every selected receiver. UV-dependent materials must have explicitly authored
+or restored coordinates, and every textured face must have finite, non-collapsed UVs.
+This rejects accidental reuse of an earlier lighting atlas as reflectance coordinates.
+Run `npm run bake:hallway -- --preflight` to check the current hallway without rendering
+or installing assets. Dedicated ceiling and window bakes validate their own receivers.
+The generic regression fixtures run with `node --test tests/house-bake-uv-guard.test.mjs`.
+This checks coordinate safety; visual quality still needs whole-room review.
+
+The all-room recipe `scene/scripts/bake_house_atlases.py --prepare-only` runs this
+preflight over every fixed receiver in the structure, hallway, workshop, basement
+and attic. Source coordinates are restored per face to preserve material seams;
+lighting coordinates remain separate. Painted wall coordinates are authored in
+world metres in the native model. `scene/scripts/check_house_source_uv.py` provides
+Blender integration checks for material seams, normal-map coordinates and face
+material preservation. Ground-floor slab undersides retain their original timber
+finish: these slabs sit below the separate cellar ceiling panel and form its
+visible surface. The integration fixture protects the original finish on both
+sides of the slabs.
+See [the cloud workflow](runpod-baking.md#full-room-atlas-refresh)
+for staging and validating a complete refresh before installation.
+
+`npm run bake:hallway` uses the production lighting pipeline at 64 samples to
+rebake the fixed shell currently delivered with the hallway. The window frame
+has a separate 1024 atlas with a minimum width of 32 texels per face, and the
+hallway ceilings have their own 2048 atlas. Their flat undersides use a continuous
+world-plane UV mapping across slab and triangle boundaries, with 32-pixel perimeter
+padding and extended bake margins. This prevents artificial seams from separately
+packed ceiling triangles. `npm run bake:hall-ceiling` rebuilds only these undersides
+at 64 samples; both paths include the UV helper in their cache fingerprints. The command
+verifies the replacement geometry before updating the master and streamed assets;
+it does not rebake the original furnishing atlases. Run `npm run build` afterward
+to regenerate the compressed site assets.
+
+Structural painted walls use metre-scale planar reflectance UVs authored by
+`house_wall_uv.py`; material maps never use coordinates from a prior lighting
+atlas. `npm run bake:hall-window-wall` rebakes only the four panels around the
+hallway window at 64 samples, preserving the repaired ceiling and other surfaces.
+The same wall finish mapping and continuous window-wall lighting UVs are used by
+full bakes. Its 2048 source atlas is delivered at 1024 with WebP quality 80 encoding. Lossless PNG and EXR bake masters stay available
+locally; delivery encoding does not require another bake.
+
 The basement floor also receives deterministic concrete grain, branching cracks, paint splashes, and a white tape body outline from `scripts/house-source/basement-floor-art.js`. These marks are exported as a source material and receive baked lighting with the slab. The fixed drain has a dark inset, metal rim, and seven grate bars. Ceiling joists touch the ceiling, the pendant stem reaches its canopy, and the rear pipe clears the window frames. `scene/scripts/fit_basement_fixtures.mjs` applies these target heights to existing GLBs without repacking their lighting UVs; the authoring source uses the same heights for future exports.
 
 ## Room-owned structure and texture streaming
@@ -85,3 +127,66 @@ and targeted post-bake ceiling/trim painting tools have been removed.
 Retained original furnishing lightmaps use the same 1024-pixel delivery cap as
 other small baked groups. Source masters and separate artwork images retain their
 resolution; compression applies the cap when building the runtime assets.
+
+The hallway doorway and attic hatch frames use white painted timber, configured
+in `scene/house-finishes.json`. `paint_door_frames` in the authoring finish pass
+assigns white paint without changing the original normal maps. The finish is
+saved in both `house-plan-preview.blend` and `house-release.blend`; it does not
+recolor exported meshes. Picture/window frames, doors and skirting retain their
+existing finishes. Refresh the trim through `npm run bake:atlases -- hall-trim`
+when changing this finish.
+
+Doorway and hatch clearance is authored by `scene/scripts/house_frame_geometry.py`
+(and saved in both editable house models). Door headers extend 10 mm below the
+wall opening's reveal; side casings butt into that underside. This covers all
+eight hallway openings, including bedroom-1, bedroom-2, kitchen and bath in the
+rear hallway. The release test also rejects hallway headers missing from its
+coverage list. Hatch liners stand
+10 mm inside the ceiling opening, the moving leaf has 5 mm clearance to the
+liners, and horizontal hatch casings butt into the side casings rather than
+sharing visible corner faces. Source finishing reapplies this repair idempotently.
+Both bake paths restore the repaired frame geometry from the editable model,
+so an older release GLB cannot reintroduce the coincident faces. The atlas cache
+fingerprints the geometry helper. `tests/house-frame-clearance.test.mjs` checks
+these constraints on delivered geometry before local atlas publication.
+
+The ground-floor `Main floor` slabs retain their original oak on the undersides
+visible from the cellar. The source finish pass must not include these slabs in
+the cream ceiling paint selection: that repaint changes both the visible cellar
+ceiling and its indirect bounce. `restore_cellar_ceiling_finish.py` restores the
+retained original material slot in both editable models; the finish pass enforces
+the same rule. `house-ceiling-finish.test.mjs` checks the saved models and runs the
+finish pass in memory, checking that slab geometry, UVs and materials survive.
+
+`python3 scripts/check-house-lighting.py REFERENCE_DIR CURRENT_DIR` compares
+matching 1280 × 720 room endpoint screenshots against a live-site reference.
+It converts sRGB to linear Rec.709 luminance and fails when a room differs by
+more than 5%. The hallway measurement samples unchanged walls and ceiling, so
+new white doorway paint does not count as a lighting increase. Each hallway
+sample must also pass separately. Other rooms use
+the whole matching endpoint view. Save the live reference, current images and
+JSON report together when reviewing lighting; an overall mean does not establish
+that every individual surface has identical lighting.
+
+Shared slabs are authored as separate room surfaces by
+`scene/scripts/house_slab_ownership.py`: cellar-facing `Main floor` undersides use
+`basement-slab-ceilings`, and the upper faces of `Attic floor / hall ceiling` use
+`attic-floor`. Both are 2048² source atlases. Upstairs floor tops and the hallway
+ceiling undersides retain their own room atlases. The legacy source preparation
+uses `splitSlabSurfaces` to preserve these same face boundaries and reflectance
+UVs before baking. Stair details belong to `structure-stairs`; the garage slab
+belongs to `structure-garage`. Attic landing rails are attic scenery, despite
+their names containing “landing.” Atlas publication checks both group ownership
+and the actual image bytes to reject mixed-room lightmaps.
+Local runs retain their exact input models in `input-baseline`; assembly records
+that directory for geometry and live-art checks. The comparison uses referenced
+vertices with 0.1 mm tolerance for float32 export rounding, rather than an older
+snapshot from before source repairs.
+
+For flicker diagnosis, a local preview can be launched with
+`python3 scripts/serve.py --port 8006 --capture-directory scene/renders/frame-flicker/consecutive`.
+The URL parameters `captureHouseTravel=1&captureHouseBurstAt=0.28` expose a button
+that captures four consecutive movement frames, copying the rendered canvas on
+four animation frames and encoding PNGs after the burst. Arm it in the hallway
+and enter the workshop to capture the doorframe during the approach. The optional
+`noHouseInk=1` diagnostic disables contour meshes; normal previews retain them.

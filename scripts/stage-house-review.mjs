@@ -22,7 +22,6 @@ for(const room of ['structure','basement','attic']){
 }
 const structure=models.get('structure').root;structure.updateMatrixWorld(true);const anchors=fixtureAnchors(structure);
 turnOffCeilingFixtures(structure);
-structure.traverse(o=>{if(o.isMesh&&/^Finish \/ ceiling moulding/.test(o.userData.house_bake_source)){const p=new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());if(p.x<12&&p.y<2.8)o.visible=false;}});
 for(const room of ['basement','attic'])refineRoomFixtures(models.get(room).root,room,{structure,...anchors});
 const fixture=/^(Copper water pipe|Stored flexible hose|Loose electrical junction box|Misaligned junction cover|Attic bare work bulb|Bare bulb hanging wire|Attic bulb socket|Copper pipe ceiling elbow|Copper pipe wall mounting plate|Copper pipe wall saddle)$/;
 for(const [room,{doc,nodes,root,owners,originalMeshes}] of models){

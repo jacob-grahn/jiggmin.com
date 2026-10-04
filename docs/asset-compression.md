@@ -20,8 +20,11 @@ never overwritten: every build starts from the original exports, avoiding
 cumulative lossy recompression. New GLBs are discovered recursively, including
 embedded color textures. Add new standalone room images to `ROOM_IMAGES` in the
 shared configuration. Geometry uses sequential Draco with 14-bit positions,
-10-bit normals, and 12-bit UVs; color images use WebP quality 80. Room texture resolution and triangle counts are preserved, and data maps are
-left in their source format. Standalone cartridge labels are capped at 640×512
+10-bit normals, and 12-bit UVs (18-bit UVs for baked house atlases); color images
+use WebP quality 80, including all house lighting atlases. House lighting maps
+are resized from lossless source masters to their 1024 or 2048 delivery caps
+before encoding once. Triangle counts are preserved, and data maps are left in
+their source format. Standalone cartridge labels are capped at 640×512
 with aspect ratio preserved and no upscaling (the current 768×615 labels become
 639×512 after pixel rounding), then encoded at WebP quality 80. Label URLs stay
 unchanged; originals stay in the source tree. `LABEL_BOUNDS` controls this cap,

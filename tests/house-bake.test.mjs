@@ -18,7 +18,7 @@ function triangles(node){
  }
  return [...result].sort();
 }
-test('window bake changes only fixed surface lighting, retaining every reviewed triangle',{skip:!layout.lightingBake},async()=>{
+test('window bake changes only fixed surface lighting, retaining every reviewed triangle',{skip:!layout.lightingBake||!!layout.atlasRefresh},async()=>{
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
  for(const room of ['structure','basement','attic']){
   const input=await io.read(`scene/exports/house-release/bake-input/${room}.glb`),output=await io.read(`${dir}/${room}.glb`);
@@ -57,7 +57,9 @@ test('basement and attic fixture lightmaps retain the exact generated pixels',{s
   const doc=await io.read(`${dir}/${room}.glb`),nodes=doc.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().house_window_bake);
   for(const n of nodes)for(const p of n.getMesh().listPrimitives()){
    assert.ok(p.getAttribute('TEXCOORD_0'));
-   const atlas=readFileSync(layout.atlasRefresh&&n.getExtras().atlas_group?`${layout.atlasRefresh.resultDirectory}/${n.getExtras().atlas_group}.png`:`scene/exports/house-release/${layout.lightingBake.quality}/${n.getExtras().release_baked}.png`);
+   const group=n.getExtras().atlas_group;
+   const masterDirectory=layout.atlasRefresh?.atlases?.[group]?.masterDirectory??layout.atlasRefresh?.resultDirectory;
+   const atlas=readFileSync(layout.atlasRefresh&&group?`${masterDirectory}/${group}.png`:`scene/exports/house-release/${layout.lightingBake.quality}/${n.getExtras().release_baked}.png`);
    assert.equal(hash(p.getMaterial().getEmissiveTexture().getImage()),hash(atlas),n.getName());
    assert.deepEqual(p.getMaterial().getEmissiveFactor(),[1,1,1]);
   }

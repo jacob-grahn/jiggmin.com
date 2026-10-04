@@ -26,7 +26,7 @@ class Handler(SimpleHTTPRequestHandler):
         name=self.headers.get('X-House-Frame','')
         try:length=int(self.headers.get('Content-Length','0'))
         except ValueError:length=0
-        if not re.fullmatch(r'(?:den|workshop|basement|attic|private-hall)-(?:in|out)-(?:\d+\.\d+|endpoint)\.png',name) or not 0<length<=6_000_000 or self.headers.get('Content-Type')!='image/png':
+        if not re.fullmatch(r'(?:den|workshop|basement|attic|private-hall)-(?:in|out)-(?:\d+\.\d+|endpoint)(?:-[0-3])?\.png',name) or not 0<length<=6_000_000 or self.headers.get('Content-Type')!='image/png':
             self.send_error(400)
             return
         target=self.server.capture_directory/name
@@ -38,13 +38,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', action='store_true', help='Serve original exports and comparison fixtures')
     parser.add_argument('--port', type=int, default=8000)
+    parser.add_argument('--directory', type=Path, help='Serve an alternate build directory')
+    parser.add_argument('--capture-directory', type=Path, help='Save explicitly requested local travel captures here')
     args = parser.parse_args()
-    site_root = ROOT if args.source else ROOT / 'dist'
+    site_root = args.directory.resolve() if args.directory else ROOT if args.source else ROOT / 'dist'
     if not (site_root / 'index.html').exists():
         parser.error('Run npm run build before previewing production output')
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     server.site_root = site_root
     server.game_slugs = game_slugs()
-    server.capture_directory = ROOT/'docs/house-plan/den-transition-captures' if args.source else None
+    server.capture_directory = args.capture_directory.resolve() if args.capture_directory else ROOT/'docs/house-plan/den-transition-captures' if args.source else None
     print(f'Midnight Den ({"source" if args.source else "balanced build"}): http://127.0.0.1:{args.port}', flush=True)
     server.serve_forever()

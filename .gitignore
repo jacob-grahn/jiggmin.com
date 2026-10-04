@@ -13,6 +13,13 @@
 # Original personal reference photo; the cropped authoring texture is versioned
 /docs/references/kindergarten-plate.jpg
 *.blend
+!scene/house-plan-preview.blend
+!scene/house-release.blend
+!scene/house-hallway.blend
+!scene/house-workshop.blend
+!scene/house-basement.blend
+!scene/house-attic.blend
+!scene/midnight-den-illustrated.blend
 *.blend[0-9]*
 *.blend@
 *.psd
@@ -20,6 +27,7 @@
 *.xcf
 
 # Machine-local files and caches
+/dist-atlas-masters/
 .DS_Store
 __pycache__/
 *.py[cod]

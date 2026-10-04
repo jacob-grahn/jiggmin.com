@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "bake:hall-window-wall": "node scripts/bake-hallway.mjs --hall-window-wall",
+    "bake:hallway": "node scripts/bake-hallway.mjs",
+    "bake:hall-window": "node scripts/bake-hall-window.mjs",
+    "bake:hall-ceiling": "node scripts/bake-hall-ceiling.mjs",
     "cloud:status": "python3 scripts/runpod_bake.py status",
     "cloud:quote": "python3 scripts/runpod_bake.py quote",
     "cloud:bake": "python3 scripts/runpod_bake.py auto",
@@ -11,6 +15,7 @@
     "start:source": "python3 scripts/serve.py --source",
     "test": "npm run build && node --test tests/*.test.mjs",
     "build": "python3 scripts/build_routes.py",
+    "build:atlas-masters": "python3 scripts/build_routes.py --atlas-masters",
     "perf:visibility": "node scripts/benchmark-visibility.mjs",
     "assets:compare": "node scripts/compress-assets.mjs",
     "preview:house": "python3 scripts/house_preview.py serve",
@@ -26,7 +31,8 @@
     "release:house:prepare": "python3 scripts/house_release.py prepare",
     "release:house:test": "python3 scripts/house_release.py test --review",
     "release:house:bake": "python3 scripts/house_release.py release",
-    "release:house:style": "node scripts/restore-house-style.mjs"
+    "release:house:style": "node scripts/restore-house-style.mjs",
+    "bake:atlases": "python3 scripts/bake-house-atlases-local.py"
   },
   "dependencies": {
     "@ruffle-rs/ruffle": "0.6.0",

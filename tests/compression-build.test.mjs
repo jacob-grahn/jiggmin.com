@@ -72,3 +72,28 @@ test('retained original room lightmaps obey the shared phone delivery cap',async
   for(const i of images){const view=doc.bufferViews[doc.images[i].bufferView],meta=await sharp(bytes.subarray(start+(view.byteOffset??0),start+(view.byteOffset??0)+view.byteLength)).metadata();assert.ok(Math.max(meta.width,meta.height)<=1024,`${room} retained an oversized lightmap`);}
  }
 });
+
+test('lighting atlases use the shared WebP quality 80 production encoder',async()=>{
+ const path='web/assets/house/release/structure/hallway.glb';
+ const sourceBytes=readFileSync(path),builtBytes=readFileSync('dist/'+path);
+ const source=gltf(sourceBytes),built=gltf(builtBytes),checked=new Set();
+ const image=(bytes,doc,index)=>{
+  const t=doc.textures[index],i=t.extensions?.EXT_texture_webp?.source??t.source;
+  const v=doc.bufferViews[doc.images[i].bufferView],start=28+bytes.readUInt32LE(12)+(v.byteOffset??0);
+  return bytes.subarray(start,start+v.byteLength);
+ };
+ for(const n of source.nodes.filter(n=>n.extras?.atlas_group)){
+  const output=built.nodes.find(o=>o.extras?.house_bake_id===n.extras.house_bake_id);
+  assert.ok(output?.extras.atlas_group,n.name);
+  for(const [i,p] of source.meshes[n.mesh].primitives.entries()){
+   const index=source.materials[p.material].emissiveTexture?.index;
+   if(index===undefined||checked.has(index))continue;checked.add(index);
+   const cap=n.extras.atlas_delivery_max;
+   const expected=await sharp(image(sourceBytes,source,index)).resize({width:cap,height:cap,fit:'inside',withoutEnlargement:true}).webp({quality:80,effort:4}).toBuffer();
+   const q=built.meshes[output.mesh].primitives[i],outputIndex=built.materials[q.material].emissiveTexture.index;
+   const actual=image(builtBytes,built,outputIndex);
+   assert.equal(hash(actual),hash(expected),`${n.name}: lighting atlas differs from WebP quality 80`);
+  }
+ }
+ assert.ok(checked.size>0,'expected a baked lighting atlas');
+});

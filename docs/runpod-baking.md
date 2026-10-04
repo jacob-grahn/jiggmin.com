@@ -45,17 +45,28 @@ are ignored by Git. Never add credentials to source files or shell arguments.
 
 ## Commands
 
+To inspect existing bakes without atlas downscaling or WebP encoding, run
+`npm run build:atlas-masters`, then
+`python3 scripts/serve.py --directory dist-atlas-masters --port 8004`.
+This separate diagnostic build preserves all embedded source texture bytes and
+dimensions, including PNG atlas masters, while retaining the normal geometry
+compression. It requires no bake and leaves the production build settings unchanged.
+Standalone images retain their normal build processing.
+
 ```sh
 npm run cloud:status
 npm run cloud:quote
 npm run cloud:test
-npm run cloud:bake -- --quality test --budget 2 --max-hourly 1 --max-minutes 60
+npm run cloud:bake -- --quality test
 # Full resolution; same recipe and samples as release:house:bake:
-npm run cloud:bake -- --quality final --budget 2 --max-hourly 1 --max-minutes 60
+npm run cloud:bake -- --quality final
 ```
 
 `npm run cloud:bake` uses the automatic allocator. It tries Secure Cloud GPUs in
-this order: **RTX PRO 6000 Blackwell Workstation → RTX 5090 → RTX PRO 6000 Blackwell Server → RTX PRO 6000 Blackwell Max-Q**. Each candidate is tried once.
+this order: **RTX PRO 6000 Blackwell Workstation → RTX PRO 6000 Blackwell Server → RTX 5090**. Each candidate is tried once.
+Quotes and single-GPU benchmarks also default to the PRO 6000 Blackwell Workstation.
+Default limits are **$5 total, $2.50/hour, and 60 minutes**, including provisioning
+and result transfer. Max-Q, RTX 4090, A5000 and A4500 remain explicit options.
 Unavailable quotes and candidates outside the requested hourly/budget/runtime
 limits are skipped. If capacity disappears during creation, the runner checks
 that no pod was created before trying the next GPU. Every selection and skip is
@@ -64,7 +75,7 @@ printed; the allocated GPU is recorded in the run's `state.json`.
 Customize the order or pin a single GPU:
 
 ```sh
-npm run cloud:bake -- --target den --budget .50 --max-hourly 1 --max-minutes 30
+npm run cloud:bake -- --target den --gpu 'NVIDIA RTX A5000' --budget .50 --max-hourly 1 --max-minutes 30
 npm run cloud:bake -- --gpus 'NVIDIA GeForce RTX 4090' 'NVIDIA RTX A5000' --quality final
 npm run cloud:bake -- --gpu 'NVIDIA RTX A5000' --quality test
 ```
@@ -155,22 +166,61 @@ source basement model/refit metadata, Python bake scripts, and project textures.
 The fallback pool prioritizes full Blackwell GPUs; it excludes MIG partitions
 and no longer falls back to the slower A5000 automatically.
 
-The recipe repairs source UV mapping (including signed object names and metre
-mapping for primitives without UVs), applies corrected hallway ownership to the
-window wall, and allocates per-room/surface atlases based on world surface area.
+The recipe restores native material UVs before creating lighting UVs, authors
+metre-scale coordinates for painted walls and otherwise unmapped textured faces,
+and validates every textured triangle before rendering. Explicit source UVs also
+control tangent-space normal maps. It preserves the current per-room atlas
+allocations, including the separate hallway ceiling and window atlases, and uses
+64 samples. Hallway door casings, headers, thresholds and baseboards use a
+separate `hall-trim` atlas at 2048×2048 for both baking and delivery, freeing
+space in `structure-hall`. Attic atlases use the same −1.3 exposure as the other rooms.
+`--atlas-groups` on the cloud runner selects a partial refresh; all other surfaces
+still participate in lighting, but their installed textures remain unchanged.
+Each atlas records its own master directory so a partial refresh retains the
+provenance and exact-pixel checks for masters from earlier bakes.
+For example, the hallway allocation and attic exposure refresh is:
+
+```sh
+python3 scripts/runpod_bake.py auto --target house-atlases --quality final --atlas-groups structure-hall hall-trim structure-attic original-attic attic-hatch-closed attic-fixtures
+```
+
+Native source repairs persist in the `.blend` files and the source
+generation pipeline. Source helpers are included in the upload fingerprint.
 Cellar window spill starts on the room side of its opaque backdrop/masonry,
-preventing a blocked, black bake. The reviewed cellar ceiling paint is retained.
+preventing a blocked, black bake. Ceiling paint is authored on the visible
+ground-floor slab undersides in both editable models and `house_finishes.py`;
+the separate cellar ceiling panels alone do not cover those undersides.
+`check_house_source_uv.py` verifies UV restoration, coplanar seams, tangent normal
+bases and preservation of the painted underside material slots.
 Irradiance and albedo are baked separately. Only irradiance is denoised, then
 multiplied by the untouched albedo in linear space before display grading.
-PNG and EXR masters remain lossless. Production applies quality-80 WebP once,
+Unlit source materials retain a separate emission contribution; the tiny Blender
+fixture `scene/scripts/check_house_atlas_emission.py` verifies this with a glTF
+light-path wrapper and a Principled material on adjacent faces.
+PNG and EXR masters remain lossless. Production encodes lighting atlases as WebP at quality 80,
 keeps 18-bit atlas UV precision, and produces one shared asset set for all
 browsers. Per-atlas delivery limits are 1024 or 2048 pixels to bound phone
 texture memory; these are applied from the lossless masters before WebP
 encoding. There are no phone variants or viewport-dependent texture resizes.
 
 ```sh
-python3 scripts/runpod_bake.py auto --target house-atlases --quality final --budget 5 --max-hourly 2.50 --max-minutes 90
+python3 scripts/runpod_bake.py auto --target house-atlases --quality final
 node scripts/assemble-house-atlases.mjs <verified-output>
+ATLAS_REFRESH_DIR=scene/exports/house-release/atlas-refresh node --test --test-name-pattern='^(?!production)' tests/house-atlas-refresh.test.mjs
+node scripts/publish-house-atlases.mjs
+npm test
+```
+
+The default allocator starts with the full PRO 6000 Blackwell Workstation GPU.
+Check the current quote before adjusting budget/hourly limits. Include provisioning and
+result transfer in the time cap; a short rendering estimate alone is insufficient
+for a cold worker. The normal runner verifies the output checksum and deletes the
+pod before installing any assets.
+
+```sh
+python3 scripts/runpod_bake.py quote
+# Override the limits when needed:
+python3 scripts/runpod_bake.py auto --target house-atlases --quality final --budget 5 --max-hourly 2.50 --max-minutes 60
 ```
 
 The merger stages `scene/exports/house-release/atlas-refresh` for validation.
@@ -178,3 +228,45 @@ It does not deploy or install the results automatically. `--prepare-only` and
 `--smoke` on `bake_house_atlases.py` provide a source audit and tiny local end-to-end
 validation before paid rendering. The user rejected the illustrated hallway
 experiment; this refresh uses the original materials and moonlit window rig.
+
+## Local atlas experiments and trim noise guard
+
+Use `npm run bake:atlases -- hall-trim` to run the production atlas refresh on
+this machine. It uses 64 samples and full timber normal strength, fingerprints
+inputs, bakes, assembles, validates geometry, and publishes locally. No cloud
+service is contacted. `--stage-only` leaves the result for inspection. Outputs,
+raw linear irradiance, albedo, filtered irradiance, quality scores and the log
+are saved under `scene/renders/local-atlases/<timestamp>/`.
+
+The `hall-trim` lighting pass uses a normalized binomial filter with a four-texel
+standard deviation within connected coplanar UV charts, replacing photographic
+whole-atlas denoising for this group. Filtering cannot cross into another board
+face or packed object. The twelve-texel bake gutter is rebuilt from filtered
+lighting. The separate albedo pass retains wood grain; native timber normals
+remain enabled. Other atlas groups retain their previous treatment.
+
+`scene/scripts/house_lightmap_filter.py::speckle_score` returns a relative
+high-frequency lighting contrast in [0,1]. Solid colors and linear gradients
+score zero; half/full contrast alternating speckle score approximately .5/1.
+The trim bake rejects measured chart interiors above .12 before export. Charts
+without a two-texel interior are explicitly reported as too small to measure.
+This is a numerical noise indicator, not image recognition: use irradiance,
+not textured color, to avoid treating intentional wood grain as a defect. The
+same function/masks can measure ceiling, wall and baseboard lighting, but those
+atlases are not changed by this trim experiment. The regression fixture contains
+raw pixels from the original noisy trim, so a disabled filter fails the guard.
+
+Run `node --test tests/house-lightmap-filter.test.mjs` for the detector tests.
+Outside macOS, set `BLENDER_PYTHON` to a Python interpreter with NumPy. NumPy is
+included in Blender; no additional bake-time package is required. The atlas
+publisher fingerprints this helper, and cloud input bundles include it too.
+
+The trim compositor reopens the saved EXR passes instead of retaining mutable
+generated images across subsequent bake operations. It writes a linear composite
+EXR and rejects any difference above 1e-5 from filtered irradiance × albedo. This
+checks the actual composited output as well as the filtering buffer. To retry
+postprocessing without tracing new samples, use
+`python3 scripts/reprocess-house-trim-local.py <local-bake-output>`; it verifies
+that the model, lighting and reflectance inputs still match, keeps original ray
+tracing provenance and pass checksums, and fingerprints the new postprocessing
+inputs before assembling and publishing. It never contacts a cloud provider.

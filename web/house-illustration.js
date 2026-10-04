@@ -44,7 +44,7 @@ export function illustrateHouseMaterial(material,{masonry=false}={}){
  material.needsUpdate=true;
 }
 
-export function illustrateHouse(roots){
+export function illustrateHouse(roots,{outlines=true}={}){
  const materials=new Map(),inks=new Map(),seen=new Set();
  for(const root of roots){
   const meshes=[];root.traverse(mesh=>{if(mesh.isMesh&&!mesh.userData.houseInk&&!seen.has(mesh)){seen.add(mesh);meshes.push(mesh);}});
@@ -67,7 +67,7 @@ export function illustrateHouse(roots){
     const light=new THREE.PointLight(0xffa258,5,4.5,2);light.name='Illustrated warm practical';
     mesh.geometry.boundingBox.getCenter(light.position);light.layers.mask=mesh.layers.mask;mesh.add(light);mesh.userData.housePractical=true;
    }
-   if(Math.min(...size.toArray())<.012||Math.max(...size.toArray())<.12)continue;
+   if(!outlines||Math.min(...size.toArray())<.012||Math.max(...size.toArray())<.12)continue;
    const source=Array.isArray(mesh.material)?mesh.material[0]:mesh.material;
    if(source.transparent||/glow|exterior|rain|night/i.test(source.name))continue;
    // Room-owned contours inherit clipping and are disposed with that room.

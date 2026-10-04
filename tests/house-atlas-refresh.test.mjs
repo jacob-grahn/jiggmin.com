@@ -6,16 +6,36 @@ import {readFileSync,existsSync} from 'node:fs';
 const dir=process.env.ATLAS_REFRESH_DIR??'web/assets/house/release';
 const layout=JSON.parse(readFileSync(`${dir}/layout.json`));
 const enabled=!!layout.atlasRefresh;
-const baselineAvailable=['structure','hallway','workshop','basement','attic'].every(room=>existsSync(`scene/exports/house-release/atlas-baseline/${room}.glb`));
+const baselineDirectory=layout.atlasRefresh?.baselineDirectory??'scene/exports/house-release/atlas-baseline';
+const baselineAvailable=['structure','hallway','workshop','basement','attic'].every(room=>existsSync(`${baselineDirectory}/${room}.glb`));
 const localBakeAvailable=enabled&&existsSync(`${layout.atlasRefresh.resultDirectory}/source-audit.json`)&&existsSync(`${layout.atlasRefresh.resultDirectory}/report.json`);
-function points(node){return node.getMesh().listPrimitives().flatMap(p=>{const a=p.getAttribute('POSITION');return Array.from({length:a.getCount()},(_,i)=>a.getElement(i,[]).map(v=>Math.round(v*1e5)).join(','));}).filter((v,i,a)=>a.indexOf(v)===i).sort();}
+function points(node){return [...new Map(node.getMesh().listPrimitives().flatMap(p=>{
+ const a=p.getAttribute('POSITION'),indices=p.getIndices();
+ return Array.from({length:indices?.getCount()??a.getCount()},(_,i)=>{
+  const point=a.getElement(indices?indices.getScalar(i):i,[]);return [point.join(','),point];
+ });
+})).values()];}
+function sameSurfaceVertices(a,b,name){
+ // Exporters may weld or split corners and round float32 coordinates. Ignore
+ // unreferenced accessor vertices left by source face separation.
+ const tolerance=.0001,near=(p,q)=>p.every((v,i)=>Math.abs(v-q[i])<=tolerance);
+ const covered=(source,target)=>{
+  const grid=new Map();for(const p of target){const key=p.map(v=>Math.floor(v/tolerance)).join(',');const bucket=grid.get(key)??[];bucket.push(p);grid.set(key,bucket);}
+  return source.every(p=>{
+   const [x,y,z]=p.map(v=>Math.floor(v/tolerance));
+   for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++)if(grid.get(`${x+dx},${y+dy},${z+dz}`)?.some(q=>near(p,q)))return true;
+   return false;
+  });
+ };
+ assert.ok(covered(a,b)&&covered(b,a),name);
+}
 test('full atlas refresh preserves geometry and live art while exporting lossless bake masters',{skip:!enabled||(!baselineAvailable&&'Local bake baseline is not included in Git')},async()=>{
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);let receivers=0;const groups=new Set();
  for(const room of ['structure','hallway','workshop','basement','attic']){
-  const source=await io.read(`scene/exports/house-release/atlas-baseline/${room}.glb`),after=await io.read(`${dir}/${room}.glb`);
+  const source=await io.read(`${baselineDirectory}/${room}.glb`),after=await io.read(`${dir}/${room}.glb`);
   const originals=new Map(source.getRoot().listNodes().filter(n=>n.getMesh()).map(n=>[n.getExtras().house_bake_id??n.getName(),n]));
   for(const n of after.getRoot().listNodes().filter(n=>n.getMesh())){
-   const o=originals.get(n.getExtras().house_bake_id??n.getName());assert.ok(o,n.getName());assert.deepEqual(n.getWorldMatrix(),o.getWorldMatrix(),n.getName());assert.deepEqual(points(n),points(o),n.getName());
+   const o=originals.get(n.getExtras().house_bake_id??n.getName());assert.ok(o,n.getName());assert.ok(n.getWorldMatrix().every((v,i)=>Math.abs(v-o.getWorldMatrix()[i])<=.000001),n.getName());sameSurfaceVertices(points(n),points(o),n.getName());
    if(n.getExtras().atlas_source_id){
     receivers++;groups.add(n.getExtras().atlas_group);
     for(const p of n.getMesh().listPrimitives())assert.equal(p.getMaterial().getEmissiveTexture().getMimeType(),'image/png');
@@ -31,7 +51,10 @@ test('full atlas refresh preserves geometry and live art while exporting lossles
 test('full atlas source mapping rejects mismatched geometry',{skip:!enabled||(!localBakeAvailable&&'Local bake audit and masters are not included in Git')},()=>{
  const audit=JSON.parse(readFileSync(`${layout.atlasRefresh.resultDirectory}/source-audit.json`));
  assert.equal(audit.length,layout.atlasRefresh.objects);
- for(const n of audit)assert.ok(n.maxSourceDistance<=.01,n.name);
+ for(const n of audit){
+  if(n.maxSourceDistance===null){assert.ok(['authored-window-reveal-metres','authored-world-metres'].includes(n.mapping));assert.ok(n.projectedNewFaces>0,n.name);}
+  else assert.ok(n.maxSourceDistance<=.01,n.name);
+ }
  const master=JSON.parse(readFileSync(`${layout.atlasRefresh.resultDirectory}/report.json`));
  assert.equal(master.losslessBake,true);
  for(const [group,a] of Object.entries(master.atlases)){
@@ -56,7 +79,7 @@ test('shared delivery atlases fit a bounded texture budget without changing mast
 test('production serves one shared, phone-bounded WebP atlas set',{skip:!enabled},async()=>{
  const {readdirSync}=await import('node:fs');
  const draco3d=(await import('draco3dgltf')).default;
- const builtDir='dist/web/assets/house/release';
+ const builtDir=process.env.ATLAS_BUILT_DIR??'dist/web/assets/house/release';
  const builtLayout=JSON.parse(readFileSync(`${builtDir}/layout.json`));
  assert.equal(builtLayout.mobileAssets,undefined);
  assert.ok(!readdirSync(builtDir).some(name=>name.includes('-mobile')));

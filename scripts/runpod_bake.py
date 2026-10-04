@@ -20,9 +20,9 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 STATE_DIR = ROOT / '.runpod'
 API = 'https://rest.runpod.io/v1'
-GPU = 'NVIDIA GeForce RTX 4090'
-FAST_GPUS = ['NVIDIA RTX PRO 6000 Blackwell Workstation Edition', 'NVIDIA GeForce RTX 5090', 'NVIDIA RTX PRO 6000 Blackwell Server Edition', 'NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition']
-GPUS = FAST_GPUS + [GPU, 'NVIDIA RTX A5000']
+GPU = 'NVIDIA RTX PRO 6000 Blackwell Workstation Edition'
+FAST_GPUS = [GPU, 'NVIDIA RTX PRO 6000 Blackwell Server Edition', 'NVIDIA GeForce RTX 5090']
+GPUS = FAST_GPUS + ['NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition', 'NVIDIA GeForce RTX 4090', 'NVIDIA RTX A5000', 'NVIDIA RTX A4500']
 FALLBACK_GPUS = FAST_GPUS.copy()
 
 
@@ -273,6 +273,8 @@ def benchmark(args, key):
             'dockerStartCmd': [(ROOT / 'scripts/runpod_worker.py').read_text()],
             'env': {'BAKE_TOKEN': token, 'BAKE_RUNPOD_KEY': key,
                     'BAKE_DEADLINE': str(deadline), 'BAKE_QUALITY': args.quality, 'BAKE_TARGET': args.target,
+                    'BAKE_ATLAS_GROUPS': ','.join(getattr(args, 'atlas_groups', None) or []),
+                    'BAKE_TRIM_NORMAL_SCALE': str(getattr(args, 'trim_normal_scale', 1)),
                     'NVIDIA_DRIVER_CAPABILITIES': 'compute,utility,graphics',
                     'NVIDIA_VISIBLE_DEVICES': 'all'},
         }, timeout=60)
@@ -377,7 +379,7 @@ def automatic(args, key):
     raise RuntimeError('No GPU could be allocated within the limits. ' + '; '.join(failures))
 
 
-def main():
+def argument_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     sub.add_parser('status')
@@ -390,18 +392,24 @@ def main():
         if command == 'auto':
             selection = bake.add_mutually_exclusive_group()
             selection.add_argument('--gpus', nargs='+', choices=GPUS, default=FALLBACK_GPUS,
-                                   help='Ordered GPU candidates (default: Blackwell workstation, 5090, Blackwell server, Blackwell Max-Q)')
+                                   help='Ordered GPU candidates (default: PRO 6000 Blackwell workstation, PRO 6000 Blackwell server, RTX 5090)')
             selection.add_argument('--gpu', choices=GPUS, help='Use only this GPU; disables fallback')
         else:
             bake.add_argument('--gpu', choices=GPUS, default=GPU)
         bake.add_argument('--target', choices=['house', 'den', 'hallway-style', 'house-atlases'], default='house')
         bake.add_argument('--quality', choices=['test', 'final'], default='test')
-        bake.add_argument('--budget', type=float, default=2)
-        bake.add_argument('--max-hourly', type=float, default=1)
+        bake.add_argument('--atlas-groups', nargs='+', help='Bake only these house-atlases groups; other groups still cast shadows')
+        bake.add_argument('--trim-normal-scale', type=float, default=1, help='Experimental hall-trim timber normal multiplier (0 disables, default 1)')
+        bake.add_argument('--budget', type=float, default=5)
+        bake.add_argument('--max-hourly', type=float, default=2.50)
         bake.add_argument('--max-minutes', type=float, default=60)
     remove = sub.add_parser('delete')
     remove.add_argument('pod_id')
-    args = parser.parse_args()
+    return parser
+
+
+def main():
+    args = argument_parser().parse_args()
     key = credential()
     if args.command == 'status':
         print(json.dumps([safe_pod(pod) for pod in request(API + '/pods', key)], indent=2))
@@ -418,6 +426,9 @@ def main():
         print(json.dumps(request(url + '/status', token), indent=2))
         logs = request(url + '/logs', token)
         if isinstance(logs, str):
+            milestones = [line for line in logs.splitlines() if line.startswith(('ROOM_UV_PREFLIGHT ', 'BAKE_IRRADIANCE ', 'ATLAS_COMPLETE ', 'UV_PREFLIGHT_ERROR '))]
+            if milestones:
+                print('\n'.join(milestones[-24:]))
             print(logs[-4000:])
     elif args.command == 'delete':
         pods = request(API + '/pods', key)

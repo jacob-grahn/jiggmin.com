@@ -5,8 +5,9 @@ import * as THREE from 'three';
 import {GLTFLoader} from '../web/vendor/three/GLTFLoader.js';
 import {collectHouseStructureColliders,createHouseProps} from '../web/house-props.js';
 globalThis.ProgressEvent??=class{};
+const releaseDir=process.env.ATLAS_REFRESH_DIR??'web/assets/house/release';
 async function model(room){
- const b=readFileSync(`web/assets/house/release/${room}.glb`),n=b.readUInt32LE(12),d=JSON.parse(b.subarray(20,20+n));
+ const b=readFileSync(`${releaseDir}/${room}.glb`),n=b.readUInt32LE(12),d=JSON.parse(b.subarray(20,20+n));
  d.buffers[0].uri=`data:application/octet-stream;base64,${b.subarray(28+n).toString('base64')}`;
  d.materials=[];for(const m of d.meshes)for(const p of m.primitives)delete p.material;delete d.images;delete d.textures;
  return (await new GLTFLoader().parseAsync(JSON.stringify(d),'')).scene;

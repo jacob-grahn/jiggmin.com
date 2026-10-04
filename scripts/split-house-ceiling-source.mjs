@@ -1,5 +1,5 @@
 // Source preparation only: make legacy spanning ceilings room-owned before baking.
-import {Matrix4,Vector3} from 'three';
+import {Matrix4,Matrix3,Vector3} from 'three';
 // Clip triangles in world space while interpolating every vertex attribute,
 // including baked UVs. The adjoining pieces meet at the authored room boundary.
 export function clipCeilingMesh(doc,mesh,matrix,room){
@@ -48,5 +48,57 @@ export function splitSourceCeilings(doc){
   }
   node.dispose();count++;
  }
+ return count;
+}
+
+// Split existing faces before baking; never duplicate a visible surface.
+export function splitSlabSurfaces(doc){
+ let count=0;
+ for(const node of [...doc.getRoot().listNodes()]){
+  if(!node.getMesh())continue;
+  const cellar=node.getName().startsWith('Main floor'),attic=node.getName().startsWith('Attic floor / hall ceiling');
+  if(!cellar&&!attic)continue;
+  const original=node.getMesh(),upper=doc.createMesh(original.getName()),lower=doc.createMesh(original.getName());
+  const normalMatrix=new Matrix3().getNormalMatrix(new Matrix4().fromArray(node.getWorldMatrix()));
+  let moved=0;
+  for(const p of original.listPrimitives()){
+   const indices=p.getIndices(),normal=p.getAttribute('NORMAL'),position=p.getAttribute('POSITION'),keep=[],separate=[];
+   for(let i=0;i<(indices?.getCount()??position.getCount());i+=3){
+    const tri=[0,1,2].map(k=>indices?indices.getScalar(i+k):i+k);
+    const y=new Vector3(...normal.getElement(tri[0],[])).applyMatrix3(normalMatrix).normalize().y;
+    ((cellar?-y:y)>.9?separate:keep).push(...tri);
+   }
+   const add=(mesh,array)=>{if(array.length)mesh.addPrimitive(p.clone().setIndices(doc.createAccessor().setType('SCALAR').setArray(new Uint32Array(array)).setBuffer(position.getBuffer())));};
+   add(upper,keep);add(lower,separate);moved+=separate.length;
+  }
+  if(!moved){upper.dispose();lower.dispose();continue;}
+  if(cellar){
+   // The legacy den infill export lowered box vertices by 25 mm to sit
+   // beneath the den's original boards. That clearance belongs upstairs;
+   // the separate cellar underside follows the original flat model plane.
+   const world=new Matrix4().fromArray(node.getWorldMatrix()),inverse=world.clone().invert();
+   const heights=[];
+   for(const p of lower.listPrimitives()){const a=p.getAttribute('POSITION'),ix=p.getIndices();for(let i=0;i<ix.getCount();i++)heights.push(new Vector3(...a.getElement(ix.getScalar(i),[])).applyMatrix4(world).y);}
+   const high=Math.max(...heights),low=Math.min(...heights);
+   if(high-low>.01){
+    if(Math.abs(high-low-.025)>1e-5)throw Error('Unexpected cellar slab clearance: '+node.getName());
+    for(const p of lower.listPrimitives()){
+     const a=p.getAttribute('POSITION'),values=new Float32Array(a.getArray()),ix=p.getIndices();
+     for(const id of new Set(ix.getArray())){const point=new Vector3(...a.getElement(id,[])).applyMatrix4(world);point.y=high;point.applyMatrix4(inverse).toArray(values,id*3);}
+     p.setAttribute('POSITION',doc.createAccessor().setType('VEC3').setArray(values).setBuffer(a.getBuffer()));
+    }
+   }
+  }
+  const e=node.getExtras(),prefix=cellar?'Cellar slab underside / ':'Attic slab upper / ',group=cellar?'basement-slab-ceilings':'attic-floor';
+  const source=e.source_ceiling_object??e.source_object??node.getName();
+  const part=doc.createNode(prefix+node.getName()).setMatrix(node.getMatrix()).setMesh(lower).setExtras({...e,
+   house_bake_id:(e.house_bake_id??node.getName())+(cellar?':cellar-underside':':attic-upper'),
+   source_object:prefix+source,house_bake_source:prefix+node.getName(),source_slab_object:prefix+source,
+   source_shell_room:cellar?'basement':'attic',release_baked:group,atlas_group:group,preview_kind:cellar?'ceiling':'floor'});
+  const parent=node.getParentNode();if(parent)parent.addChild(part);else for(const scene of doc.getRoot().listScenes())if(scene.listChildren().includes(node))scene.addChild(part);
+  node.setMesh(upper);count++;
+ }
+ for(const node of doc.getRoot().listNodes())if(node.getName()==='Garage slab')node.setExtras({...node.getExtras(),source_shell_room:'workshop',release_baked:'structure-garage',atlas_group:'structure-garage'});
+ for(const node of doc.getRoot().listNodes())if(/\b(stair|flight|landing|stringer)\b/i.test(node.getName())&&(node.getExtras().atlas_group??node.getExtras().release_baked)==='structure-hall')node.setExtras({...node.getExtras(),source_shell_room:'basement',release_baked:'structure-stairs',atlas_group:'structure-stairs'});
  return count;
 }

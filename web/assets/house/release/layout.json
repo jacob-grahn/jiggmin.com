@@ -330,203 +330,15 @@
     "attic": 244
   },
   "assets": {
-    "structure": "/web/assets/house/release/structure.glb?v=c7d3991fda75",
+    "structure": "/web/assets/house/release/structure.glb?v=b82e4a623263",
     "den": null,
-    "hallway": "/web/assets/house/release/hallway.glb?v=472de7e4036a",
-    "workshop": "/web/assets/house/release/workshop.glb?v=2576cc164f7f",
-    "basement": "/web/assets/house/release/basement.glb?v=e0e18886bc50",
-    "attic": "/web/assets/house/release/attic.glb?v=dd5b5cc8fc8c"
+    "hallway": "/web/assets/house/release/hallway.glb?v=31bc599d3454",
+    "workshop": "/web/assets/house/release/workshop.glb?v=153e65312b07",
+    "basement": "/web/assets/house/release/basement.glb?v=cde33325f2bc",
+    "attic": "/web/assets/house/release/attic.glb?v=f2d6b15ab2e3"
   },
   "style": "original",
-  "fixedFixtures": "/web/assets/house/release/smoke-detectors.glb?v=7eecb4a05c57",
-  "structureAssets": {
-    "hallway": "/web/assets/house/release/structure/hallway.glb?v=857794b45b91",
-    "den": "/web/assets/house/release/structure/den.glb?v=42a5eb3ce528",
-    "workshop": "/web/assets/house/release/structure/workshop.glb?v=5fe613b8f1e1",
-    "basement": "/web/assets/house/release/structure/basement.glb?v=e052f2a0fb43",
-    "attic": "/web/assets/house/release/structure/attic.glb?v=ba44e3b9e872"
-  },
-  "structureStreaming": {
-    "version": 1,
-    "sourceKey": "4b2c72960d5ca0dabf3f13f48db71987289fc0af4c8d06e4856f019654934260",
-    "rooms": {
-      "hallway": {
-        "nodes": 351,
-        "bytes": 57068264,
-        "textureMiB": 130.81,
-        "textures": [
-          {
-            "name": "hallway / structure-hall",
-            "width": 4060,
-            "height": 4078
-          },
-          {
-            "name": "finish-oak-rough",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-timber-normal",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-wood",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "attic-hatch-closed",
-            "width": 2048,
-            "height": 2048
-          },
-          {
-            "name": "structure-exterior",
-            "width": 2048,
-            "height": 2048
-          },
-          {
-            "name": "finish-oak",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-brass-rough",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-metal-normal",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-brass",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "hallway / lighting",
-            "width": 331,
-            "height": 947
-          }
-        ],
-        "sha256": "857794b45b915c9c49c73cd0b628a16527ea1448f75b35b948f5ba90dc356047"
-      },
-      "den": {
-        "nodes": 30,
-        "bytes": 2150584,
-        "textureMiB": 21.33,
-        "textures": [
-          {
-            "name": "structure-den",
-            "width": 2048,
-            "height": 2048
-          }
-        ],
-        "sha256": "42a5eb3ce528a7f240971896138a2a6a043879f1a644fbc6d31cd6b3e2c1dd3d"
-      },
-      "workshop": {
-        "nodes": 86,
-        "bytes": 3664596,
-        "textureMiB": 32.47,
-        "textures": [
-          {
-            "name": "structure-garage",
-            "width": 2048,
-            "height": 2048
-          },
-          {
-            "name": "workshop / structure-stairs",
-            "width": 951,
-            "height": 1767
-          },
-          {
-            "name": "finish-oak-rough",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-timber-normal",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-wood",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "workshop / lighting",
-            "width": 330,
-            "height": 947
-          }
-        ],
-        "sha256": "5fe613b8f1e1073d98ba7e6a6ef4c96d4f2c329fcdaf4b858f243e4ede362519"
-      },
-      "basement": {
-        "nodes": 81,
-        "bytes": 9054992,
-        "textureMiB": 120.33,
-        "textures": [
-          {
-            "name": "basement / structure-hall",
-            "width": 3902,
-            "height": 3939
-          },
-          {
-            "name": "basement / structure-attic",
-            "width": 2047,
-            "height": 1847
-          },
-          {
-            "name": "basement / structure-stairs",
-            "width": 2048,
-            "height": 2048
-          },
-          {
-            "name": "basement / lighting",
-            "width": 331,
-            "height": 947
-          }
-        ],
-        "sha256": "e052f2a0fb433eaf901da615de5734475a77e54a100661b29132dcafd3b5f0eb"
-      },
-      "attic": {
-        "nodes": 155,
-        "bytes": 2276656,
-        "textureMiB": 22.67,
-        "textures": [
-          {
-            "name": "attic / structure-attic",
-            "width": 2048,
-            "height": 2048
-          },
-          {
-            "name": "finish-oak-rough",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-timber-normal",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-wood",
-            "width": 256,
-            "height": 256
-          },
-          {
-            "name": "finish-oak",
-            "width": 256,
-            "height": 256
-          }
-        ],
-        "sha256": "ba44e3b9e872bbbe2284a66356bea5fc603ff6c34243a23e9bf1fcc557c72b55"
-      }
-    }
-  },
+  "fixedFixtures": "/web/assets/house/release/smoke-detectors.glb?v=563e7d84c4ac",
   "reviewPreparation": {
     "removed": {
       "structure": [
@@ -572,7 +384,10 @@
         "Finish / ceiling moulding.063",
         "Finish / ceiling moulding.064",
         "Finish / ceiling moulding.065",
-        "Finish / ceiling moulding.066"
+        "Finish / ceiling moulding.066",
+        "Finish / ceiling moulding.007",
+        "Finish / ceiling moulding.008",
+        "Finish / ceiling moulding.009"
       ],
       "basement": [
         "Pencil on ordinary paper"
@@ -608,57 +423,109 @@
   "staticSourceRevision": 1,
   "lightingBake": {
     "quality": "final",
+    "source": "original-window-rig",
     "report": {
-      "quality": "release",
-      "samples": 64,
       "atlases": {
+        "hall-ceilings": {
+          "resolution": [
+            2048,
+            2048
+          ],
+          "objects": 8,
+          "worldArea": 142.06,
+          "seconds": 380.98
+        },
         "structure-den": {
+          "resolution": [
+            2048,
+            2048
+          ],
           "objects": 30,
-          "resolution": 2048
+          "worldArea": 147.33,
+          "seconds": 267.52
+        },
+        "attic-floor": {
+          "resolution": [
+            2048,
+            2048
+          ],
+          "objects": 10,
+          "worldArea": 142.75,
+          "seconds": 300.38
         },
         "structure-hall": {
-          "objects": 255,
-          "resolution": 4096
+          "resolution": [
+            4096,
+            4096
+          ],
+          "objects": 139,
+          "worldArea": 643.85,
+          "seconds": 820.25
         },
-        "structure-attic": {
-          "objects": 133,
-          "resolution": 2048
-        },
-        "attic-hatch-closed": {
-          "objects": 1,
-          "resolution": 2048
-        },
-        "structure-exterior": {
-          "objects": 42,
-          "resolution": 2048
-        },
-        "structure-garage": {
-          "objects": 81,
-          "resolution": 2048
+        "basement-slab-ceilings": {
+          "resolution": [
+            2048,
+            2048
+          ],
+          "objects": 8,
+          "worldArea": 136.72,
+          "seconds": 249.76
         },
         "structure-stairs": {
-          "objects": 63,
-          "resolution": 2048
+          "resolution": [
+            4096,
+            4096
+          ],
+          "objects": 72,
+          "worldArea": 149.11,
+          "seconds": 1064.9
         },
-        "basement-details": {
-          "objects": 24,
-          "resolution": 2048
+        "structure-garage": {
+          "resolution": [
+            2048,
+            2048
+          ],
+          "objects": 80,
+          "worldArea": 428.51,
+          "seconds": 387.72
         },
-        "basement-ceiling": {
-          "objects": 4,
-          "resolution": 2048
+        "original-basement": {
+          "resolution": [
+            4096,
+            4096
+          ],
+          "objects": 34,
+          "worldArea": 88.99,
+          "seconds": 1349.02
         },
         "basement-windows": {
+          "resolution": [
+            2048,
+            2048
+          ],
           "objects": 33,
-          "resolution": 2048
+          "worldArea": 33.28,
+          "seconds": 438.39
         },
-        "attic-fixtures": {
-          "objects": 5,
-          "resolution": 2048
+        "basement-ceiling": {
+          "resolution": [
+            2048,
+            2048
+          ],
+          "objects": 4,
+          "worldArea": 298.27,
+          "seconds": 543.33
+        },
+        "basement-details": {
+          "resolution": [
+            2048,
+            2048
+          ],
+          "objects": 24,
+          "worldArea": 625,
+          "seconds": 560.37
         }
       },
-      "movableShadowsExcluded": true,
-      "denoised": true,
       "lighting": {
         "source": "scene/scripts/bake_room.py",
         "worldStrength": 0.1,
@@ -672,96 +539,496 @@
         "apertureEmitters": "outside, rectangular, lowered hall sources",
         "liveWindowLights": false
       },
-      "preservedOriginalRooms": [
-        "den",
-        "hallway",
-        "workshop",
-        "basement furnishings",
-        "attic furnishings"
+      "samples": 64,
+      "objects": 442,
+      "selectedGroups": [
+        "attic-floor",
+        "basement-ceiling",
+        "basement-details",
+        "basement-slab-ceilings",
+        "basement-windows",
+        "hall-ceilings",
+        "original-basement",
+        "structure-den",
+        "structure-garage",
+        "structure-hall",
+        "structure-stairs"
       ],
-      "sourceKey": "6d225e92050cb627202c8250692fdb98365c30c9d4ec9db631acb28242f88713",
-      "inputKey": "04bde5c634fde86df3e568a936976a82873217dff87f47b556e5022f70eb4dc1",
-      "reviewPreparation": {
-        "removed": {
-          "structure": [
-            "Finish / ceiling moulding",
-            "Finish / ceiling moulding.001",
-            "Finish / ceiling moulding.002",
-            "Finish / ceiling moulding.003",
-            "Finish / ceiling moulding.004",
-            "Finish / ceiling moulding.010",
-            "Finish / ceiling moulding.011",
-            "Finish / ceiling moulding.012",
-            "Finish / ceiling moulding.013",
-            "Finish / ceiling moulding.014",
-            "Finish / ceiling moulding.015",
-            "Finish / ceiling moulding.016",
-            "Finish / ceiling moulding.017",
-            "Finish / ceiling moulding.018",
-            "Finish / ceiling moulding.019",
-            "Finish / ceiling moulding.020",
-            "Finish / ceiling moulding.021",
-            "Finish / ceiling moulding.022",
-            "Finish / ceiling moulding.023",
-            "Finish / ceiling moulding.024",
-            "Finish / ceiling moulding.025",
-            "Finish / ceiling moulding.026",
-            "Finish / ceiling moulding.027",
-            "Finish / ceiling moulding.028",
-            "Finish / ceiling moulding.029",
-            "Finish / ceiling moulding.030",
-            "Finish / ceiling moulding.031",
-            "Finish / ceiling moulding.032",
-            "Finish / ceiling moulding.033",
-            "Finish / ceiling moulding.034",
-            "Finish / ceiling moulding.047",
-            "Finish / ceiling moulding.048",
-            "Finish / ceiling moulding.049",
-            "Finish / ceiling moulding.050",
-            "Finish / ceiling moulding.051",
-            "Finish / ceiling moulding.052",
-            "Finish / ceiling moulding.053",
-            "Finish / ceiling moulding.054",
-            "Finish / ceiling moulding.062",
-            "Finish / ceiling moulding.063",
-            "Finish / ceiling moulding.064",
-            "Finish / ceiling moulding.065",
-            "Finish / ceiling moulding.066"
-          ],
-          "basement": [
-            "Pencil on ordinary paper"
-          ],
-          "attic": []
-        },
-        "fixed": {
-          "structure": [
-            "Finish / Laundry light globe",
-            "Finish / Workshop overhead globe",
-            "Finish / Workshop overhead globe.001"
-          ],
-          "basement": [
-            "Copper water pipe",
-            "Stored flexible hose",
-            "Copper pipe ceiling elbow",
-            "Copper pipe wall mounting plate",
-            "Copper pipe wall saddle",
-            "Copper pipe wall mounting plate",
-            "Copper pipe wall saddle",
-            "Copper pipe wall mounting plate",
-            "Copper pipe wall saddle"
-          ],
-          "attic": [
-            "Attic bare work bulb",
-            "Misaligned junction cover",
-            "Loose electrical junction box",
-            "Bare bulb hanging wire",
-            "Attic bulb socket"
-          ]
-        }
-      },
-      "seconds": 2510.4
-    },
-    "source": "original-window-rig"
+      "exposure": -1.3,
+      "losslessBake": true,
+      "denoise": "irradiance-only",
+      "sourceAudit": "source-audit.json",
+      "projectedDenPreserved": true,
+      "removedObjects": [],
+      "sourceUVGuard": true,
+      "materialUV": "Source UV; normal bases explicitly bound"
+    }
   },
-  "denFloorReference": "/web/assets/house/release/den-floor-reference.glb"
+  "denFloorReference": "/web/assets/house/release/den-floor-reference.glb?v=127858515106",
+  "atlasRefresh": {
+    "atlases": {
+      "hall-ceilings": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 8,
+        "worldArea": 142.06,
+        "seconds": 380.98,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "structure-den": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 30,
+        "worldArea": 147.33,
+        "seconds": 267.52,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "attic-hatch-closed": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 1,
+        "worldArea": 2.63,
+        "seconds": 467.92,
+        "masterDirectory": "/Users/jacobgrahn/Documents/jiggmin.com/scene/renders/local-atlases/20261004-121707/output"
+      },
+      "structure-attic": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 133,
+        "worldArea": 740.19,
+        "seconds": 12.98,
+        "masterDirectory": ".runpod/20261004-002049-5bdc60/output"
+      },
+      "structure-hall": {
+        "resolution": [
+          4096,
+          4096
+        ],
+        "objects": 139,
+        "worldArea": 643.85,
+        "seconds": 820.25,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "structure-stairs": {
+        "resolution": [
+          4096,
+          4096
+        ],
+        "objects": 72,
+        "worldArea": 149.11,
+        "seconds": 1064.9,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "structure-garage": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 80,
+        "worldArea": 428.51,
+        "seconds": 387.72,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "hall-window-frames": {
+        "resolution": [
+          1024,
+          1024
+        ],
+        "objects": 6,
+        "worldArea": 4.33,
+        "seconds": 7.55,
+        "masterDirectory": ".runpod/20261003-231424-1a9754/output"
+      },
+      "structure-exterior": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 42,
+        "worldArea": 1031.76,
+        "seconds": 79.41,
+        "masterDirectory": ".runpod/20261003-231424-1a9754/output"
+      },
+      "hall-window-wall": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 4,
+        "worldArea": 31.95,
+        "seconds": 9.76,
+        "masterDirectory": ".runpod/20261003-231424-1a9754/output"
+      },
+      "original-hallway": {
+        "resolution": [
+          4096,
+          4096
+        ],
+        "objects": 78,
+        "worldArea": 11.27,
+        "seconds": 18.01,
+        "masterDirectory": ".runpod/20261003-231424-1a9754/output"
+      },
+      "original-workshop": {
+        "resolution": [
+          4096,
+          4096
+        ],
+        "objects": 60,
+        "worldArea": 44.84,
+        "seconds": 23.25,
+        "masterDirectory": ".runpod/20261003-231424-1a9754/output"
+      },
+      "original-basement": {
+        "resolution": [
+          4096,
+          4096
+        ],
+        "objects": 34,
+        "worldArea": 88.99,
+        "seconds": 1349.02,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "basement-windows": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 33,
+        "worldArea": 33.28,
+        "seconds": 438.39,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "basement-ceiling": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 4,
+        "worldArea": 298.27,
+        "seconds": 543.33,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "basement-details": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 24,
+        "worldArea": 625,
+        "seconds": 560.37,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "attic-fixtures": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 5,
+        "worldArea": 0.47,
+        "seconds": 12.18,
+        "masterDirectory": ".runpod/20261004-002049-5bdc60/output"
+      },
+      "original-attic": {
+        "resolution": [
+          4096,
+          4096
+        ],
+        "objects": 18,
+        "worldArea": 19.05,
+        "seconds": 25.8,
+        "masterDirectory": ".runpod/20261004-002049-5bdc60/output"
+      },
+      "hall-trim": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 85,
+        "worldArea": 87.09,
+        "timberNormalScale": 1,
+        "irradianceFilter": "planar-UV-chart-binomial-sigma4",
+        "speckleThreshold": 0.12,
+        "maxSpeckleScore": 0.00030959854229703634,
+        "compositionMaxError": 0,
+        "seconds": 398.25,
+        "masterDirectory": "/Users/jacobgrahn/Documents/jiggmin.com/scene/renders/local-atlases/20261004-125532/output"
+      },
+      "attic-floor": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 10,
+        "worldArea": 142.75,
+        "seconds": 300.38,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      },
+      "basement-slab-ceilings": {
+        "resolution": [
+          2048,
+          2048
+        ],
+        "objects": 8,
+        "worldArea": 136.72,
+        "seconds": 249.76,
+        "masterDirectory": "scene/renders/local-atlases/20261004-140757/output"
+      }
+    },
+    "lighting": {
+      "source": "scene/scripts/bake_room.py",
+      "worldStrength": 0.1,
+      "viewTransform": "AgX",
+      "exposure": -1.3,
+      "atticExposure": -0.7,
+      "saturation": 1.2,
+      "lighting": "blue windows and exterior moon backlight",
+      "windowRevision": 5,
+      "cellarEmitters": "outside authored wall openings",
+      "apertureEmitters": "outside, rectangular, lowered hall sources",
+      "liveWindowLights": false
+    },
+    "samples": 64,
+    "objects": 874,
+    "selectedGroups": [
+      "attic-floor",
+      "basement-ceiling",
+      "basement-details",
+      "basement-slab-ceilings",
+      "basement-windows",
+      "hall-ceilings",
+      "original-basement",
+      "structure-den",
+      "structure-garage",
+      "structure-hall",
+      "structure-stairs"
+    ],
+    "exposure": -1.3,
+    "losslessBake": true,
+    "denoise": "irradiance-only",
+    "sourceAudit": "source-audit.json",
+    "projectedDenPreserved": true,
+    "removedObjects": [],
+    "sourceUVGuard": true,
+    "materialUV": "Source UV; normal bases explicitly bound",
+    "rebakedObjects": 442,
+    "resultDirectory": "scene/renders/local-atlases/20261004-140757/output",
+    "masterFormat": "PNG",
+    "webFormat": "WebP quality 80 lighting atlases",
+    "den": "original projection",
+    "delivery": "One shared asset set; 1024/2048px lighting atlas limits, WebP quality 80",
+    "retainedFixtureSourceKey": "6d225e92050cb627202c8250692fdb98365c30c9d4ec9db631acb28242f88713",
+    "baselineDirectory": "scene/renders/local-atlases/20261004-140757/input-baseline"
+  },
+  "structureAssets": {
+    "hallway": "/web/assets/house/release/structure/hallway.glb?v=fc100f79587f",
+    "den": "/web/assets/house/release/structure/den.glb?v=10ab8614ba53",
+    "workshop": "/web/assets/house/release/structure/workshop.glb?v=7e6689593c36",
+    "basement": "/web/assets/house/release/structure/basement.glb?v=ed8f7c61cb3a",
+    "attic": "/web/assets/house/release/structure/attic.glb?v=0493767582ba"
+  },
+  "structureStreaming": {
+    "version": 1,
+    "sourceKey": "a3d6ed6d24b0a97fc5ec329a5f3ad55c110942628b03213e04c0390839347e4a",
+    "rooms": {
+      "hallway": {
+        "nodes": 352,
+        "bytes": 88803756,
+        "textureMiB": 201.26,
+        "textures": [
+          {
+            "name": "structure-hall",
+            "width": 4096,
+            "height": 4096
+          },
+          {
+            "name": "hall-window-wall",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "hall-ceilings",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "finish-oak-rough",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-timber-normal",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-wood",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "attic-hatch-closed",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "structure-exterior",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "hall-trim",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "hall-window-frames",
+            "width": 1024,
+            "height": 1024
+          },
+          {
+            "name": "finish-oak",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-brass-rough",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-metal-normal",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-brass",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "hallway / lighting",
+            "width": 331,
+            "height": 947
+          }
+        ],
+        "sha256": "fc100f79587ffb314ceb35a1edaac28bd86f105210a71bb85ef6e62182ee308a"
+      },
+      "den": {
+        "nodes": 30,
+        "bytes": 2206344,
+        "textureMiB": 21.33,
+        "textures": [
+          {
+            "name": "structure-den",
+            "width": 2048,
+            "height": 2048
+          }
+        ],
+        "sha256": "10ab8614ba53c64911baf86402422ca99345a63e4c915dcdcf67da6220a4e778"
+      },
+      "workshop": {
+        "nodes": 84,
+        "bytes": 3644080,
+        "textureMiB": 23.92,
+        "textures": [
+          {
+            "name": "structure-garage",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "finish-oak-rough",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-timber-normal",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-wood",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "workshop / lighting",
+            "width": 330,
+            "height": 947
+          }
+        ],
+        "sha256": "7e6689593c36085ee9dbca03d7d026be94a2169ccab171c1e51a2eade7063f71"
+      },
+      "basement": {
+        "nodes": 81,
+        "bytes": 12718108,
+        "textureMiB": 108.26,
+        "textures": [
+          {
+            "name": "structure-stairs",
+            "width": 4096,
+            "height": 4096
+          },
+          {
+            "name": "basement-slab-ceilings",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "basement / lighting",
+            "width": 331,
+            "height": 947
+          }
+        ],
+        "sha256": "ed8f7c61cb3aea5950fcda897ff4097da85481b9308c50f909ca1e58d1cd32b9"
+      },
+      "attic": {
+        "nodes": 169,
+        "bytes": 5019292,
+        "textureMiB": 44,
+        "textures": [
+          {
+            "name": "structure-attic",
+            "width": 2048,
+            "height": 2048
+          },
+          {
+            "name": "finish-oak-rough",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-timber-normal",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-wood",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "finish-oak",
+            "width": 256,
+            "height": 256
+          },
+          {
+            "name": "attic-floor",
+            "width": 2048,
+            "height": 2048
+          }
+        ],
+        "sha256": "0493767582ba003c9110d5ae2760931bde7377754ae2378bbd23eba3ea64f901"
+      }
+    }
+  }
 }

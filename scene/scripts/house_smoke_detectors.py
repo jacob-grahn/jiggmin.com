@@ -18,7 +18,7 @@ def create_smoke_detectors(scene):
  bpy.context.view_layer.update()
  ceilings=[]
  for surface in scene.objects:
-  if surface.type!='MESH' or surface.hide_render or not surface.name.startswith(('Attic floor / hall ceiling','Garage ceiling','Main floor','Basement ceiling')):continue
+  if surface.type!='MESH' or surface.hide_render or not surface.name.startswith(('Attic floor / hall ceiling','Garage ceiling','Main floor','Basement ceiling','Cellar slab underside / ')):continue
   ceilings.append(BVHTree.FromPolygons([surface.matrix_world@v.co for v in surface.data.vertices],[list(p.vertices) for p in surface.data.polygons]))
  result=[]
  for room,position in PLACEMENTS:

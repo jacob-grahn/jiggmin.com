@@ -14,11 +14,16 @@ export function shellOwner(name,e={},bounds){
  if(e.source_shell_room)return e.source_shell_room;
  // Boundary doors/hatch stay with the hall so closed entrances never disappear.
  if(e.preview_kind==='door')return e.door_id==='vehicle'?'workshop':'hallway';
+ // The cellar entrance trim is upstairs, despite its authored "stairs" name.
+ if(/^Finish \/ stairs (casing|head|jamb|threshold)(?:\.\d+)?$/.test(name))return 'hallway';
  if(e.preview_kind==='ladder')return 'attic';
  if(e.house_smoke_detector)return e.house_smoke_detector==='garage'?'workshop':e.house_smoke_detector;
  if(name==='Garage slab')return 'workshop'; // Historical atlas label says stairs.
+ if(/^Finish \/ attic /.test(name))return 'attic';
  if(e.preview_kind==='stair'||/stair|flight|landing|stringer|Cellar front closure/i.test(name))return 'basement';
  const group=e.atlas_group??e.release_baked??'';
+ if(/^basement-/.test(group))return 'basement';
+ if(/^attic-/.test(group)&&group!=='attic-hatch-closed')return 'attic';
  if(/^structure-garage/.test(group))return 'workshop';
  if(/^structure-den/.test(group))return 'den';
  if(/^structure-attic/.test(group))return 'attic';

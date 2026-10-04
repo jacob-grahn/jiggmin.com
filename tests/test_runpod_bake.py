@@ -18,6 +18,20 @@ spec.loader.exec_module(cloud)
 
 
 class RunpodTests(unittest.TestCase):
+    def test_default_gpu_selection_and_limits(self):
+        parser = cloud.argument_parser()
+        preferred = 'NVIDIA RTX PRO 6000 Blackwell Workstation Edition'
+        self.assertEqual(parser.parse_args(['quote']).gpu, preferred)
+        for command in ['benchmark', 'auto']:
+            args = parser.parse_args([command])
+            self.assertEqual((args.budget, args.max_hourly, args.max_minutes), (5, 2.50, 60))
+            self.assertEqual(cloud.limits(2.20, args.max_hourly, args.budget, args.max_minutes), 3600)
+            if command == 'benchmark':
+                self.assertEqual(args.gpu, preferred)
+            else:
+                self.assertEqual(args.gpus, [preferred, 'NVIDIA RTX PRO 6000 Blackwell Server Edition', 'NVIDIA GeForce RTX 5090'])
+        self.assertEqual(len(cloud.GPUS), len(set(cloud.GPUS)))
+
     def auto_args(self, **overrides):
         values = dict(gpu=None, gpus=cloud.FALLBACK_GPUS, budget=.5,
                       max_hourly=1, max_minutes=30, target='den', quality='test')

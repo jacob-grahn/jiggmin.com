@@ -1,5 +1,39 @@
 {
-  "ceiling": {"name": "Light cream ceiling", "linear_rgb": [0.82, 0.76, 0.63], "roughness": 0.94},
-  "workshop_window_framing": {"opening_clearance": 0.08, "stud_width": 0.09, "header_height": 0.18, "depth": 0.15, "floor_y": -0.15, "top_y": 2.57},
-  "superseded_workshop_studs": ["Exposed garage wall stud.002", "Exposed garage wall stud.007"]
+  "ceiling": {
+    "name": "Light cream ceiling",
+    "linear_rgb": [
+      0.82,
+      0.76,
+      0.63
+    ],
+    "roughness": 0.94
+  },
+  "workshop_window_framing": {
+    "opening_clearance": 0.08,
+    "stud_width": 0.09,
+    "header_height": 0.18,
+    "depth": 0.15,
+    "floor_y": -0.15,
+    "top_y": 2.57
+  },
+  "superseded_workshop_studs": [
+    "Exposed garage wall stud.002",
+    "Exposed garage wall stud.007"
+  ],
+  "door_frames": {
+    "name": "White painted timber",
+    "linear_rgb": [
+      0.82,
+      0.82,
+      0.82
+    ],
+    "roughness": 0.55,
+    "openings": [
+      "den",
+      "front",
+      "mudroom",
+      "stairs",
+      "hatch"
+    ]
+  }
 }

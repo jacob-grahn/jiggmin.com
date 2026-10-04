@@ -7,13 +7,15 @@ A static HTML game room with real 3D geometry, throwable physics cartridges and 
 - `index.html`, `web/`: site source, original browser asset exports, and vendored runtimes.
 - `data/`: versioned game catalog, checksums, source URLs, and archive notes.
 - `scripts/`, `tests/`: download/build/preview tools and verification.
-- `scene/`: Blender authoring scripts and documentation. Local `.blend` files, `textures/`, `renders/`, and `mockups/` are ignored by Git.
+- `scene/`: Blender authoring scripts and documentation. The current house models and illustrated den source use Git LFS; historical models, backups, `textures/`, `renders/`, and `mockups/` are ignored by Git.
 - `games/`: versioned archived SWFs, thumbnails, and loader payloads.
 - `scene/exports/house/`: unbaked models, reference renders, and reports used by the authoring pipeline; not deployed.
 - `npm run assets:compare`: generate adjustable compression experiments; see [room compression](docs/asset-compression.md) for the preview and quality controls.
 - `dist/`: generated static deployment output; ignored by Git.
 
-The game archive is included in Git so a fresh clone can play games and build the complete site. The checked-in catalog lists the expected files and their hashes. Source artwork remains local and ignored; retain a separate backup of it. The fetch scripts can attempt downloads from the original mirror, but availability may change. No Blender source files are needed to run the exported website. Run `npm ci` to install dependencies for tests.
+The game archive is included in Git so a fresh clone can play games and build the complete site. The checked-in catalog lists the expected files and their hashes. The current Blender models and released source GLBs use Git LFS; other ignored source artwork still needs a separate backup. The fetch scripts can attempt downloads from the original mirror, but availability may change. No Blender source files are needed to run the exported website. Run `npm ci` to install dependencies for tests.
+
+Install [Git LFS](https://git-lfs.com/) before cloning to download the editable Blender models and released source GLBs automatically. For an existing checkout, run `git lfs install --local` followed by `git lfs pull`. Seven current models are tracked: the assembled preview, production scene, four room scenes, and illustrated den. Historical variants and Blender backup files remain ignored. Site builds use the versioned source exports and automatically fetch any remaining GLB LFS pointers before compression. Blender is not required to build, and Git LFS is not needed by the deployed website.
 
 ## Run locally
 

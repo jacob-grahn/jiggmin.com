@@ -1,4 +1,4 @@
-import {splitSourceCeilings} from './split-house-ceiling-source.mjs';
+import {splitSourceCeilings,splitSlabSurfaces} from './split-house-ceiling-source.mjs';
 import {assertUniqueTrim} from './house-source/validate-trim.mjs';
 import {includeFixedFixtures} from './house-fixed-fixtures.mjs';
 // Preserve approved placement while reusing the original room shading and UVs.
@@ -154,7 +154,7 @@ for(const node of structure.getRoot().listNodes().filter(n=>/stair side enclosur
 const originalWorkshop=await io.read('web/assets/house/workshop-baked.glb');
 addPlywoodBacking(structure,originalWorkshop);clearWorkshopOpenings(structure);addWorkshopWindowFraming(structure,originalWorkshop);paintCeilings(structure);
 await refineHallAndExterior(structure,hall);
-splitSourceCeilings(structure);await structure.transform(dedup(),prune(),unpartition());
+splitSourceCeilings(structure);splitSlabSurfaces(structure);await structure.transform(dedup(),prune(),unpartition());
 for(const node of structure.getRoot().listNodes()){
  const fixedWindow=node.getExtras().preview_kind==='window'&&!/glass/i.test(node.getName());
  node.setExtras({...node.getExtras(),...(fixedWindow?{release_dynamic:false,house_window_receiver:true}:{}),style_source:'original-room-palette'});

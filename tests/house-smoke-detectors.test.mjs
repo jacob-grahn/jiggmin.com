@@ -15,7 +15,7 @@ test('three ceiling-mounted smoke detectors share an actual baked texture and ha
  assert.equal(nodes.length,3);assert.equal(doc.getRoot().listTextures().length,1);
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),ceilings=new THREE.Group();
  const models=await Promise.all(['structure','basement'].map(room=>io.read(`web/assets/house/release/${room}.glb`)));
- for(const n of models.flatMap(doc=>doc.getRoot().listNodes()).filter(n=>n.getMesh()&&/^(Attic floor \/ hall ceiling|Garage ceiling|Main floor|Basement ceiling)/.test(n.getName())))for(const p of n.getMesh().listPrimitives()){
+ for(const n of models.flatMap(doc=>doc.getRoot().listNodes()).filter(n=>n.getMesh()&&/^(Attic floor \/ hall ceiling|Garage ceiling|Main floor|Basement ceiling|Cellar slab underside \/ Main floor)/.test(n.getName())))for(const p of n.getMesh().listPrimitives()){
   const g=new THREE.BufferGeometry(),a=p.getAttribute('POSITION');g.setAttribute('position',new THREE.BufferAttribute(a.getArray(),3));if(p.getIndices())g.setIndex(new THREE.BufferAttribute(p.getIndices().getArray(),1));
   const mesh=new THREE.Mesh(g,new THREE.MeshBasicMaterial({side:THREE.DoubleSide}));mesh.applyMatrix4(new THREE.Matrix4().fromArray(n.getWorldMatrix()));ceilings.add(mesh);
  }
