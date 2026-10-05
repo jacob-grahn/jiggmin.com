@@ -28,7 +28,7 @@ export function createHousePropInput(host,{getRoom,getCamera,onActivate,wake,red
   if(!gesture){host.style.cursor=pick(event)?'grab':'';return;}
   const g=gesture;if(g.id!==event.pointerId)return;
   if(!g.dragged&&Math.hypot(event.clientX-g.start[0],event.clientY-g.start[1])<6)return;
-  if(g.prop.mode==='wiggle')return;
+  if(g.prop.mode==='wiggle'||g.prop.mode==='game')return;
   if(!g.dragged){
    g.prop.spring.reset();if(getRoom().props.physics.items.get(g.prop.id).body.type!==1)g.prop.root.quaternion.copy(g.prop.rest);
    getRoom().props.physics.grab(g.prop.id,g.point);g.dragged=true;
@@ -47,6 +47,7 @@ export function createHousePropInput(host,{getRoom,getCamera,onActivate,wake,red
   const room=getRoom();
   if(cancelled)room.props.cancel();
   else if(g.dragged){room.props.physics.release(performance.now()-g.time>120?new THREE.Vector3():g.velocity);if(!interrupted&&g.prop.hotspot)onActivate(g.prop.hotspot);}
+  else if(!interrupted&&g.prop.onPress){g.prop.onPress();}
   else if(!interrupted){room.props.kick(g.prop,reduced.matches);if(g.prop.hotspot)onActivate(g.prop.hotspot);}
   host.style.cursor='';wake();
  }
@@ -69,6 +70,7 @@ export function createHousePropInput(host,{getRoom,getCamera,onActivate,wake,red
   setEnabled(value){enabled=value;if(!value)cancel();host.style.cursor='';},
   activate(prop){
    const room=getRoom();if(!enabled||!room)return;
+   if(prop.onPress){prop.onPress();wake();return;}
    if(prop.mode==='throw'&&!prop.hotspot){
     const impulse=getCamera().position.clone().sub(prop.root.position).normalize().multiplyScalar(2);impulse.y=2;
     room.props.physics.grab(prop.id,prop.root.position);room.props.physics.release(impulse);

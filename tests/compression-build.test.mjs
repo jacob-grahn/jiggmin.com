@@ -97,3 +97,15 @@ test('lighting atlases use the shared WebP quality 80 production encoder',async(
  }
  assert.ok(checked.size>0,'expected a baked lighting atlas');
 });
+
+test('rear-hall cups atlas is encoded from its master at production WebP quality without resizing',async()=>{
+ const path='web/assets/house/hallway-cups/atlas.webp';
+ const asset=report.assets.find(asset=>asset.source===path);
+ assert.ok(asset,'standalone cups atlas must go through the production encoder');
+ const expected=await sharp(path).webp({quality:BALANCED.quality,effort:6}).toBuffer();
+ const built=readFileSync('dist/'+path),meta=await sharp(built).metadata();
+ assert.equal(hash(built),hash(expected));
+ assert.equal(meta.width,1024);assert.equal(meta.height,512);
+ assert.equal(report.urls['/'+path],'/'+path);
+ assert.ok(built.length<readFileSync(path).length);
+});

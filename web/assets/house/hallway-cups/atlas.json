@@ -1,0 +1,22 @@
+{
+  "room": "private-hall",
+  "size": [
+    1024,
+    512
+  ],
+  "regions": {
+    "metal": [
+      0,
+      0,
+      0.5,
+      1
+    ],
+    "wovenBall": [
+      0.5,
+      0,
+      0.5,
+      1
+    ]
+  },
+  "source": "scripts/create-hallway-cups-atlas.mjs"
+}

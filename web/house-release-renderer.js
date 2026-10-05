@@ -6,11 +6,12 @@ import * as THREE from 'three';
 import {GLTFLoader} from './model-loader.js';
 import {configureWindowGlass,createMoonlitSky,MOONLIT_SKY_URL,WINDOW_GLASS_LAYER} from './house-window-sky.js?v=source-models-1';
 import {createContinuousDen} from './house-den-continuity.js?v=source-models-1';
-import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js';
+import {assignRoomLighting,renderIsolatedRooms} from './house-lighting.js?v=cup-shadows-1';
 import {illustrateHouse} from './house-illustration.js';
 import {createRoomResources} from './house-resources.js';
 import {createHouseProps,collectHouseStructureColliders} from './house-props.js?v=ceiling-collision-1';
-import {createHousePropInput} from './house-prop-input.js?v=prop-cleanup-1';
+import {createHousePropInput} from './house-prop-input.js?v=hallway-cups-1';
+import {createHallwayCups,CUP_FLOOR_Y} from './hallway-cups.js?v=cup-nested-reveal-8';
 import {createHiddenScraps} from './house-scraps.js?v=prop-cleanup-1';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
 import {createBasementCartridges} from './cartridge-storage.js';
@@ -30,7 +31,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
  function configureRenderer(){
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;
-  renderer.localClippingEnabled=true;renderer.shadowMap.enabled=false;renderer.setClearColor('#10191e');
+  renderer.localClippingEnabled=true;renderer.shadowMap.enabled=false;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.shadowMap.autoUpdate=false;renderer.setClearColor('#10191e');
  }
  configureRenderer();renderer.domElement.id='';renderer.domElement.classList.add('house-canvas');host.prepend(renderer.domElement);
  const saveFrame=captureEnabled?document.createElement('button'):null;
@@ -94,7 +95,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z])points.push(new THREE.Vector3(x,y,z).project(camera));
    let left=Math.max(0,Math.min(...points.map(p=>(p.x+1)/2))),right=Math.min(1,Math.max(...points.map(p=>(p.x+1)/2)));
    let top=Math.max(0,Math.min(...points.map(p=>(1-p.y)/2))),bottom=Math.min(1,Math.max(...points.map(p=>(1-p.y)/2)));
-   button.hidden=right<=left||bottom<=top||points.every(p=>p.z>1||p.z< -1);
+   button.hidden=!prop.root.visible||right<=left||bottom<=top||points.every(p=>p.z>1||p.z< -1);
    if(prop.navigation&&!button.hidden){
     const width=Math.max(right-left,56/viewport.width),height=Math.max(bottom-top,56/viewport.height);
     left=THREE.MathUtils.clamp((left+right-width)/2,0,1-width);top=THREE.MathUtils.clamp((top+bottom-height)/2,0,1-height);right=left+width;bottom=top+height;
@@ -102,12 +103,13 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    Object.assign(button.style,{left:`${left*100}%`,top:`${top*100}%`,width:`${(right-left)*100}%`,height:`${(bottom-top)*100}%`});
   }
  }
- let renderedFrames=0;
+ let renderedFrames=0,cupShadowsEnabled=!debugParams.has('noCupShadows');
  function render(){if(camera){
   renderedFrames++;
   host.dataset.houseLoadedRooms=[...rooms.keys()].join(',');
   host.dataset.houseLoadedShells=[...structures.entries.keys()].join(',');
-  renderIsolatedRooms(renderer,world,camera,[...rooms.keys()].filter(id=>id!=='private-hall'),continuousDen?.exposure);
+  renderer.shadowMap.enabled=cupShadowsEnabled&&Boolean(rooms.get('private-hall')?.cups);
+  renderIsolatedRooms(renderer,world,camera,[...new Set([...rooms.keys()].map(id=>id==='private-hall'?'hallway':id))],continuousDen?.exposure,1);
   updateTargets();
  }}
  function resize(){input.cancel();const {width,height}=host.getBoundingClientRect();renderer.setSize(width,height,false);if(camera){resizeHouseCamera(camera,width/height);render();}}
@@ -148,20 +150,22 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    cartridge.position.add(new THREE.Vector3(6.53,-4,3.29));gltf.scene.add(cartridge);
   }
   const resources=createRoomResources();resources.capture(gltf.scene);const view=viewFor(id);
-  const props=id==='den'||id==='private-hall'?{props:[],cancel(){},update(){return {};}}:createHouseProps(gltf.scene,world,{floorY:id==='basement'?-4:id==='attic'?2.8:0,roomBounds:id==='workshop'?[12,0,17,7]:id==='hallway'?[4.8,6.8,12,12]:[0,0,12,12],structureColliders:connections.structureColliders});
+  const props=id==='den'?{props:[],cancel(){},update(){return {};}}:createHouseProps(gltf.scene,world,{floorY:id==='basement'?-4:id==='attic'?2.8:id==='private-hall'?CUP_FLOOR_Y:0,roomBounds:id==='workshop'?[12,0,17,7]:id==='hallway'?[4.8,6.8,12,12]:id==='private-hall'?[4.8,0,6.3,6.8]:[0,0,12,12],structureColliders:connections.structureColliders});
+  const cups=id==='private-hall'?createHallwayCups(world,props,{texture:gltf.cupsAtlas}):null;
+  if(cups)resources.capture(cups.root);
   const glass=id==='basement'?configureWindowGlass(gltf.scene):[];
   const scraps=createHiddenScraps(props.props,view,world,collected);
-  const roots=[gltf.scene,...props.props.map(p=>p.root),...Array.from(scraps.values(),s=>s.mesh)];illustrateHouse(roots,{outlines:!debugParams.has('noHouseInk')});roots.forEach(root=>resources.capture(root));
+  const roots=[gltf.scene,...(cups?[cups.root]:[]),...props.props.map(p=>p.root),...Array.from(scraps.values(),s=>s.mesh)];illustrateHouse(roots,{outlines:!debugParams.has('noHouseInk')});roots.forEach(root=>resources.capture(root));
   assignRoomLighting(roots,id==='private-hall'?'hallway':id);
-  if(!debugParams.has('unbatched')){batchHouseMeshes(gltf.scene,{staticCells:true});for(const prop of props.props)batchHouseMeshes(prop.root);}
+  if(!debugParams.has('unbatched')){batchHouseMeshes(gltf.scene,{staticCells:true});for(const prop of props.props)if(prop.mode!=='game')batchHouseMeshes(prop.root);}
   roots.forEach(root=>resources.capture(root));
   glass.forEach(mesh=>mesh.layers.set(WINDOW_GLASS_LAYER));
-  rooms.set(id,{id,scene:world,resources,roots,model:gltf.scene,view,doors:new Map(),props,scraps,pickRoots:[connections.group,gltf.scene,...props.props.map(p=>p.root)]});
+  rooms.set(id,{id,scene:world,resources,roots,model:gltf.scene,view,doors:new Map(),props,scraps,cups,pickRoots:[connections.group,gltf.scene,...(cups?[cups.root]:[]),...props.props.map(p=>p.root)]});
  }
  function unloadRoom(id,{releaseDen=true}={}){
   const room=rooms.get(id);if(!room)return;
   if(id==='den'){continuousDen.scene.removeFromParent();continuousDen.resources.dispose();continuousDen=null;rooms.delete(id);if(releaseDen)unloadDen?.();structures.remove('den');refreshStructure();renderer.renderLists.dispose();return;}
-  room.props.cancel();room.roots.forEach(root=>root.removeFromParent());room.resources.dispose({closeImages:true});rooms.delete(id);if(id!=='hallway'&&id!=='private-hall'){structures.remove(id);refreshStructure();}renderer.renderLists.dispose();
+  room.props.cancel();room.cups?.dispose();room.roots.forEach(root=>root.removeFromParent());room.resources.dispose({closeImages:true});rooms.delete(id);if(id!=='hallway'&&id!=='private-hall'){structures.remove(id);refreshStructure();}renderer.renderLists.dispose();
  }
  function refreshStructure(){
   if(!connections)return;
@@ -229,13 +233,17 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    }
    gltf=id==='private-hall'?{scene:new THREE.Group()}:await loader.loadAsync(id==='hallway'&&debugParams.get('hallwayStyle')==='illustrated'?'/web/assets/house/hallway-style/hallway.glb':id==='hallway'&&debugParams.get('hallwayInk')==='transfer'?'/web/assets/house/hallway-ink/hallway.glb':roomAsset(id));
    if(ticket!==revision)return;
+   if(id==='private-hall'){
+    gltf.cupsAtlas=await new THREE.TextureLoader().loadAsync('/web/assets/house/hallway-cups/atlas.webp?v=cup-nested-reveal-8');
+    gltf.cupsAtlas.colorSpace=THREE.SRGBColorSpace;gltf.cupsAtlas.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+   }
    if(id==='basement')archive=await loadBasementCartridges?.()??[];
    if(ticket!==revision)return;
    gltf.archive=archive;addRoom(id,gltf);
   }finally{
    const r=createRoomResources();archive.forEach(root=>r.capture(root));r.dispose();
    if(!rooms.has(id)){
-    if(gltf){gltf.scene.removeFromParent();r.capture(gltf.scene);}r.dispose({closeImages:true});
+    if(gltf){gltf.cupsAtlas?.dispose();gltf.scene.removeFromParent();r.capture(gltf.scene);}r.dispose({closeImages:true});
     if(id!=='hallway'&&id!=='private-hall'){structures.remove(id);refreshStructure();}
    }
   }
@@ -391,7 +399,15 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    updateMedianMs:+percentile(updates,.5).toFixed(3),frameMedianMs:+percentile(interval,.5).toFixed(2),
    completedMedianMs:+percentile(gpuComplete,.5).toFixed(2)};
  }
- return {load,travel,benchmark,capture(){render();return renderer.domElement.toDataURL('image/png');},depart:()=>travel('den'),resize,cancel,setActive,setInteractive:value=>input.setEnabled(value),revealScrap,cancelGrab:()=>input.cancel(),
+ async function benchmarkCupShadows({frames=90}={}){
+  const saved=cupShadowsEnabled;
+  try{
+   cupShadowsEnabled=false;const without=await benchmark({frames});
+   cupShadowsEnabled=true;const withShadows=await benchmark({frames});
+   return {without,withShadows};
+  }finally{cupShadowsEnabled=saved;render();}
+ }
+ return {load,travel,benchmark,benchmarkCupShadows,setCupShadows(value){cupShadowsEnabled=value;render();},get cupGame(){return current?.cups;},capture(){render();return renderer.domElement.toDataURL('image/png');},depart:()=>travel('den'),resize,cancel,setActive,setInteractive:value=>input.setEnabled(value),revealScrap,cancelGrab:()=>input.cancel(),
   get props(){return current?.props?.props??[];},
   get fixedTargets(){
    const result=new Map();current?.model?.traverse(o=>{if(o.userData.hotspot)result.set(o.userData.hotspot,{root:o});});
@@ -403,6 +419,6 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
    return result;
   },
   bindTargets(value){targets=value;updateTargets();},activateProp(prop){input.activate(prop);},
-  async dispose(){cancel();input.dispose();await loading?.catch(()=>{});await structures.dispose();const resources=createRoomResources();resources.capture(world);resources.dispose({closeImages:true});world.clear();connections=null;sky=null;loading=null;targetGeometry.dispose();targetMaterial.dispose();renderer.renderLists.dispose();saveFrame?.remove();saveBurst?.remove();}
+  async dispose(){cancel();input.dispose();await loading?.catch(()=>{});await structures.dispose();for(const room of rooms.values())room.cups?.dispose();const resources=createRoomResources();resources.capture(world);resources.dispose({closeImages:true});world.clear();connections=null;sky=null;loading=null;targetGeometry.dispose();targetMaterial.dispose();renderer.renderLists.dispose();saveFrame?.remove();saveBurst?.remove();}
  };
 }

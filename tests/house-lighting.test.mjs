@@ -27,3 +27,11 @@ test('room lights cannot illuminate adjacent rooms; removing a room preserves re
  renderIsolatedRooms(renderer,world,camera,['hallway']);
  assert.deepEqual(passes,[['constant fill','stairs'],['constant fill','hallway'],['constant fill']]);
 });
+
+test('cup shadow map updates only in the receiving room pass',()=>{
+ const camera=new THREE.PerspectiveCamera(),passes=[];
+ const renderer={autoClear:true,shadowMap:{enabled:true,autoUpdate:false,needsUpdate:false},clear(){},render(scene,view){passes.push({layer:Math.log2(view.layers.mask),update:this.shadowMap.needsUpdate});}};
+ renderIsolatedRooms(renderer,new THREE.Scene(),camera,['hallway'],.85,1);
+ assert.deepEqual(passes,[{layer:0,update:false},{layer:1,update:true},{layer:6,update:false}]);
+ assert.equal(camera.layers.mask,1);assert.equal(renderer.shadowMap.needsUpdate,false);
+});

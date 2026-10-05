@@ -1,5 +1,5 @@
 import {setRoomNavigation,fadeNavigation} from './room-navigation.js?v=fade-1';
-import {createHouseRenderer} from './house-release-renderer.js?v=source-models-1';
+import {createHouseRenderer} from './house-release-renderer.js?v=cup-nested-reveal-8';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 const ROOMS = ['hallway', 'workshop', 'attic', 'basement', 'private-hall'];

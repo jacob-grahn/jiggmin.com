@@ -1,0 +1,38 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Cup shadow review</title>
+<style>body{margin:0;background:#10191e;color:#ddd;font:13px monospace}nav{height:42px;display:flex;align-items:center;gap:8px;padding:0 8px}canvas{display:block;width:100%;height:100%}#view{position:absolute;inset:42px 0 0}#results{position:absolute;top:45px;left:5px;background:#111d;z-index:5;white-space:pre-wrap;max-width:90%;font-size:11px}button{padding:5px}</style>
+<script type="importmap">{"imports":{"three":"/web/vendor/three/three.module.js"}}</script></head>
+<body><nav><button id="round">Ten-cup round</button><button id="ten">Ten-cup pyramid</button><button id="inside">Inspect interior</button><button id="throw">Throw top cup</button><button id="toggle">Shadows off</button><button id="compare">Compare shadow cost</button><span id="status">Loading…</span></nav><div id="view"></div><pre id="results"></pre>
+<script type="module">
+import * as THREE from 'three';
+import {createHouseRenderer} from '/web/house-release-renderer.js?v=cup-nested-reveal-8';
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true}),host=document.querySelector('#view'),status=document.querySelector('#status'),output=document.querySelector('#results');
+const layout=await (await fetch('/dist/web/assets/house/release/layout.json')).json();
+for(const key of ['assets','structureAssets'])for(const id in layout[key])if(layout[key][id])layout[key][id]=layout[key][id].replace('/web/','/dist/web/');
+const layoutURL=URL.createObjectURL(new Blob([JSON.stringify(layout)],{type:'application/json'}));
+const view=createHouseRenderer(host,{getDen:()=>({renderer}),layoutURL});
+await view.travel('private-hall');view.setActive(true);status.textContent='Ready';
+new ResizeObserver(()=>view.resize()).observe(host);
+document.querySelector('#round').onclick=()=>{
+ const game=view.cupGame;if(game.state.phase==='idle')game.press(10);
+ for(let i=0;i<20000;i++){
+  if(game.state.phase==='choose'){if(game.state.count===10)break;game.press(game.state.winner);}
+  game.update(1/60);
+ }
+ view.resize();status.textContent='Ten-cup round';
+};
+document.querySelector('#ten').onclick=()=>{
+ const game=view.cupGame;if(game.state.phase==='idle')game.press(10);
+ for(let i=0;i<20000&&game.state.phase!=='done';i++){if(game.state.phase==='choose')game.press(game.state.winner);game.update(1/60);}
+ view.resize();status.textContent='Ten cups';
+};
+document.querySelector('#inside').onclick=()=>{
+ const game=view.cupGame;if(game.state.phase!=='done')return;
+ const cup=game.props[9];cup.root.rotation.x=-Math.PI/2;
+ view.setCupShadows(true);
+ const proof=document.createElement('img');proof.src=view.capture();proof.style='position:absolute;inset:42px 0 0;width:100%;height:calc(100% - 42px)';host.append(proof);
+};
+document.querySelector('#throw').onclick=()=>{const cup=view.props.find(p=>p.id==='hallway-cups-9');if(cup?.mode==='throw')view.activateProp(cup);};
+let shadows=true;
+document.querySelector('#toggle').onclick=e=>{shadows=!shadows;view.setCupShadows(shadows);e.target.textContent=shadows?'Shadows off':'Shadows on';};
+document.querySelector('#compare').onclick=async()=>{status.textContent='Measuring…';output.textContent='';const result=await view.benchmarkCupShadows();output.textContent=JSON.stringify(result,null,2);status.textContent='Measured';};
+</script></body></html>
