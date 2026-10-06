@@ -9,7 +9,7 @@ import {GLTFLoader} from './model-loader.js';
 import {inSlot,slotTarget,playbackFile} from './interaction.js?v=aligned-slot-1';
 import {resolveRoute,writeGameUrl} from './routes.js';
 import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
-import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=painted-brick-1';
+import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=crt-scanlines-1';
 import {createControllerCord} from './controller-cord.js?v=2';
 import {remodelCartridge} from './cartridge-model.js?v=screenprint-3';
 import {SHELF_SLOTS,SHELF_FILL_ORDER,remapShelfAssignments,shuffled,RecoveryQueue,ease} from './library-behavior.js?v=visible-shelf-1';
@@ -379,12 +379,12 @@ async function loadDen(){
  const json=async path=>{const r=await fetch(path);if(!r.ok)throw Error(`Could not load ${path}`);return r.json();};
  const denLighting=new URLSearchParams(location.search).get('denLighting');
  const denModel=denLighting==='transfer'?'/web/assets/den-transferred.glb':denLighting==='uv'?'/web/assets/den-baked.glb':'/web/assets/room.glb?v=painted-brick-1';
- const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel,propLighting,profiles]=await Promise.all([
-  json('/data/games.json?v=swf-compat-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync(denModel),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=painted-brick-1'),json('/web/assets/colliders.json?v=painted-brick-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=painted-brick-1'),json('/data/gameplay.json?v=swf-compat-1')
+ const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel,propLighting,profiles,crtLighting]=await Promise.all([
+  json('/data/games.json?v=swf-compat-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync(denModel),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=painted-brick-1'),json('/web/assets/colliders.json?v=painted-brick-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=painted-brick-1'),json('/data/gameplay.json?v=swf-compat-1'),new THREE.TextureLoader().loadAsync('/web/assets/crt-screen.webp?v=crt-atlas-1')
  ]);
  games=manifest.games;for(const game of games){game.gameplay=profiles.games[game.id];if(!game.gameplay)throw Error(`Missing gameplay profile: ${game.id}`);}meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;
- environment=prepareRoom(roomModel,camera,lighting,propLighting);scene.add(environment.group);
+ environment=prepareRoom(roomModel,camera,lighting,propLighting,crtLighting);scene.add(environment.group);
  const journal=createDenJournal();scene.add(journal.group);environment.props.push(...journal.meshes);environment.occluders.push(...journal.meshes);
  physics=new CartridgePhysics(colliders);
  upperShelf=createUpperShelf();illustrateObject(upperShelf.group);illustrateObject(journal.group);scene.add(upperShelf.group);upperShelf.group.visible=false;

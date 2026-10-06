@@ -6,7 +6,7 @@ import {mergeGeometries} from './vendor/three/BufferGeometryUtils.js';
 
 // A camera-space light bake on actual 3D surfaces: the depth buffer, not DOM order,
 // determines whether the rack, TV, or table hides a moving cartridge.
-export function prepareRoom(gltf, camera, lighting, propLighting=lighting) {
+export function prepareRoom(gltf, camera, lighting, propLighting=lighting,crtLighting=null) {
   let uvBaked=false;gltf.scene.traverse(o=>{if(o.userData.role==='room_geometry'&&o.userData.den_baked)uvBaked=true;});
   if(uvBaked)return prepareBakedDen(gltf);
   lighting.colorSpace = THREE.SRGBColorSpace;
@@ -55,6 +55,22 @@ export function prepareRoom(gltf, camera, lighting, propLighting=lighting) {
   const aperture = new THREE.ShaderMaterial({vertexShader:`void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,fragmentShader:`void main(){gl_FragColor=vec4(0.0);}`,blending:THREE.NoBlending,depthWrite:true,side:THREE.DoubleSide});
   // Animate only the glass: the room's baked lighting stays steady.
   const idle=material.clone();
+  // Preserve the authored glass UVs from its planar bounds: room exports strip
+  // UVs because other surfaces use the shared camera-projected lighting plate.
+  if(crtLighting){
+    crtLighting.colorSpace=THREE.SRGBColorSpace;
+    crtLighting.anisotropy=8;crtLighting.wrapS=crtLighting.wrapT=THREE.ClampToEdgeWrapping;
+    glass.geometry.computeBoundingBox();
+    const bounds=glass.geometry.boundingBox,positions=glass.geometry.attributes.position;
+    const uvs=new Float32Array(positions.count*2);
+    for(let i=0;i<positions.count;i++){
+      uvs[i*2]=(positions.getX(i)-bounds.min.x)/(bounds.max.x-bounds.min.x);
+      uvs[i*2+1]=(positions.getY(i)-bounds.min.y)/(bounds.max.y-bounds.min.y);
+    }
+    glass.geometry.setAttribute('uv',new THREE.BufferAttribute(uvs,2));
+    idle.uniforms.crtLighting={value:crtLighting};
+    idle.vertexShader='varying vec2 crtUV;\n'+idle.vertexShader.replace('void main(){','void main(){crtUV=uv;');
+  }
   idle.uniforms.time={value:0};
   idle.fragmentShader=`uniform sampler2D lighting;uniform float time;varying vec4 bakePosition;
     float hash(float n){return fract(sin(n*127.1)*43758.5453);}
@@ -64,11 +80,22 @@ export function prepareRoom(gltf, camera, lighting, propLighting=lighting) {
       float flutter=(hash(tick)-.5)*.045;
       float dip=step(.94,hash(floor(time*7.0)))*.075;
       float breathing=.012*sin(time*2.3)+.009*sin(time*7.7);
-      float band=exp(-pow((fract(uv.y-time*.065)-.5)/.075,2.0))*.025;
+      // A slow refresh band uses screen coordinates, independent of room framing.
+      float band=exp(-pow((fract(uv.y-time*.065)-.5)/.045,2.0))*.14;
       vec3 color=texture2D(lighting,uv).rgb;
       gl_FragColor=vec4(color*(1.0+flutter+breathing-dip-band),1.0);
       #include <colorspace_fragment>
     }`;
+  if(crtLighting)idle.fragmentShader='uniform sampler2D crtLighting;varying vec2 crtUV;\n'+idle.fragmentShader
+    .replace('texture2D(lighting,uv)','texture2D(crtLighting,crtUV)')
+    .replace('fract(uv.y-time*.065)','fract(crtUV.y-time*.065)')
+    .replace('vec3 color=texture2D(crtLighting,crtUV).rgb;',`vec3 color=texture2D(crtLighting,crtUV).rgb;
+      // Stationary raster lines follow the glass, including its curved edges.
+      // Fade above the pixel sampling limit to avoid moire in small views.
+      float raster=crtUV.y*140.0;
+      float resolved=1.0-smoothstep(.35,.5,fwidth(raster));
+      float scanline=.5+.5*cos(raster*6.28318530718);
+      color*=1.0-.20*scanline*resolved;`);
   let playing=false,lastTick=-1;
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   glass.material=idle;glass.renderOrder=1;

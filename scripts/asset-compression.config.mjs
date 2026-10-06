@@ -7,7 +7,7 @@ export const PRESETS=[
 ];
 // GLB models and their embedded color textures are discovered automatically.
 // Standalone room images to encode alongside those models:
-export const ROOM_IMAGES=['room-lighting.webp','room-props.webp','den.webp','house/windows/night-forest.webp','house/hallway-cups/atlas.webp'];
+export const ROOM_IMAGES=['room-lighting.webp','room-props.webp','crt-screen.webp','den.webp','house/windows/night-forest.webp','house/hallway-cups/atlas.webp'];
 // Standalone WebP labels are discovered recursively; preserve aspect ratio.
 export const LABEL_BOUNDS={width:640,height:512};
 
