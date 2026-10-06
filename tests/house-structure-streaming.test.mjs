@@ -8,18 +8,28 @@ import * as THREE from 'three';
 import {clipCeilingMesh,splitSourceCeilings} from '../scripts/split-house-ceiling-source.mjs';
 import {shellOwner,SHELL_ROOMS} from '../scripts/split-house-structure.mjs';
 import {createStructureStore} from '../web/house-structure-store.js';
+import {isExteriorTree} from '../scripts/house-source/tree-delivery.mjs';
 const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
 const directory='web/assets/house/release';
 const master=await io.read(`${directory}/structure.glb`);
 const parts=new Map(await Promise.all(SHELL_ROOMS.map(async id=>[id,await io.read(`${directory}/structure/${id}.glb`)])));
+const treeReport=JSON.parse(await readFile(`${directory}/tree-delivery-report.json`));
 
-test('every authored shell mesh has exactly one room owner and keeps its world transform',()=>{
+test('shells keep one room owner and authored geometry except for documented tree delivery changes',()=>{
  const nodes=new Map();for(const [room,doc] of parts)for(const n of doc.getRoot().listNodes().filter(n=>n.getMesh())){
   assert.equal(n.getExtras().shell_room,room);
   assert.ok(!nodes.has(n.getName()),`duplicate ${n.getName()}`);nodes.set(n.getName(),n);
  }
  for(const n of master.getRoot().listNodes().filter(n=>n.getMesh())){
-  const copy=nodes.get(n.getName());assert.ok(copy,`missing ${n.getName()}`);
+  const copy=nodes.get(n.getName());
+  if(isExteriorTree(n)){
+   const result=treeReport.trees.find(t=>t.room==='structure'&&t.name===n.getName());assert.ok(result);
+   if(result.action==='removed'){assert.equal(copy,undefined);assert.deepEqual(result.windows,[]);continue;}
+   assert.ok(copy);assert.deepEqual(copy.getWorldMatrix(),n.getWorldMatrix());
+   assert.ok(result.windows.length>0);
+   if(result.action==='silhouette'){assert.equal(copy.getExtras().tree_delivery,'crossed-silhouette');assert.ok(result.afterTriangles<result.beforeTriangles*.15);continue;}
+  }
+  assert.ok(copy,`missing ${n.getName()}`);
   assert.ok(n.getWorldMatrix().every((v,i)=>Math.abs(v-copy.getWorldMatrix()[i])<1e-6),`moved ${n.getName()}`);
   const a=n.getMesh().listPrimitives(),b=copy.getMesh().listPrimitives();assert.equal(a.length,b.length);
   for(let i=0;i<a.length;i++){

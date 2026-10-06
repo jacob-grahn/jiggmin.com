@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,readdirSync,statSync} from 'node:fs';
+import {readFileSync,readdirSync,statSync,existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {BALANCED,ROOM_IMAGES,LABEL_BOUNDS} from '../scripts/asset-compression.config.mjs';
+import {BALANCED,ROOM_IMAGES,LABEL_BOUNDS,GEOMETRY_SIMPLIFICATION} from '../scripts/asset-compression.config.mjs';
 import sharp from 'sharp';
 
 const report=JSON.parse(readFileSync('dist/web/assets/compression-report.json'));
@@ -11,7 +11,10 @@ const gltf=bytes=>JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
 
 test('production automatically compresses every runtime model with the approved preset',()=>{
  for(const [key,value] of Object.entries(BALANCED))assert.equal(report[key],value);
- const models=readdirSync('web/assets',{recursive:true}).filter(path=>path.endsWith('.glb')).map(path=>'web/assets/'+path);
+ assert.deepEqual(report.geometrySimplification,GEOMETRY_SIMPLIFICATION);
+ const excluded=JSON.parse(readFileSync('scripts/production-asset-exclusions.json'));
+ const models=readdirSync('web/assets',{recursive:true}).filter(path=>path.endsWith('.glb')&&!excluded.includes(path)).map(path=>'web/assets/'+path);
+ for(const path of excluded){assert.ok(existsSync('web/assets/'+path),'source must remain available');assert.ok(!existsSync('dist/web/assets/'+path),'unused asset was deployed: '+path);}
  const labels=readdirSync('web/assets/labels',{recursive:true}).filter(path=>path.endsWith('.webp')).map(path=>'web/assets/labels/'+path);
  const expected=[...models,...ROOM_IMAGES.map(path=>'web/assets/'+path),...labels].sort();
  assert.deepEqual(report.assets.map(a=>a.source).sort(),expected);
@@ -24,6 +27,11 @@ test('production automatically compresses every runtime model with the approved 
    assert.ok(!gltf(source).extensionsRequired?.includes('KHR_draco_mesh_compression'),'source was overwritten');
    assert.ok(gltf(built).extensionsRequired.includes('KHR_draco_mesh_compression'),'runtime geometry is not compressed');
    assert.ok(asset.triangles>0);
+   assert.ok(asset.triangles<=asset.beforeTriangles);
+   assert.equal(asset.geometry.beforeTriangles,asset.beforeTriangles);
+   assert.equal(asset.geometry.afterTriangles,asset.triangles);
+   assert.ok(asset.geometry.nodes.length>0);
+   assert.ok(asset.geometry.meshes.every(m=>m.afterTriangles<=m.beforeTriangles));
   }else{
    assert.equal(built.toString('ascii',0,4),'RIFF');
    assert.equal(built.toString('ascii',8,12),'WEBP');
@@ -61,7 +69,7 @@ test('both production room loaders share self-hosted Draco decoding',()=>{
 
 test('retained original room lightmaps obey the shared phone delivery cap',async()=>{
  for(const room of ['hallway','workshop','basement','attic']){
-  const bytes=readFileSync(`dist/web/assets/house/release/${room}.glb`),doc=gltf(bytes),start=28+bytes.readUInt32LE(12),images=new Set();
+  const bytes=readFileSync(`dist/web/assets/house/release/${room==='basement'?'scenery/basement':room}.glb`),doc=gltf(bytes),start=28+bytes.readUInt32LE(12),images=new Set();
   for(const n of doc.nodes.filter(n=>String(n.extras?.release_baked??'').startsWith('original-'))){
    for(const p of doc.meshes[n.mesh]?.primitives??[]){
     const index=doc.materials[p.material]?.emissiveTexture?.index;if(index===undefined)continue;
@@ -73,29 +81,23 @@ test('retained original room lightmaps obey the shared phone delivery cap',async
  }
 });
 
-test('lighting atlases use the shared WebP quality 80 production encoder',async()=>{
- const path='web/assets/house/release/structure/hallway.glb';
- const sourceBytes=readFileSync(path),builtBytes=readFileSync('dist/'+path);
- const source=gltf(sourceBytes),built=gltf(builtBytes),checked=new Set();
- const image=(bytes,doc,index)=>{
-  const t=doc.textures[index],i=t.extensions?.EXT_texture_webp?.source??t.source;
-  const v=doc.bufferViews[doc.images[i].bufferView],start=28+bytes.readUInt32LE(12)+(v.byteOffset??0);
-  return bytes.subarray(start,start+v.byteLength);
- };
- for(const n of source.nodes.filter(n=>n.extras?.atlas_group)){
-  const output=built.nodes.find(o=>o.extras?.house_bake_id===n.extras.house_bake_id);
-  assert.ok(output?.extras.atlas_group,n.name);
-  for(const [i,p] of source.meshes[n.mesh].primitives.entries()){
-   const index=source.materials[p.material].emissiveTexture?.index;
-   if(index===undefined||checked.has(index))continue;checked.add(index);
-   const cap=n.extras.atlas_delivery_max;
-   const expected=await sharp(image(sourceBytes,source,index)).resize({width:cap,height:cap,fit:'inside',withoutEnlargement:true}).webp({quality:80,effort:4}).toBuffer();
-   const q=built.meshes[output.mesh].primitives[i],outputIndex=built.materials[q.material].emissiveTexture.index;
-   const actual=image(builtBytes,built,outputIndex);
-   assert.equal(hash(actual),hash(expected),`${n.name}: lighting atlas differs from WebP quality 80`);
-  }
+test('lighting atlases are repacked from masters and encoded once at quality 80',async()=>{
+ const {NodeIO}=await import('@gltf-transform/core'),{ALL_EXTENSIONS}=await import('@gltf-transform/extensions');
+ const draco3d=(await import('draco3dgltf')).default;
+ const {repackLightingAtlases}=await import('../scripts/repack-lighting-atlases.mjs');
+ const {LIGHTING_ATLASES}=await import('../scripts/asset-compression.config.mjs');
+ const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'draco3d.decoder':await draco3d.createDecoderModule()});
+ const path='web/assets/house/release/structure/hallway.glb',source=await io.read(path),built=await io.read('dist/'+path);
+ await repackLightingAtlases(source,LIGHTING_ATLASES);
+ const expected=new Map(source.getRoot().listTextures().filter(t=>t.getExtras().delivery_atlas).map(t=>[t.getName(),t]));
+ assert.ok(expected.size>0);
+ let checked=0;
+ for(const t of built.getRoot().listTextures())if(t.getExtras().delivery_atlas){
+  const master=expected.get(t.getName());assert.ok(master,t.getName());assert.deepEqual(t.getSize(),master.getSize());
+  const encoded=await sharp(master.getImage()).webp({quality:80,effort:4}).toBuffer();
+  assert.equal(hash(t.getImage()),hash(encoded),t.getName());checked++;
  }
- assert.ok(checked.size>0,'expected a baked lighting atlas');
+ assert.equal(checked,expected.size);
 });
 
 test('rear-hall cups atlas is encoded from its master at production WebP quality without resizing',async()=>{
@@ -108,4 +110,32 @@ test('rear-hall cups atlas is encoded from its master at production WebP quality
  assert.equal(meta.width,1024);assert.equal(meta.height,512);
  assert.equal(report.urls['/'+path],'/'+path);
  assert.ok(built.length<readFileSync(path).length);
+});
+
+
+test('production layout and live/debug loader asset URLs resolve',()=>{
+ const layout=JSON.parse(readFileSync('dist/web/assets/house/release/layout.json'));
+ assert.equal(layout.assets.structure,undefined);assert.equal(layout.fixedFixtures,undefined);
+ const urls=[...Object.values(layout.assets),...Object.values(layout.structureAssets),layout.denFloorReference];
+ for(const file of ['web/app.js','web/house-release-renderer.js','web/house-window-sky.js']){
+  const text=readFileSync(file,'utf8');
+  urls.push(...[...text.matchAll(/['"](\/web\/assets\/[^'"\s]+\.(?:glb|webp|json)(?:\?[^'"\s]*)?)['"]/g)].map(m=>m[1]));
+ }
+ for(const url of urls.filter(Boolean))assert.ok(existsSync('dist'+url.split('?')[0]),url);
+});
+
+test('discarded cartridge and window maps are absent from delivery GLBs',async()=>{
+ const {NodeIO}=await import('@gltf-transform/core'),{ALL_EXTENSIONS}=await import('@gltf-transform/extensions');
+ const draco3d=(await import('draco3dgltf')).default;
+ const {replacesWindowMaterial}=await import('../scripts/remove-unused-runtime-textures.mjs');
+ const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'draco3d.decoder':await draco3d.createDecoderModule()});
+ const carts=await io.read('dist/web/assets/cartridges.glb');assert.equal(carts.getRoot().listTextures().length,0);
+ let checked=0;
+ for(const asset of report.assets.filter(a=>a.source.startsWith('web/assets/house/release/')&&a.source.endsWith('.glb'))){
+  const doc=await io.read('dist/'+asset.source);
+  for(const n of doc.getRoot().listNodes().filter(n=>replacesWindowMaterial(n,asset.source)))for(const p of n.getMesh()?.listPrimitives()??[]){
+   const m=p.getMaterial();for(const slot of ['BaseColor','Emissive','Normal','Occlusion','MetallicRoughness'])assert.equal(m['get'+slot+'Texture'](),null,n.getName());checked++;
+  }
+ }
+ assert.ok(checked>0);
 });

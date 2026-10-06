@@ -83,6 +83,10 @@ lighting=configure(S);S.cycles.samples=1 if smoke else 64;S.cycles.use_denoising
 S.render.use_freestyle=False;S.view_settings.view_transform='AgX';S.view_settings.exposure=-1.3
 cam=bpy.data.objects.new('Atlas filter camera',bpy.data.cameras.new('Atlas filter camera'));S.collection.objects.link(cam);S.camera=cam
 records={};pending=[]
+atlas_profile=os.environ.get('BAKE_ATLAS_PROFILE','browser')
+if atlas_profile not in {'browser','render'}:raise RuntimeError('BAKE_ATLAS_PROFILE must be browser or render')
+atlas_overrides=json.loads(os.environ.get('BAKE_ATLAS_SIZES','{}'))
+if any(not isinstance(v,int) or v not in {512,1024,2048,4096} for v in atlas_overrides.values()):raise RuntimeError('Bake atlas sizes must be 512, 1024, 2048 or 4096')
 trim_normal_scale=float(os.environ.get('BAKE_TRIM_NORMAL_SCALE','1'))
 if not math.isfinite(trim_normal_scale) or not 0<=trim_normal_scale<=1:raise RuntimeError('Trim normal scale must be between 0 and 1')
 requested=set(filter(None,os.environ.get('BAKE_ATLAS_GROUPS','').split(',')))
@@ -99,7 +103,8 @@ for key,parts in groups.items():
    a,b,c=[o.matrix_world@o.data.vertices[i].co for i in t.vertices];area+=(b-a).cross(c-a).length/2
  # About 128 texels/metre before packing. Fine parts don't each demand 4K.
  desired=math.sqrt(area*128**2/.65)
- size=64 if smoke else (2048 if key in {'hall-ceilings','hall-trim','basement-slab-ceilings','attic-floor'} else 1024 if key=='hall-window-frames' else min(4096,max(1024,sizes[key])))
+ render_size=2048 if key in {'hall-ceilings','hall-trim','basement-slab-ceilings','attic-floor'} else 1024 if key=='hall-window-frames' else min(4096,max(1024,sizes[key]))
+ size=64 if smoke else atlas_overrides.get(key,1024 if atlas_profile=='browser' else render_size)
  records[key]={'resolution':[size,size],'objects':len(parts),'worldArea':round(area,2)}
 print('ATLAS_PLAN',json.dumps(records),flush=True)
 (OUT/'source-audit.json').write_text(json.dumps(audit,indent=2))
@@ -230,5 +235,5 @@ for o,baked,coords in pending:
 for o in S.objects:o.select_set(False)
 for o,_,_ in pending:o.select_set(True)
 bpy.ops.export_scene.gltf(filepath=str(OUT/'house-atlases.glb'),use_selection=True,export_format='GLB',export_extras=True,export_image_format='AUTO')
-(OUT/'report.json').write_text(json.dumps({'atlases':records,'lighting':lighting,'samples':S.cycles.samples,'objects':len(pending),'selectedGroups':sorted(requested),'exposure':-1.3,'losslessBake':True,'denoise':'irradiance-only','sourceAudit':'source-audit.json','projectedDenPreserved':True,'removedObjects':removed,'sourceUVGuard':True,'materialUV':'Source UV; normal bases explicitly bound'},indent=2)+'\n')
+(OUT/'report.json').write_text(json.dumps({'atlases':records,'lighting':lighting,'samples':S.cycles.samples,'atlasProfile':atlas_profile,'objects':len(pending),'selectedGroups':sorted(requested),'exposure':-1.3,'losslessBake':True,'denoise':'irradiance-only','sourceAudit':'source-audit.json','projectedDenPreserved':True,'removedObjects':removed,'sourceUVGuard':True,'materialUV':'Source UV; normal bases explicitly bound'},indent=2)+'\n')
 print('HOUSE_ATLASES_COMPLETE',flush=True)

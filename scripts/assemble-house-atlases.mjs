@@ -8,6 +8,7 @@ import {mkdir,readFile,writeFile,copyFile,stat} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {splitHouseStructure} from './split-house-structure.mjs';
+import {LIGHTING_ATLASES} from './asset-compression.config.mjs';
 const result=process.argv[2],out=process.argv[3]??'scene/exports/house-release/atlas-refresh';
 if(!result)throw Error('Expected verified result directory');
 const input=process.argv[4]??'web/assets/house/release',io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
@@ -26,7 +27,7 @@ for(const asset of ['structure','hallway','workshop','basement','attic']){
   for(const p of patch.getMesh().listPrimitives())assert.equal(p.getMaterial().getEmissiveTexture().getMimeType(),'image/png','Bake must be lossless');
   node.setMesh(copied.get(patch.getMesh()));
   const group=patch.getExtras().atlas_group;
-  const deliveryMax=['structure-hall','hall-ceilings','hall-trim'].includes(group)?2048:1024;
+  const deliveryMax=LIGHTING_ATLASES.groupCaps[group]??LIGHTING_ATLASES.pageSize;
   node.setExtras({...node.getExtras(),release_baked:patch.getExtras().release_baked,atlas_group:group,atlas_delivery_max:deliveryMax,atlas_source_id:patch.getExtras().atlas_source_id,atlas_lossless:false});count++;
  }
  receivers+=doc.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().release_baked).length;
@@ -39,7 +40,7 @@ for(const asset of ['structure','hallway','workshop','basement','attic']){
 assert.equal(count,replacements.size);
 const atlasRecords=Object.fromEntries(Object.entries(layout.atlasRefresh?.atlases??{}).map(([key,value])=>[key,{...value,masterDirectory:value.masterDirectory??layout.atlasRefresh.resultDirectory}]));
 for(const [key,value] of Object.entries(report.atlases))atlasRecords[key]={...value,masterDirectory:result};
-layout.atlasRefresh={...report,objects:receivers,rebakedObjects:report.objects,atlases:atlasRecords,resultDirectory:result,masterFormat:'PNG',webFormat:'WebP quality 80 lighting atlases',den:'original projection',delivery:'One shared asset set; 1024/2048px lighting atlas limits, WebP quality 80',retainedFixtureSourceKey:layout.atlasRefresh?.retainedFixtureSourceKey??layout.lightingBake?.report?.sourceKey};
+layout.atlasRefresh={...report,objects:receivers,rebakedObjects:report.objects,atlases:atlasRecords,resultDirectory:result,masterFormat:'PNG',webFormat:'WebP quality 80 lighting atlases',den:'original projection',delivery:'One shared asset set; 1024px lighting pages with per-group exceptions, WebP quality 80',retainedFixtureSourceKey:layout.atlasRefresh?.retainedFixtureSourceKey??layout.lightingBake?.report?.sourceKey};
 const baseline=join(dirname(result),'input-baseline');
 if(await stat(baseline).then(s=>s.isDirectory()).catch(()=>false))layout.atlasRefresh.baselineDirectory=baseline;
 // Retain the established window-rig contract with the new bake provenance.

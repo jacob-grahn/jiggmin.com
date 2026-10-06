@@ -1,0 +1,705 @@
+{
+  "version": 2,
+  "visibility": "settled-cameras",
+  "cameraSamples": 6,
+  "windows": [
+    {
+      "name": "Finish / hall-right glass",
+      "room": "structure",
+      "center": [
+        12,
+        1.625,
+        7.550000190734863
+      ],
+      "size": [
+        0.9300000071525574,
+        1.1799999475479126
+      ]
+    },
+    {
+      "name": "Finish / entry glass",
+      "room": "structure",
+      "center": [
+        8.399999618530273,
+        1.625,
+        12
+      ],
+      "size": [
+        0.7300000190734863,
+        1.1799999475479126
+      ]
+    },
+    {
+      "name": "Finish / garage-rear glass",
+      "room": "structure",
+      "center": [
+        14.449999809265137,
+        1.625,
+        -0.20000000298023224
+      ],
+      "size": [
+        2.2300000190734863,
+        1.1799999475479126
+      ]
+    },
+    {
+      "name": "Finish / garage-side glass",
+      "room": "structure",
+      "center": [
+        17,
+        1.625,
+        2.799999952316284
+      ],
+      "size": [
+        1.5299999713897705,
+        1.1799999475479126
+      ]
+    },
+    {
+      "name": "Finish / attic gable glass",
+      "room": "structure",
+      "center": [
+        6,
+        4.050000190734863,
+        0
+      ],
+      "size": [
+        1.3300000429153442,
+        0.8299999833106995
+      ]
+    },
+    {
+      "name": "Finish / attic gable glass.001",
+      "room": "structure",
+      "center": [
+        6,
+        4.050000190734863,
+        12
+      ],
+      "size": [
+        1.3300000429153442,
+        0.8299999833106995
+      ]
+    },
+    {
+      "name": "Finish / hall-rear glass",
+      "room": "structure",
+      "center": [
+        5.550000190734863,
+        1.625,
+        0
+      ],
+      "size": [
+        0.9300000071525574,
+        1.1799999475479126
+      ]
+    },
+    {
+      "name": "Garden beyond window",
+      "room": "basement",
+      "center": [
+        3.3599999427795417,
+        -1.0499999523162842,
+        0.12149990558624246
+      ],
+      "size": [
+        1.7999999523162846,
+        0.6499999761581421
+      ]
+    },
+    {
+      "name": "Garden beyond window.001",
+      "room": "basement",
+      "center": [
+        8.640000057220458,
+        -1.0499999523162842,
+        0.12149990558624246
+      ],
+      "size": [
+        1.7999999523162842,
+        0.6499999761581421
+      ]
+    },
+    {
+      "name": "Garden beyond window.002",
+      "room": "basement",
+      "center": [
+        0.16200027465820366,
+        -1.0499999523162842,
+        4.050000021457672
+      ],
+      "size": [
+        1.7999999523161598,
+        0.6499999761581421
+      ]
+    }
+  ],
+  "trees": [
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree",
+      "position": [
+        -14.422922134399414,
+        0,
+        -14.155259132385254
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.001",
+      "position": [
+        -8.481526374816895,
+        0,
+        -14.152935028076172
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.002",
+      "position": [
+        16.1218318939209,
+        -2.7,
+        -12.897916793823242
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Finish / garage-rear glass"
+      ],
+      "afterTriangles": 1209,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.003",
+      "position": [
+        -10.623764991760254,
+        0,
+        -18.94094467163086
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.004",
+      "position": [
+        29.170690536499023,
+        0,
+        0.9531822204589844
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.005",
+      "position": [
+        -5.114382743835449,
+        0,
+        -8.71984577178955
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.006",
+      "position": [
+        29.825923919677734,
+        0,
+        23.611507415771484
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.007",
+      "position": [
+        1.708693265914917,
+        0,
+        -9.399394035339355
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.008",
+      "position": [
+        -13.572623252868652,
+        0,
+        18.222381591796875
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.009",
+      "position": [
+        19.30145835876465,
+        -2.7,
+        -9.921782493591309
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Finish / garage-rear glass"
+      ],
+      "afterTriangles": 1058,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.010",
+      "position": [
+        15.121613502502441,
+        -2.7,
+        -8.602472305297852
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Finish / garage-rear glass"
+      ],
+      "afterTriangles": 1118,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.011",
+      "position": [
+        -13.053568840026855,
+        0,
+        -2.527477979660034
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.012",
+      "position": [
+        30.18220329284668,
+        0,
+        30.77440071105957
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.013",
+      "position": [
+        31.69478416442871,
+        0,
+        21.07207489013672
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.014",
+      "position": [
+        -0.6032826900482178,
+        0,
+        -10.832497596740723
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Garden beyond window"
+      ],
+      "afterTriangles": 1111,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.015",
+      "position": [
+        16.702205657958984,
+        -2.7,
+        -15.136762619018555
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Finish / garage-rear glass"
+      ],
+      "afterTriangles": 1205,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.016",
+      "position": [
+        -10.50467586517334,
+        0,
+        0.7569580674171448
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.017",
+      "position": [
+        27.774383544921875,
+        0,
+        13.765159606933594
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.018",
+      "position": [
+        31.607730865478516,
+        -2.7,
+        -9.761550903320312
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.019",
+      "position": [
+        11.39893627166748,
+        -2.7,
+        -13.862060546875
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Finish / garage-rear glass",
+        "Garden beyond window.001"
+      ],
+      "afterTriangles": 964,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.020",
+      "position": [
+        -10.353300094604492,
+        0,
+        31.115779876708984
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.021",
+      "position": [
+        -9.391995429992676,
+        0,
+        -9.906423568725586
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.022",
+      "position": [
+        -13.210423469543457,
+        0,
+        -14.174964904785156
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.023",
+      "position": [
+        1.3886442184448242,
+        0,
+        -19.41830062866211
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.024",
+      "position": [
+        -6.722674369812012,
+        0,
+        -17.65523338317871
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Garden beyond window"
+      ],
+      "afterTriangles": 1201,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.025",
+      "position": [
+        -12.650558471679688,
+        0,
+        11.925445556640625
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.026",
+      "position": [
+        -3,
+        0,
+        9
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.027",
+      "position": [
+        -5,
+        0,
+        11
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.028",
+      "position": [
+        -7,
+        0,
+        7
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.029",
+      "position": [
+        19,
+        0,
+        9.9
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.030",
+      "position": [
+        22,
+        0,
+        10
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.031",
+      "position": [
+        20,
+        0,
+        4
+      ],
+      "beforeTriangles": 20620,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.032",
+      "position": [
+        5,
+        0,
+        -4
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Finish / attic gable glass",
+        "Finish / hall-rear glass"
+      ],
+      "afterTriangles": 1137,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.033",
+      "position": [
+        8,
+        0,
+        -6
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Finish / attic gable glass",
+        "Garden beyond window.001"
+      ],
+      "afterTriangles": 1245,
+      "action": "silhouette"
+    },
+    {
+      "room": "structure",
+      "name": "Irregular leafy tree.034",
+      "position": [
+        14,
+        -2.7,
+        -5
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Finish / garage-rear glass"
+      ],
+      "afterTriangles": 1176,
+      "action": "silhouette"
+    },
+    {
+      "room": "basement",
+      "name": "Nearby bare branches",
+      "position": [
+        4.109999942779542,
+        -2.7499999523162844,
+        -0.7285000944137575
+      ],
+      "beforeTriangles": 5068,
+      "windows": [],
+      "afterTriangles": 0,
+      "action": "removed"
+    },
+    {
+      "room": "basement",
+      "name": "Irregular leafy tree",
+      "position": [
+        2.459999942779542,
+        -2.7499999523162844,
+        -2.6785000944137574
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Garden beyond window"
+      ],
+      "afterTriangles": 1298,
+      "action": "silhouette"
+    },
+    {
+      "room": "basement",
+      "name": "Nearby bare branches.001",
+      "position": [
+        9.390000057220458,
+        -2.7499999523162844,
+        -0.7285000944137575
+      ],
+      "beforeTriangles": 5068,
+      "windows": [
+        "Garden beyond window.001"
+      ],
+      "afterTriangles": 5068,
+      "action": "retained-nearby"
+    },
+    {
+      "room": "basement",
+      "name": "Irregular leafy tree.001",
+      "position": [
+        7.740000057220458,
+        -2.7499999523162844,
+        -2.6785000944137574
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Garden beyond window.001"
+      ],
+      "afterTriangles": 1147,
+      "action": "silhouette"
+    },
+    {
+      "room": "basement",
+      "name": "Nearby bare branches.002",
+      "position": [
+        -0.687999446789257,
+        -2.7499999523162844,
+        3.299999705764912
+      ],
+      "beforeTriangles": 5068,
+      "windows": [
+        "Garden beyond window.002"
+      ],
+      "afterTriangles": 5068,
+      "action": "retained-nearby"
+    },
+    {
+      "room": "basement",
+      "name": "Irregular leafy tree.002",
+      "position": [
+        -2.63800005960458,
+        -2.7499999523162844,
+        4.949998981528348
+      ],
+      "beforeTriangles": 20620,
+      "windows": [
+        "Garden beyond window.002"
+      ],
+      "afterTriangles": 1268,
+      "action": "silhouette"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {replacesWindowMaterial} from '../scripts/remove-unused-runtime-textures.mjs';
+import {createHash} from 'node:crypto';
 import {NodeIO} from '@gltf-transform/core';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import {readFileSync,existsSync} from 'node:fs';
@@ -86,18 +88,19 @@ test('production serves one shared, phone-bounded WebP atlas set',{skip:!enabled
  const renderer=readFileSync('web/house-release-renderer.js','utf8');
  assert.ok(!renderer.includes('compactTextures')&&!renderer.includes('mobileAssets'));
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'draco3d.decoder':await draco3d.createDecoderModule()});
- const groups=new Map();let bytes=0;
- for(const room of ['structure','hallway','workshop','basement','attic']){
+ const groups=new Map(),pages=new Map();let bytes=0;
+ for(const room of ['structure/hallway','structure/den','structure/workshop','structure/basement','structure/attic','hallway','workshop','scenery/basement','attic']){
   const path=`${builtDir}/${room}.glb`;bytes+=readFileSync(path).length;
   const source=await io.read(`${dir}/${room}.glb`),built=await io.read(path);
   const originals=new Map(source.getRoot().listNodes().map(n=>[n.getExtras().house_bake_id??n.getName(),n]));
   for(const n of built.getRoot().listNodes().filter(n=>n.getMesh())){
    const e=n.getExtras(),o=originals.get(e.house_bake_id??n.getName());
+   if(replacesWindowMaterial(n,`web/assets/house/release/${room}.glb`))continue;
    if(e.atlas_group){
     for(const p of n.getMesh().listPrimitives()){
      const t=p.getMaterial().getEmissiveTexture(),[w,h]=t.getSize();
      assert.equal(t.getMimeType(),'image/webp');assert.ok(Math.max(w,h)<=e.atlas_delivery_max);
-     groups.set(e.atlas_group,w*h);
+     groups.set(e.atlas_group,w*h);pages.set(createHash('sha256').update(t.getImage()).digest('hex'),w*h);
     }
    }else{
     // Live artwork keeps its original image dimensions through the shared build.
@@ -109,9 +112,9 @@ test('production serves one shared, phone-bounded WebP atlas set',{skip:!enabled
   }
  }
  assert.equal(groups.size,Object.keys(layout.atlasRefresh.atlases).length);
- const texels=[...groups.values()].reduce((a,b)=>a+b,0);
+ const texels=[...pages.values()].reduce((a,b)=>a+b,0);
  assert.ok(texels<=48*1024*1024,'Atlas base levels exceed the shared texture budget');
- console.log(`Shared release: ${groups.size} atlases, ${(texels/1e6).toFixed(2)} MP, ${(bytes/1e6).toFixed(2)} MB across five models`);
+ console.log(`Shared release: ${groups.size} atlases, ${(texels/1e6).toFixed(2)} MP, ${(bytes/1e6).toFixed(2)} MB across streamed room models`);
 });
 
 test('refreshed cellar wall lightmaps receive visible moonlight',{skip:!enabled},async()=>{

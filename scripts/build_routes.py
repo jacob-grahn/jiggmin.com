@@ -36,6 +36,7 @@ def build(output=OUTPUT, atlas_masters=False):
     if output == ROOT or output in ROOT.parents or output.is_relative_to(ROOT / 'web'):
         raise ValueError('Build output must not overwrite source files')
     hydrate_release_exports()
+    excluded = set() if atlas_masters else set(json.loads((ROOT / "scripts/production-asset-exclusions.json").read_text()))
     slugs = game_slugs()
     if not (ROOT / 'games').is_dir():
         raise FileNotFoundError('Restore the local games/ archive before building. See README.md.')
@@ -43,12 +44,25 @@ def build(output=OUTPUT, atlas_masters=False):
     output.mkdir(parents=True, exist_ok=True)
     html = (ROOT / 'index.html').read_text()
     (output / 'index.html').write_text(html)
+    def ignore_source_assets(directory, names):
+        ignored = {name for name in names if name in {'.DS_Store', '__pycache__'}}
+        for name in names:
+            path = Path(directory) / name
+            if path.is_relative_to(ROOT / 'web/assets') and path.relative_to(ROOT / 'web/assets').as_posix() in excluded:
+                ignored.add(name)
+        return ignored
     for folder in ['web', 'data', 'games']:
         # Replace generated trees so removed source assets cannot survive a rebuild.
         if (output / folder).exists():
             shutil.rmtree(output / folder)
         shutil.copytree(ROOT / folder, output / folder, dirs_exist_ok=True,
-                        ignore=shutil.ignore_patterns('.DS_Store', '__pycache__'))
+                        ignore=ignore_source_assets)
+    if not atlas_masters:
+        layout_path = output / 'web/assets/house/release/layout.json'
+        layout = json.loads(layout_path.read_text())
+        layout.get('assets', {}).pop('structure', None)
+        layout.pop('fixedFixtures', None)  # Already included in streamed room shells.
+        layout_path.write_text(json.dumps(layout, indent=2) + '\n')
     for slug in slugs:
         directory = output / slug
         directory.mkdir(exist_ok=True)

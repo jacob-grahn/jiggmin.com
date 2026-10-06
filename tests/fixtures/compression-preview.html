@@ -3,19 +3,23 @@
 <style>
 body{margin:0;background:#090e12;color:#eee;font:14px system-ui}header{height:64px;padding:0 20px;display:flex;align-items:center;gap:18px;box-sizing:border-box}select{font:inherit;padding:6px}iframe{display:block;border:0;width:100%;height:calc(100vh - 64px)}small{color:#bbb}#status{margin-left:auto}
 </style>
-<header><strong>Room compression</strong><label>Quality <select id="preset"><option value="original">Original</option><option value="high">High · image quality 90</option><option value="balanced">Balanced · image quality 80</option><option value="smaller">Smaller · image quality 65</option><option value="custom">Custom</option></select></label><small>Switching restarts the scene. Explore every room at desktop width.</small><span id="status"></span></header>
+<header><strong>Room compression</strong><label>Quality <select id="preset"><option value="before">Atlas · before</option><option value="after">Atlas · after</option><option value="original" selected>Original</option><option value="high">High · image quality 90</option><option value="balanced">Balanced · image quality 80</option><option value="smaller">Smaller · image quality 65</option><option value="custom">Custom</option></select></label><small>Switching restarts the scene. Explore every room at desktop width.</small><span id="status"></span></header>
 <iframe title="Explore the house with the selected compression settings"></iframe>
 <script type="module">
 const select=document.querySelector('select'),frame=document.querySelector('iframe'),status=document.querySelector('#status');
+if(new URLSearchParams(location.search).has('phone'))frame.style.width='390px';
+const initial=new URLSearchParams(location.search).get('preset');if(initial)select.value=initial;
 let revision=0;
 async function load(){
   const ticket=++revision,preset=select.value;status.textContent='Loading…';
   try{
     let report;
     if(preset!=='original'){
-      const response=await fetch(`/scene/compression/${preset}/report.json`);
+      const prefix=preset==='before'?'/scene/compression/atlas-before':preset==='after'?'/dist/web/assets':null;
+      const response=await fetch(prefix?`${prefix}/compression-report.json`:`/scene/compression/${preset}/report.json`);
       if(!response.ok)throw Error('Generate this preset first with npm run assets:compare.');
       report=await response.json();
+      if(prefix)for(const key in report.urls)report.urls[key]=prefix+key.slice('/web/assets'.length);
     }
     const response=await fetch('/index.html');if(!response.ok)throw Error('Site HTML unavailable');
     const doc=new DOMParser().parseFromString(await response.text(),'text/html');

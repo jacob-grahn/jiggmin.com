@@ -100,6 +100,29 @@ The hallway shell contains the closed boundary doors, attic hatch, and exterior 
 
 Meshes retain their world transforms and geometry. The source generator authors separate den and hallway ceiling sections at world x = 4.8. Source preparation also splits legacy spanning panels before baking. Streaming only packages the resulting surfaces; it never cuts baked geometry. Existing baked panels were converted once with their original UV mapping preserved. Textures referenced only by other rooms are omitted. Where a bake atlas crosses a room boundary, the generator copies the relevant pixel rectangle with padding and remaps that room's UVs, without rebaking. On departure, room-owned geometry, materials, textures, and decoded bitmaps are disposed; cancelled asynchronous shell loads cannot reattach.
 
+Exterior trees are the exception to exact geometry preservation. The approved
+selection was determined once by clipping tree triangles against the window
+openings and authored resting cameras, including portrait and landscape coverage.
+Builds now replay the saved selection in `scripts/house-source/tree-delivery.json`
+and the flat meshes in `tree-silhouettes.glb`, without checking visibility again.
+Camera and window changes do not alter the selection; new trees remain authored
+until explicitly added to it.
+
+Unseen trees are omitted from delivery. Leafy trees become two intersecting,
+double-sided black vector silhouettes traced from projections of their original
+meshes; large canopy gaps stay open, while subpixel detail is simplified. These
+cutouts use no image textures and need no runtime billboarding. The two visible close
+basement branch meshes keep their 3D geometry for parallax. Full `structure.glb`
+and `basement.glb` bake masters remain unchanged. The basement's derived delivery
+file is `scenery/basement.glb`, selected by `layout.assets.basement`.
+
+`web/assets/house/release/tree-delivery-report.json` records each tree's position,
+candidate windows, removal/conversion decision, and before/after triangle counts.
+Source models or saved delivery inputs invalidate the cached room exports.
+The saved selection removes 26 trees, converts 13 leafy trees, and retains two
+nearby branch meshes, reducing exterior tree geometry from 798,764 to 25,273
+triangles.
+
 
 ## Static model preparation
 

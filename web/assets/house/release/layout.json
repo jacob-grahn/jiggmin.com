@@ -334,7 +334,7 @@
     "den": null,
     "hallway": "/web/assets/house/release/hallway.glb?v=31bc599d3454",
     "workshop": "/web/assets/house/release/workshop.glb?v=153e65312b07",
-    "basement": "/web/assets/house/release/basement.glb?v=cde33325f2bc",
+    "basement": "/web/assets/house/release/scenery/basement.glb?v=98e4eebd1a68",
     "attic": "/web/assets/house/release/attic.glb?v=f2d6b15ab2e3"
   },
   "style": "original",
@@ -829,7 +829,7 @@
     "baselineDirectory": "scene/renders/local-atlases/20261004-140757/input-baseline"
   },
   "structureAssets": {
-    "hallway": "/web/assets/house/release/structure/hallway.glb?v=fc100f79587f",
+    "hallway": "/web/assets/house/release/structure/hallway.glb?v=3c9559c149e1",
     "den": "/web/assets/house/release/structure/den.glb?v=10ab8614ba53",
     "workshop": "/web/assets/house/release/structure/workshop.glb?v=7e6689593c36",
     "basement": "/web/assets/house/release/structure/basement.glb?v=ed8f7c61cb3a",
@@ -837,11 +837,11 @@
   },
   "structureStreaming": {
     "version": 1,
-    "sourceKey": "a3d6ed6d24b0a97fc5ec329a5f3ad55c110942628b03213e04c0390839347e4a",
+    "sourceKey": "0ec1fef7f43832bc38f72c0a0b0a2ed288155beaa758ee93a3c53d2ef44800d2",
     "rooms": {
       "hallway": {
-        "nodes": 352,
-        "bytes": 88803756,
+        "nodes": 327,
+        "bytes": 19670912,
         "textureMiB": 201.26,
         "textures": [
           {
@@ -920,7 +920,7 @@
             "height": 947
           }
         ],
-        "sha256": "fc100f79587ffb314ceb35a1edaac28bd86f105210a71bb85ef6e62182ee308a"
+        "sha256": "3c9559c149e111ea8c4230e25fcd172f9b2ba056055cc74b1fcc7506720af9e0"
       },
       "den": {
         "nodes": 30,
@@ -1030,5 +1030,12 @@
         "sha256": "0493767582ba003c9110d5ae2760931bde7377754ae2378bbd23eba3ea64f901"
       }
     }
+  },
+  "treeDelivery": {
+    "version": 1,
+    "sourceKey": "0ec1fef7f43832bc38f72c0a0b0a2ed288155beaa758ee93a3c53d2ef44800d2",
+    "basementHash": "98e4eebd1a68574b22fae098c7d646b16a78984409fa4788c890c2c2bb1207fd",
+    "reportHash": "e970610516d01e9e907897526b55705f0de9c849f1cd4ee8b624b992cfea17fa",
+    "report": "/web/assets/house/release/tree-delivery-report.json"
   }
 }

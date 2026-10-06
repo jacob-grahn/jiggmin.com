@@ -8,6 +8,7 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
 import {Box3,Vector3,Matrix4} from 'three';
+import {applySavedTreeDelivery} from './house-source/saved-tree-delivery.mjs';
 
 export const SHELL_ROOMS=['hallway','den','workshop','basement','attic'];
 export function shellOwner(name,e={},bounds){
@@ -46,9 +47,25 @@ function inheritedExtras(node){const chain=[];for(let n=node;n;n=n.getParentNode
 export async function splitHouseStructure({directory='web/assets/house/release'}={}){
  const layoutPath=`${directory}/layout.json`,layout=JSON.parse(await readFile(layoutPath));
  const paths=[`${directory}/structure.glb`,...['fixedFixtures','denFloorReference'].filter(k=>layout[k]).map(k=>local(layout[k]))];
- const key=hash(Buffer.concat([await readFile(fileURLToPath(import.meta.url)),...await Promise.all(paths.map(p=>readFile(p)))]));
- if(layout.structureStreaming?.sourceKey===key&&await Promise.all(SHELL_ROOMS.map(id=>readFile(`${directory}/structure/${id}.glb`).then(b=>hash(b)===layout.structureStreaming.rooms[id].sha256,()=>false))).then(v=>v.every(Boolean)))return layout.structureStreaming;
+ const roomPaths=['hallway','workshop','basement','attic'].map(id=>`${directory}/${id}.glb`);
+ const codePaths=[fileURLToPath(import.meta.url),'scripts/house-source/saved-tree-delivery.mjs','scripts/house-source/tree-delivery.json','scripts/house-source/tree-silhouettes.glb'];
+ const key=hash(Buffer.concat([...await Promise.all([...codePaths,...paths,...roomPaths].map(p=>readFile(p))),Buffer.from('saved-tree-selection')]));
+ if(layout.structureStreaming?.sourceKey===key&&layout.treeDelivery?.sourceKey===key&&
+  await readFile(`${directory}/scenery/basement.glb`).then(b=>hash(b)===layout.treeDelivery.basementHash,()=>false)&&
+  await readFile(`${directory}/tree-delivery-report.json`).then(b=>hash(b)===layout.treeDelivery.reportHash,()=>false)&&
+  await Promise.all(SHELL_ROOMS.map(id=>readFile(`${directory}/structure/${id}.glb`).then(b=>hash(b)===layout.structureStreaming.rooms[id].sha256,()=>false))).then(v=>v.every(Boolean)))return layout.structureStreaming;
  const io=new NodeIO().registerExtensions(ALL_EXTENSIONS),master=await io.read(paths[0]);
+ // Preserve full authoring/bake inputs; only streamed delivery meshes change.
+ const documents=new Map([['structure',master]]);
+ for(const [i,id] of ['hallway','workshop','basement','attic'].entries())documents.set(id,await io.read(roomPaths[i]));
+ const treeReport=await applySavedTreeDelivery(documents,io);
+ await mkdir(`${directory}/scenery`,{recursive:true});
+ const basementPath=`${directory}/scenery/basement.glb`,basement=documents.get('basement');
+ await basement.transform(prune({keepAttributes:true,keepLeaves:true,keepSolidTextures:true}),unpartition());await io.write(basementPath,basement);
+ const basementHash=hash(await readFile(basementPath)),reportBytes=Buffer.from(JSON.stringify(treeReport,null,2)+'\n');
+ await writeFile(`${directory}/tree-delivery-report.json`,reportBytes);
+ layout.treeDelivery={version:1,sourceKey:key,basementHash,reportHash:hash(reportBytes),report:`/${directory}/tree-delivery-report.json`};
+ layout.assets.basement=`/${basementPath}?v=${basementHash.slice(0,12)}`;
  const sources=[master];
  if(layout.fixedFixtures)sources.push(await io.read(local(layout.fixedFixtures)));
  const assignments=new Map(),textureOwners=new Map();

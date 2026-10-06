@@ -4,11 +4,18 @@
 <body><nav><button data-room="hallway">Hallway</button><button data-room="workshop">Workshop</button><button data-room="basement">Basement</button><button data-room="attic">Attic</button><button data-room="private-hall">Rear hall</button><a href="/">Test live den handoff in game</a><button id="capture">Save frame</button><button id="benchmark">Measure rooms</button><span id="status">Loading</span></nav><pre id="performance" style="position:absolute;z-index:20;top:45px;background:#111e;font-size:11px;max-width:100%;white-space:pre-wrap"></pre><div id="view"><div id="targets"></div></div>
 <script type="module">
 import {createHouseRenderer} from '/web/house-release-renderer.js?v=house-reference-46';
+import {DefaultLoadingManager,WebGLRenderer} from 'three';
+const delivery=new URLSearchParams(location.search).get('delivery');
+// Fixed-width stage allows paired portrait captures without changing the desktop.
+if(new URLSearchParams(location.search).has('phone'))document.querySelector('#view').style.cssText='right:auto;width:390px';
+const assetPrefix=delivery==='before'?'/scene/compression/atlas-before/':delivery==='after'?'/dist/web/assets/':null;
+if(assetPrefix)DefaultLoadingManager.setURLModifier(url=>{const p=new URL(url,location.href).pathname;return p.startsWith('/web/assets/')?assetPrefix+p.slice('/web/assets/'.length):url;});
 const status=document.querySelector('#status'),host=document.querySelector('#view'),targets=document.querySelector('#targets');
 let currentRoom='hallway',measuring=false;
 const test=new URLSearchParams(location.search).has('test');
 if(new URLSearchParams(location.search).has('clean'))targets.hidden=true;
-const view=createHouseRenderer(host,{layoutURL:test?'/scene/exports/house-release/test/layout.json':'/web/assets/house/release/layout.json',onActivate:id=>{status.textContent='Activated '+id;}});
+const renderer=new WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+const view=createHouseRenderer(host,{getDen:()=>({renderer}),layoutURL:test?'/scene/exports/house-release/test/layout.json':'/web/assets/house/release/layout.json',onActivate:id=>{status.textContent='Activated '+id;}});
 async function go(id){if(!measuring)document.querySelector('#performance').hidden=true;try{document.querySelectorAll('nav button').forEach(b=>b.disabled=true);status.textContent='Travelling';targets.replaceChildren();view.setActive(false);await view.travel(id);const bindings=new Map();for(const prop of view.props){const b=document.createElement('button');b.textContent=prop.hotspot??prop.title;b.onclick=()=>view.activateProp(prop);targets.append(b);bindings.set(prop,b);}view.bindTargets(bindings);view.setActive(true);currentRoom=id;status.textContent=id+' ready · '+view.props.length+' props';}catch(e){status.textContent='ERROR '+e.message;console.error(e);}finally{document.querySelectorAll('nav button').forEach(b=>b.disabled=measuring);}}
 document.querySelectorAll('nav button[data-room]').forEach(b=>b.onclick=()=>go(b.dataset.room));document.querySelector('#capture').onclick=()=>{const a=document.createElement('a');a.download='house-'+(test?'test':'release')+'-'+currentRoom+'.png';a.href=view.capture();a.click();};document.querySelector('#benchmark').onclick=async()=>{const output=document.querySelector('#performance');measuring=true;output.hidden=false;output.textContent='Measuring rooms…';const results=[];for(const id of ['hallway','workshop','basement','attic','private-hall']){await go(id);results.push(await view.benchmark());output.textContent=JSON.stringify(results,null,2);}measuring=false;document.querySelectorAll('nav button').forEach(b=>b.disabled=false);status.textContent='Measurements complete';};new ResizeObserver(()=>view.resize()).observe(host);go('hallway');
 </script></body></html>

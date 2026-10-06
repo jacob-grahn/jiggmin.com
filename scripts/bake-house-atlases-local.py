@@ -8,6 +8,8 @@ from pathlib import Path
 R=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('groups',nargs='+');p.add_argument('--threads',default='6');p.add_argument('--stage-only',action='store_true')
+p.add_argument('--profile',choices=['browser','render'],default='browser')
+p.add_argument('--atlas-size',type=int,choices=[512,1024,2048,4096],help='Override selected groups')
 a=p.parse_args();run=R/'scene/renders/local-atlases'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S');out=run/'output';out.mkdir(parents=True)
 inputs=[R/'scene/house-release.blend',R/'scene/basement-refit.json',R/'scene/exports/house/basement.glb',*sorted((R/'scene/scripts').glob('*.py')),*[(R/f'web/assets/house/release/{n}.glb') for n in ['structure','hallway','workshop','basement','attic']]]
 for directory in ['scene/exports/house-release/bake-input','scene/house-textures','scene/textures']:
@@ -16,7 +18,8 @@ for directory in ['scene/exports/house-release/bake-input','scene/house-textures
 baseline=run/'input-baseline';baseline.mkdir()
 for asset in ['structure','hallway','workshop','basement','attic']:
  shutil.copy2(R/f'web/assets/house/release/{asset}.glb',baseline/f'{asset}.glb')
-env={**os.environ,'BAKE_OUTPUT_DIR':str(out),'BAKE_ATLAS_GROUPS':','.join(a.groups),'BAKE_TRIM_NORMAL_SCALE':'1'}
+env={**os.environ,'BAKE_OUTPUT_DIR':str(out),'BAKE_ATLAS_GROUPS':','.join(a.groups),'BAKE_TRIM_NORMAL_SCALE':'1','BAKE_ATLAS_PROFILE':a.profile}
+if a.atlas_size:env['BAKE_ATLAS_SIZES']=json.dumps({group:a.atlas_size for group in a.groups})
 command=[os.environ.get('BLENDER','/Applications/Blender.app/Contents/MacOS/Blender'),'-b','scene/house-release.blend','--threads',a.threads,'--python-exit-code','1','--python','scene/scripts/bake_house_atlases.py']
 print(f'Local production bake: {out}',flush=True)
 with (run/'bake.log').open('w') as log:

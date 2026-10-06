@@ -32,7 +32,9 @@
     "release:house:test": "python3 scripts/house_release.py test --review",
     "release:house:bake": "python3 scripts/house_release.py release",
     "release:house:style": "node scripts/restore-house-style.mjs",
-    "bake:atlases": "python3 scripts/bake-house-atlases-local.py"
+    "bake:atlases": "python3 scripts/bake-house-atlases-local.py",
+    "textures:audit": "node scripts/audit-textures.mjs",
+    "textures:plan": "node scripts/plan-texture-sizes.mjs"
   },
   "dependencies": {
     "@ruffle-rs/ruffle": "0.6.0",
@@ -45,6 +47,7 @@
     "@gltf-transform/extensions": "^4.5.1",
     "@gltf-transform/functions": "^4.5.1",
     "draco3dgltf": "^1.5.7",
+    "meshoptimizer": "^1.3.0",
     "sharp": "^0.35.5"
   }
 }

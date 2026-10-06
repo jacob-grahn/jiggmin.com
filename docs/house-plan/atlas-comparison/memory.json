@@ -1,0 +1,16 @@
+{
+  "before": {
+    "textures": 96,
+    "lightingPages": 24,
+    "pixels": 49941072,
+    "lightingPixels": 32396704,
+    "rgbaMipMiB": 254.013427734375
+  },
+  "after": {
+    "textures": 98,
+    "lightingPages": 26,
+    "pixels": 42601040,
+    "lightingPixels": 25056672,
+    "rgbaMipMiB": 216.68009440104166
+  }
+}

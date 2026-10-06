@@ -11,7 +11,11 @@ import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import {draco, textureCompress} from '@gltf-transform/functions';
 import draco3d from 'draco3dgltf';
 import sharp from 'sharp';
-import {BALANCED, PRESETS, ROOM_IMAGES, LABEL_BOUNDS} from './asset-compression.config.mjs';
+import {BALANCED, PRESETS, ROOM_IMAGES, LABEL_BOUNDS, GEOMETRY_SIMPLIFICATION,LIGHTING_ATLASES,IMAGE_BOUNDS} from './asset-compression.config.mjs';
+import {repackLightingAtlases} from './repack-lighting-atlases.mjs';
+
+import {removeUnusedRuntimeTextures} from './remove-unused-runtime-textures.mjs';
+import {simplifyGeometry} from './simplify-geometry.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const {values}=parseArgs({options:{
@@ -19,7 +23,7 @@ const {values}=parseArgs({options:{
   'atlas-masters':{type:'boolean',default:false},
   quality:{type:'string'}, 'position-bits':{type:'string'},
   'normal-bits':{type:'string'}, 'uv-bits':{type:'string'},
-  'max-texture-size':{type:'string'},
+  'max-texture-size':{type:'string'}, 'geometry-error':{type:'string'},
 }});
 const production=values.production;
 const output=resolve(root,values.output??(production?'dist/web/assets':'scene/compression'));
@@ -34,6 +38,9 @@ function integer(key,fallback,min,max){
   if(!Number.isInteger(n)||n<min||n>max)throw Error(`${key} must be an integer from ${min} to ${max}`);
   return n;
 }
+const geometryError=Number(values['geometry-error']??GEOMETRY_SIMPLIFICATION.error);
+if(!Number.isFinite(geometryError)||geometryError<0||geometryError>1)throw Error('geometry-error must be between 0 and 1');
+const geometrySimplification={...GEOMETRY_SIMPLIFICATION,error:geometryError};
 const presets=production?[BALANCED]:custom?[{
   id:'custom',quality:integer('quality',80,1,100),
   positionBits:integer('position-bits',14,8,24),normalBits:integer('normal-bits',10,6,16),
@@ -48,7 +55,8 @@ async function findAssets(directory,suffix){
   }
   return result.sort();
 }
-const models=await findAssets('web/assets','.glb');
+const excluded=new Set(production&&!atlasMasters?JSON.parse(await readFile(new URL('./production-asset-exclusions.json',import.meta.url))):[]);
+const models=(await findAssets('web/assets','.glb')).filter(path=>!excluded.has(path.slice('web/assets/'.length)));
 const labels=await findAssets('web/assets/labels','.webp');
 const labelSet=new Set(labels);
 const images=ROOM_IMAGES.map(name=>`web/assets/${name}`);
@@ -75,17 +83,21 @@ function inspectGeometry(document){
 }
 await mkdir(output,{recursive:true});
 for(const preset of presets){
-  const report={...preset,atlasMasters,labelBounds:LABEL_BOUNDS,assets:[],urls:{},originalBytes:0,bytes:0,gzipBytes:0};
+  const report={...preset,atlasMasters,geometrySimplification,labelBounds:LABEL_BOUNDS,assets:[],urls:{},originalBytes:0,bytes:0,gzipBytes:0};
   for(const source of [...models,...images,...labels]){
     const relative=source.replace(/^web\/assets\//,'').replace(/\.png$/,'.webp');
     const target=production?resolve(output,relative):resolve(output,preset.id,relative);
     await mkdir(dirname(target),{recursive:true});
-    let beforeTriangles,afterTriangles;
+    let beforeTriangles,afterTriangles,geometry,atlases,cleanup;
     if(source.endsWith('.glb')){
       const document=await io.read(resolve(root,source));
       document.setLogger(new Logger(Logger.Verbosity.WARN));
       const signature=sceneSignature(document);
       beforeTriangles=inspectGeometry(document);
+      if(!atlasMasters){cleanup=await removeUnusedRuntimeTextures(document,source);atlases=await repackLightingAtlases(document,LIGHTING_ATLASES);}
+      geometry=await simplifyGeometry(document,geometrySimplification);
+      assert.deepEqual(sceneSignature(document),signature,`${source}: simplification changed scene structure`);
+      const simplifiedTriangles=inspectGeometry(document);
       const hasAtlas=document.getRoot().listNodes().some(n=>n.getExtras().release_baked||n.getExtras().den_native_artwork||n.getExtras().texture_pixel_exact);
       // The one shared delivery set has a fixed atlas budget on every device.
       // Resize from lossless masters before the only lossy encoding step.
@@ -99,6 +111,7 @@ for(const preset of presets){
       }
       if(!atlasMasters){
       for(const [texture,cap] of limits){
+        if(texture.getExtras().delivery_atlas)continue;
         const pixels=await sharp(texture.getImage()).resize({width:cap,height:cap,fit:'inside',withoutEnlargement:true}).png().toBuffer();
         texture.setImage(pixels).setMimeType('image/png');
       }
@@ -115,14 +128,14 @@ for(const preset of presets){
       const decoded=await io.read(target);
       assert.deepEqual(sceneSignature(decoded),signature,`${source}: scene structure changed`);
       afterTriangles=inspectGeometry(decoded);
-      assert.equal(afterTriangles,beforeTriangles,`${source}: triangle count changed`);
+      assert.equal(afterTriangles,simplifiedTriangles,`${source}: compression changed simplified triangle count`);
     }else{
       let pipeline=sharp(resolve(root,source));
       if(labelSet.has(source)){
         const width=Math.min(LABEL_BOUNDS.width,preset.maxTextureSize||Infinity);
         const height=Math.min(LABEL_BOUNDS.height,preset.maxTextureSize||Infinity);
         pipeline=pipeline.resize({width,height,fit:'inside',withoutEnlargement:true});
-      }else if(preset.maxTextureSize)pipeline=pipeline.resize({width:preset.maxTextureSize,height:preset.maxTextureSize,fit:'inside',withoutEnlargement:true});
+      }else {const cap=preset.maxTextureSize||IMAGE_BOUNDS[relative];if(cap)pipeline=pipeline.resize({width:cap,height:cap,fit:'inside',withoutEnlargement:true});}
       await pipeline.webp({quality:preset.quality,effort:6}).toFile(target);
     }
     const sourceData=await readFile(resolve(root,source));
@@ -131,10 +144,10 @@ for(const preset of presets){
     const gzipBytes=gzipSync(await readFile(target)).length;
     const sourceHash=createHash('sha256').update(sourceData).digest('hex');
     const outputHash=createHash('sha256').update(await readFile(target)).digest('hex');
-    report.assets.push({source,sourceHash,outputHash,originalBytes,bytes,gzipBytes,...(beforeTriangles===undefined?{}:{triangles:afterTriangles})});
+    report.assets.push({source,sourceHash,outputHash,originalBytes,bytes,gzipBytes,...(beforeTriangles===undefined?{}:{triangles:afterTriangles,beforeTriangles,geometry,atlases,cleanup})});
     report.urls['/'+source]=production?`/web/assets/${relative}`:`/scene/compression/${preset.id}/${relative}`;
     report.originalBytes+=originalBytes;report.bytes+=bytes;report.gzipBytes+=gzipBytes;
-    console.log(`${preset.id}: ${source}: ${(originalBytes/1e6).toFixed(2)} → ${(bytes/1e6).toFixed(2)} MB`);
+    console.log(`${preset.id}: ${source}: ${(originalBytes/1e6).toFixed(2)} → ${(bytes/1e6).toFixed(2)} MB${geometry?` | ${beforeTriangles.toLocaleString()} → ${afterTriangles.toLocaleString()} triangles`: ""}`);
   }
   await writeFile(production?resolve(output,'compression-report.json'):resolve(output,preset.id,'report.json'),JSON.stringify(report,null,2)+'\n');
   console.log(`${preset.id} total: ${(report.bytes/1e6).toFixed(2)} MB (${(100*(1-report.bytes/report.originalBytes)).toFixed(1)}% smaller)`);
