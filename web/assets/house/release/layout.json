@@ -330,7 +330,7 @@
     "attic": 244
   },
   "assets": {
-    "structure": "/web/assets/house/release/structure.glb?v=b82e4a623263",
+    "structure": "/web/assets/house/release/structure.glb?v=0ff1a533a346",
     "den": null,
     "hallway": "/web/assets/house/release/hallway.glb?v=31bc599d3454",
     "workshop": "/web/assets/house/release/workshop.glb?v=153e65312b07",
@@ -426,104 +426,14 @@
     "source": "original-window-rig",
     "report": {
       "atlases": {
-        "hall-ceilings": {
+        "structure-attic": {
           "resolution": [
             2048,
             2048
           ],
-          "objects": 8,
-          "worldArea": 142.06,
-          "seconds": 380.98
-        },
-        "structure-den": {
-          "resolution": [
-            2048,
-            2048
-          ],
-          "objects": 30,
-          "worldArea": 147.33,
-          "seconds": 267.52
-        },
-        "attic-floor": {
-          "resolution": [
-            2048,
-            2048
-          ],
-          "objects": 10,
-          "worldArea": 142.75,
-          "seconds": 300.38
-        },
-        "structure-hall": {
-          "resolution": [
-            4096,
-            4096
-          ],
-          "objects": 139,
-          "worldArea": 643.85,
-          "seconds": 820.25
-        },
-        "basement-slab-ceilings": {
-          "resolution": [
-            2048,
-            2048
-          ],
-          "objects": 8,
-          "worldArea": 136.72,
-          "seconds": 249.76
-        },
-        "structure-stairs": {
-          "resolution": [
-            4096,
-            4096
-          ],
-          "objects": 72,
-          "worldArea": 149.11,
-          "seconds": 1064.9
-        },
-        "structure-garage": {
-          "resolution": [
-            2048,
-            2048
-          ],
-          "objects": 80,
-          "worldArea": 428.51,
-          "seconds": 387.72
-        },
-        "original-basement": {
-          "resolution": [
-            4096,
-            4096
-          ],
-          "objects": 34,
-          "worldArea": 88.99,
-          "seconds": 1349.02
-        },
-        "basement-windows": {
-          "resolution": [
-            2048,
-            2048
-          ],
-          "objects": 33,
-          "worldArea": 33.28,
-          "seconds": 438.39
-        },
-        "basement-ceiling": {
-          "resolution": [
-            2048,
-            2048
-          ],
-          "objects": 4,
-          "worldArea": 298.27,
-          "seconds": 543.33
-        },
-        "basement-details": {
-          "resolution": [
-            2048,
-            2048
-          ],
-          "objects": 24,
-          "worldArea": 625,
-          "seconds": 560.37
+          "objects": 133,
+          "worldArea": 740.19,
+          "seconds": 162.19
         }
       },
       "lighting": {
@@ -540,19 +450,10 @@
         "liveWindowLights": false
       },
       "samples": 64,
-      "objects": 442,
+      "atlasProfile": "browser",
+      "objects": 133,
       "selectedGroups": [
-        "attic-floor",
-        "basement-ceiling",
-        "basement-details",
-        "basement-slab-ceilings",
-        "basement-windows",
-        "hall-ceilings",
-        "original-basement",
-        "structure-den",
-        "structure-garage",
-        "structure-hall",
-        "structure-stairs"
+        "structure-attic"
       ],
       "exposure": -1.3,
       "losslessBake": true,
@@ -604,8 +505,8 @@
         ],
         "objects": 133,
         "worldArea": 740.19,
-        "seconds": 12.98,
-        "masterDirectory": ".runpod/20261004-002049-5bdc60/output"
+        "seconds": 162.19,
+        "masterDirectory": "/Users/jacobgrahn/Documents/jiggmin.com/scene/renders/local-atlases/20261005-215828/output"
       },
       "structure-hall": {
         "resolution": [
@@ -797,19 +698,10 @@
       "liveWindowLights": false
     },
     "samples": 64,
+    "atlasProfile": "browser",
     "objects": 874,
     "selectedGroups": [
-      "attic-floor",
-      "basement-ceiling",
-      "basement-details",
-      "basement-slab-ceilings",
-      "basement-windows",
-      "hall-ceilings",
-      "original-basement",
-      "structure-den",
-      "structure-garage",
-      "structure-hall",
-      "structure-stairs"
+      "structure-attic"
     ],
     "exposure": -1.3,
     "losslessBake": true,
@@ -819,25 +711,32 @@
     "removedObjects": [],
     "sourceUVGuard": true,
     "materialUV": "Source UV; normal bases explicitly bound",
-    "rebakedObjects": 442,
-    "resultDirectory": "scene/renders/local-atlases/20261004-140757/output",
+    "rebakedObjects": 133,
+    "resultDirectory": "/Users/jacobgrahn/Documents/jiggmin.com/scene/renders/local-atlases/20261005-215828/output",
     "masterFormat": "PNG",
     "webFormat": "WebP quality 80 lighting atlases",
     "den": "original projection",
-    "delivery": "One shared asset set; 1024/2048px lighting atlas limits, WebP quality 80",
+    "delivery": "One shared asset set; 1024px lighting pages with per-group exceptions, WebP quality 80",
     "retainedFixtureSourceKey": "6d225e92050cb627202c8250692fdb98365c30c9d4ec9db631acb28242f88713",
-    "baselineDirectory": "scene/renders/local-atlases/20261004-140757/input-baseline"
+    "baselineDirectory": "/Users/jacobgrahn/Documents/jiggmin.com/scene/renders/local-atlases/20261005-215828/input-baseline"
+  },
+  "treeDelivery": {
+    "version": 1,
+    "sourceKey": "5128107af38e96a6491268a5a2cd02ece8080f0fc4a24b4fde8b467daf1ed261",
+    "basementHash": "98e4eebd1a68574b22fae098c7d646b16a78984409fa4788c890c2c2bb1207fd",
+    "reportHash": "e970610516d01e9e907897526b55705f0de9c849f1cd4ee8b624b992cfea17fa",
+    "report": "/web/assets/house/release/tree-delivery-report.json"
   },
   "structureAssets": {
     "hallway": "/web/assets/house/release/structure/hallway.glb?v=3c9559c149e1",
     "den": "/web/assets/house/release/structure/den.glb?v=10ab8614ba53",
     "workshop": "/web/assets/house/release/structure/workshop.glb?v=7e6689593c36",
     "basement": "/web/assets/house/release/structure/basement.glb?v=ed8f7c61cb3a",
-    "attic": "/web/assets/house/release/structure/attic.glb?v=0493767582ba"
+    "attic": "/web/assets/house/release/structure/attic.glb?v=25abe78ede7c"
   },
   "structureStreaming": {
     "version": 1,
-    "sourceKey": "0ec1fef7f43832bc38f72c0a0b0a2ed288155beaa758ee93a3c53d2ef44800d2",
+    "sourceKey": "5128107af38e96a6491268a5a2cd02ece8080f0fc4a24b4fde8b467daf1ed261",
     "rooms": {
       "hallway": {
         "nodes": 327,
@@ -993,7 +892,7 @@
       },
       "attic": {
         "nodes": 169,
-        "bytes": 5019292,
+        "bytes": 4824548,
         "textureMiB": 44,
         "textures": [
           {
@@ -1027,15 +926,8 @@
             "height": 2048
           }
         ],
-        "sha256": "0493767582ba003c9110d5ae2760931bde7377754ae2378bbd23eba3ea64f901"
+        "sha256": "25abe78ede7c01744c2682ded57bd376119ba89919d285fff57c50e745c59e16"
       }
     }
-  },
-  "treeDelivery": {
-    "version": 1,
-    "sourceKey": "0ec1fef7f43832bc38f72c0a0b0a2ed288155beaa758ee93a3c53d2ef44800d2",
-    "basementHash": "98e4eebd1a68574b22fae098c7d646b16a78984409fa4788c890c2c2bb1207fd",
-    "reportHash": "e970610516d01e9e907897526b55705f0de9c849f1cd4ee8b624b992cfea17fa",
-    "report": "/web/assets/house/release/tree-delivery-report.json"
   }
 }

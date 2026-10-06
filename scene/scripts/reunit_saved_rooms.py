@@ -7,7 +7,7 @@ from mathutils import Matrix,Vector
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(Path(__file__).parent))
 from room_model_refit import SPEC,refit_object,import_source,center
 from house_preview_spec import build_spec
-for filename in ['house-plan-preview.blend','house-release.blend']:
+for filename in ['house-release.blend']:
  path=ROOT/'scene'/filename;bpy.ops.wm.open_mainfile(filepath=str(path));scene=bpy.context.scene
  if not scene.get('rooms_rigid_refit'):
   for room in ['hallway','workshop','attic']:

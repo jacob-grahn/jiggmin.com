@@ -1,4 +1,4 @@
-"""Light-cream ceiling paint and unobstructed garage window framing. No bake."""
+"""Ceiling paint, attic plywood and unobstructed garage window framing. No bake."""
 import bpy,json,re
 from pathlib import Path
 from mathutils import Vector,Matrix
@@ -66,14 +66,14 @@ def apply_house_finishes(scene):
  print('HOUSE_FINISHES',painted,'cream faces; 12 window-framing pieces',flush=True)
 
 def paint_ceiling_undersides(scene):
- """Paint the authored ceilings; keep the cellar's timber slab undersides."""
+ """Paint the authored ceilings; retain cellar timber and attic plywood."""
  restore_cellar_slab_finish(scene)
  material=bpy.data.materials.get(SPEC['ceiling']['name']) or bpy.data.materials.new(SPEC['ceiling']['name']);material.use_nodes=True
  color=(*SPEC['ceiling']['linear_rgb'],1);material.diffuse_color=color;p=material.node_tree.nodes.get('Principled BSDF');p.inputs['Base Color'].default_value=color;p.inputs['Roughness'].default_value=SPEC['ceiling']['roughness']
  painted=0
  for o in scene.objects:
   name=o.get('source_object',o.name)
-  if name.startswith(('Cellar slab underside / ','Attic slab upper / ')):continue
+  if name.startswith(('Cellar slab underside / ','Attic slab upper / ','Main pitched roof')):continue
   if o.type!='MESH' or not re.search(r'ceiling|Main pitched roof|Garage pitched roof|^Attic hatch$',name,re.I) or re.search(r'light|lamp|canopy|fixture|stem',name,re.I):continue
   o.data=o.data.copy();index=next((i for i,m in enumerate(o.data.materials) if m==material),None)
   if index is None:index=len(o.data.materials);o.data.materials.append(material)
@@ -81,6 +81,8 @@ def paint_ceiling_undersides(scene):
   for poly in o.data.polygons:
    if not split or (normal@poly.normal).normalized().z<-.5:poly.material_index=index;painted+=1
   o['ceiling_paint']='light cream'
+ from attic_plywood import apply_attic_plywood
+ apply_attic_plywood(scene)
  return painted
 
 def restore_cellar_slab_finish(scene):

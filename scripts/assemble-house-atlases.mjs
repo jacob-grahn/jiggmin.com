@@ -28,7 +28,11 @@ for(const asset of ['structure','hallway','workshop','basement','attic']){
   node.setMesh(copied.get(patch.getMesh()));
   const group=patch.getExtras().atlas_group;
   const deliveryMax=LIGHTING_ATLASES.groupCaps[group]??LIGHTING_ATLASES.pageSize;
-  node.setExtras({...node.getExtras(),release_baked:patch.getExtras().release_baked,atlas_group:group,atlas_delivery_max:deliveryMax,atlas_source_id:patch.getExtras().atlas_source_id,atlas_lossless:false});count++;
+  node.setExtras({...node.getExtras(),release_baked:patch.getExtras().release_baked,atlas_group:group,atlas_delivery_max:deliveryMax,atlas_source_id:patch.getExtras().atlas_source_id,atlas_lossless:false});
+  if(group==='structure-attic'&&/^Main pitched roof/.test(node.getExtras().source_object??node.getName())){
+   const extras={...node.getExtras(),ceiling_finish:'unfinished plywood'};delete extras.ceiling_paint;node.setExtras(extras);
+  }
+  count++;
  }
  receivers+=doc.getRoot().listNodes().filter(n=>n.getMesh()&&n.getExtras().release_baked).length;
  await doc.transform(prune({keepAttributes:true,keepLeaves:true,keepSolidTextures:true}),unpartition());

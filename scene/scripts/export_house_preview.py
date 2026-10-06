@@ -1,5 +1,5 @@
 """Fast export of the saved preview .blend. Merged meshes, optional retained den materials, and no lighting bake.
-blender -b scene/house-plan-preview.blend --python scene/scripts/export_house_preview.py
+blender -b scene/house-release.blend --python scene/scripts/export_house_preview.py
 """
 import bpy,json,time,math
 from pathlib import Path

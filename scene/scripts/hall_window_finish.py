@@ -61,7 +61,7 @@ if __name__ == '__main__':
     import shutil
     from pathlib import Path
     root = Path(__file__).resolve().parents[2]
-    for name in ('house-plan-preview.blend', 'house-release.blend'):
+    for name in ('house-release.blend',):
         path = root / 'scene' / name
         bpy.ops.wm.open_mainfile(filepath=str(path))
         backup = path.with_name(path.stem + '-before-window-finish.blend')

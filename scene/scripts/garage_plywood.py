@@ -32,7 +32,7 @@ def add_plywood_and_den_infill(scene):
  bpy.context.view_layer.update()
 
 def main():
- for filename in ['house-plan-preview.blend','house-release.blend']:
+ for filename in ['house-release.blend']:
   path=ROOT/'scene'/filename;bpy.ops.wm.open_mainfile(filepath=str(path));scene=bpy.context.scene
   add_plywood_and_den_infill(scene)
   bpy.ops.wm.save_as_mainfile(filepath=str(path),compress=True)

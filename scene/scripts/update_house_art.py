@@ -5,7 +5,7 @@ R=Path(__file__).resolve().parents[2]
 placements=json.loads((R/'scene/house-textures/influences/placements.json').read_text())
 lookup={p['node']:(R/'scene/house-textures/influences'/p['texture'],p['title']) for p in placements}
 lookup['Bitey painting image']=(R/'scene/house-textures/bitey/bitey-credited.png','Bitey — Adam Phillips')
-for file in ['house-attic.blend','house-hallway.blend','house-workshop.blend','house-basement.blend','house-connected.blend','house-plan-preview.blend','house-release.blend']:
+for file in ['house-attic.blend','house-hallway.blend','house-workshop.blend','house-basement.blend','house-connected.blend','house-release.blend']:
  path=R/'scene'/file
  if not path.exists():continue
  bpy.ops.wm.open_mainfile(filepath=str(path));changed=0

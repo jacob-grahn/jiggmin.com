@@ -5,7 +5,7 @@ import bpy,re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 shirt=re.compile(r'^(Printed worn T-shirt|PR2 cartridge screenprint|T-shirt collar)')
-for filename in ['house-plan-preview.blend','house-release.blend']:
+for filename in ['house-release.blend']:
  path=ROOT/'scene'/filename;bpy.ops.wm.open_mainfile(filepath=str(path))
  removed=[]
  for obj in list(bpy.context.scene.objects):

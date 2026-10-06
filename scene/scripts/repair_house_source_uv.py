@@ -4,7 +4,7 @@ from pathlib import Path
 R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(Path(__file__).parent))
 from house_source_uv import apply_source_uv
 report={}
-for name in ['house-plan-preview.blend','house-release.blend','midnight-den-illustrated.blend','house-hallway.blend','house-workshop.blend','house-basement.blend','house-attic.blend']:
+for name in ['house-release.blend','midnight-den-illustrated.blend','house-hallway.blend','house-workshop.blend','house-basement.blend','house-attic.blend']:
  path=R/'scene'/name;bpy.ops.wm.open_mainfile(filepath=str(path));bpy.context.view_layer.update()
  changed=apply_source_uv(bpy.context.scene);report[name]=changed
  if changed:

@@ -24,8 +24,7 @@ def source_key():
  return hashlib.sha256(b''.join((ROOT/path).read_bytes() for path in paths)).hexdigest()
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('step',choices=['prepare','test','release','publish']);p.add_argument('--review',action='store_true',help='Stage the reviewed fixture shapes before the small bake');args=p.parse_args()
 if args.step=='prepare':
- blender('scene/house-plan-preview.blend','scene/scripts/prepare_house_release.py')
- blender('scene/house-release.blend','scene/scripts/restore_house_style.py')
+ blender('scene/house-release.blend','scene/scripts/prepare_house_release.py')
  run(['node','scripts/classify-house-release.mjs'])
 elif args.step in ['test','release']:
  if args.step=='test':

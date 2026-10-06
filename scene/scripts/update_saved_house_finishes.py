@@ -1,10 +1,10 @@
-"""Apply finish edits to both saved assemblies and export without a lighting bake."""
+"""Apply finish edits to the saved house and export without a lighting bake."""
 import bpy,sys,json
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(Path(__file__).parent))
 from house_finishes import apply_house_finishes
 from workshop_seating import SPEC as WORKSHOP_SEATING
-for filename in ['house-plan-preview.blend','house-release.blend']:
+for filename in ['house-release.blend']:
  bpy.ops.wm.open_mainfile(filepath=str(ROOT/'scene'/filename));scene=bpy.context.scene
  apply_house_finishes(scene);bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'scene'/filename),compress=True)
  if filename=='house-release.blend':

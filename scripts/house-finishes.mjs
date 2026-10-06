@@ -81,6 +81,18 @@ export function paintCeilings(doc){
  const paint=doc.createMaterial(FINISHES.ceiling.name).setBaseColorFactor([...FINISHES.ceiling.linear_rgb,1]).setRoughnessFactor(FINISHES.ceiling.roughness).setMetallicFactor(0).setDoubleSided(true);
  for(const node of doc.getRoot().listNodes().filter(n=>n.getMesh())){
   const name=node.getExtras().source_object??node.getName();
+  if(/^Main pitched roof/.test(name)){
+   const plywood=doc.createMaterial(FINISHES.attic_ceiling.name).setBaseColorFactor([...FINISHES.attic_ceiling.linear_rgb,1]).setRoughnessFactor(FINISHES.attic_ceiling.roughness).setDoubleSided(true);
+   const mesh=node.getMesh().clone();node.setMesh(mesh);
+   const normalMatrix=new THREE.Matrix3().getNormalMatrix(new THREE.Matrix4().fromArray(node.getWorldMatrix()));
+   for(const old of [...mesh.listPrimitives()]){
+    const indices=old.getIndices(),normal=old.getAttribute('NORMAL'),under=[],other=[];
+    for(let i=0;i<(indices?.getCount()??normal.getCount());i+=3){const tri=[0,1,2].map(k=>indices?indices.getScalar(i+k):i+k),n=new THREE.Vector3(...normal.getElement(tri[0],[])).applyMatrix3(normalMatrix).normalize();(n.y<-.5?under:other).push(...tri);}
+    mesh.removePrimitive(old);
+    for(const [list,m] of [[under,plywood],[other,old.getMaterial()]])if(list.length)mesh.addPrimitive(old.clone().setMaterial(m).setIndices(doc.createAccessor().setType('SCALAR').setArray(new Uint32Array(list)).setBuffer(doc.getRoot().listBuffers()[0])));
+   }
+   const extras={...node.getExtras(),ceiling_finish:'unfinished plywood'};delete extras.ceiling_paint;node.setExtras(extras);continue;
+  }
   if(/^(Cellar slab underside|Attic slab upper) \/ /.test(name))continue;
   if(!/ceiling|Main pitched roof|Garage pitched roof|^Attic hatch$/i.test(name)||/light|lamp|canopy|fixture|stem/i.test(name))continue;
   const mesh=node.getMesh().clone();node.setMesh(mesh);const split=/floor \/ hall ceiling|pitched roof/i.test(name),normalMatrix=new THREE.Matrix3().getNormalMatrix(new THREE.Matrix4().fromArray(node.getWorldMatrix()));

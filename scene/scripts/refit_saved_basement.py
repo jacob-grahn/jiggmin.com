@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(Path(__file__).parent))
 from basement_model_refit import refit,import_source,SPEC
 old_shell=re.compile(r'^(?:Finish / )?(Basement masonry|Basement slab|basement joist|cellar mortar|cellar side|cellar rear|Basement utility light)',re.I)
-for filename in ['house-plan-preview.blend','house-release.blend']:
+for filename in ['house-release.blend']:
  path=ROOT/'scene'/filename;bpy.ops.wm.open_mainfile(filepath=str(path))
  for obj in list(bpy.context.scene.objects):
   if obj.get('source_room')=='basement' or old_shell.match(obj.name):bpy.data.objects.remove(obj,do_unlink=True)

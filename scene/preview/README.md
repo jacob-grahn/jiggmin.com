@@ -10,7 +10,7 @@ npm run preview:house
 
 Open http://127.0.0.1:8010/scene/preview/. The server binds to loopback only. It serves the source checkout, so keep it local. `-- --port 8011` selects another port.
 
-The editable native scene is `scene/house-plan-preview.blend`. Open it in Blender, move/edit geometry or cameras, edit route control points, and **save**. Then:
+The single editable native scene is `scene/house-release.blend`. Both preview exports and production bakes use this model; release preparation exports its saved geometry and materials without overwriting it. Open it in Blender, move/edit geometry or cameras, edit route control points, and **save**. Then:
 
 ```sh
 npm run preview:house:export

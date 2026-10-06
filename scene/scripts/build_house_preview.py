@@ -124,7 +124,7 @@ for screen in bpy.data.screens:
   if area.type=='VIEW_3D':area.spaces.active.region_3d.view_perspective='CAMERA';area.spaces.active.shading.type='SOLID';area.spaces.active.shading.color_type='MATERIAL'
 from house_finishes import apply_house_finishes
 apply_house_finishes(bpy.context.scene)
-path=ROOT/'scene/house-plan-preview.blend';bpy.ops.wm.save_as_mainfile(filepath=str(path),compress=True)
+path=ROOT/'scene/house-release.blend';bpy.ops.wm.save_as_mainfile(filepath=str(path),compress=True)
 print(f'Saved {path} in {time.monotonic()-started:.1f}s',flush=True)
 from export_house_preview import export_preview
 export_preview()

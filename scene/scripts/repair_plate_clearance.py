@@ -5,7 +5,7 @@ import bpy,re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 pattern=re.compile(r'^(?:Kindergarten plate|Ceramic plate back|Plate stand|Plate wall shelf|Shelf brass bracket(?:\.001)?|Plain jar\.002|Jar screw lid\.002)$')
-for filename in ['house-plan-preview.blend','house-release.blend']:
+for filename in ['house-release.blend']:
  path=ROOT/'scene'/filename;bpy.ops.wm.open_mainfile(filepath=str(path))
  moved=[]
  for obj in bpy.context.scene.objects:

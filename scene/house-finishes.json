@@ -35,5 +35,14 @@
       "stairs",
       "hatch"
     ]
+  },
+  "attic_ceiling": {
+    "name": "Attic ceiling plywood",
+    "linear_rgb": [
+      0.38,
+      0.23,
+      0.105
+    ],
+    "roughness": 0.94
   }
 }

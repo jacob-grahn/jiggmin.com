@@ -9,8 +9,8 @@ from house_trim import trim_walls_for_stage, assert_unique_trim
 from house_preview_spec import build_spec
 from export_house_preview import export_preview
 stage=int(sys.argv[sys.argv.index('--stage')+1]);s=bpy.context.scene;spec=build_spec();plan=json.loads((ROOT/'docs/house-plan/proposed-layout.json').read_text())
-backup=ROOT/f'scene/house-plan-preview-before-finish-{stage}.blend'
-if not backup.exists():shutil.copy2(ROOT/'scene/house-plan-preview.blend',backup)
+backup=ROOT/f'scene/house-release-before-finish-{stage}.blend'
+if not backup.exists():shutil.copy2(ROOT/'scene/house-release.blend',backup)
 name=f'06 Finish {stage}';collection=bpy.data.collections.get(name)
 if collection:
  for o in list(collection.objects):bpy.data.objects.remove(o,do_unlink=True)
@@ -320,5 +320,5 @@ polish_preview_fixtures()
 from house_finishes import apply_house_finishes
 apply_house_finishes(bpy.context.scene)
 bpy.context.view_layer.update();assert_unique_trim(s.objects)
-s['finish_stage']=max(stage,s.get('finish_stage',0));bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'scene/house-plan-preview.blend'),compress=True);export_preview()
+s['finish_stage']=max(stage,s.get('finish_stage',0));bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'scene/house-release.blend'),compress=True);export_preview()
 print('FINISHED STAGE',stage,flush=True)

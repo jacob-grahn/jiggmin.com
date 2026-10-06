@@ -8,7 +8,7 @@ ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(Path(__file__).parent))
 from house_preview_spec import build_spec
 convert=Matrix.Rotation(-math.pi/2,4,'X')
-for filename in ['house-plan-preview.blend','house-release.blend']:
+for filename in ['house-release.blend']:
  path=ROOT/'scene'/filename
  bpy.ops.wm.open_mainfile(filepath=str(path))
  scene=bpy.context.scene

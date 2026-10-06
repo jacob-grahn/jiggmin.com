@@ -10,7 +10,7 @@ from pathlib import Path
 import bpy
 
 ROOT = Path(__file__).resolve().parents[2]
-for filename in ('house-plan-preview.blend', 'house-release.blend'):
+for filename in ('house-release.blend',):
     path = ROOT / 'scene' / filename
     bpy.ops.wm.open_mainfile(filepath=str(path))
     objects = [o for o in bpy.data.objects

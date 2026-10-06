@@ -5,7 +5,7 @@ sys.path.insert(0,str(Path(__file__).parent))
 from house_finishes import paint_door_frames
 R=Path(__file__).resolve().parents[2];backup=R/'scene/renders/white-door-frames/source-backup';backup.mkdir(parents=True,exist_ok=True)
 report=[]
-for name in ['house-plan-preview','house-release']:
+for name in ['house-release']:
  path=R/'scene'/(name+'.blend')
  if not (backup/path.name).exists():shutil.copy2(path,backup/path.name)
  bpy.ops.wm.open_mainfile(filepath=str(path));painted=paint_door_frames(bpy.context.scene)
