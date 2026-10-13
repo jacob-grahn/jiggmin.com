@@ -42,8 +42,20 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/effing-meteors-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/effing-meteors-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/effing-meteors/effing-meteors.swf",
+        "titleBounds": [
+          32,
+          28,
+          338,
+          160
+        ],
+        "captureSize": [
+          400,
+          600
+        ]
       }
     },
     {
@@ -120,8 +132,22 @@
         "descriptorFile": "games/platform-racing-3/swf-info.txt"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/platform-racing-3-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/platform-racing-3-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/platform-racing-3/game_01_09_2026_b1.swf",
+        "background": "#172860",
+        "titleBounds": [
+          130,
+          22,
+          500,
+          226
+        ],
+        "cleanup": "Login status box removed with imagegen; only that rectangle composited into the original capture.",
+        "captureSize": [
+          675,
+          480
+        ]
       }
     },
     {
@@ -165,8 +191,20 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/the-great-red-herring-chase-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/the-great-red-herring-chase-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/the-great-red-herring-chase/game.swf",
+        "titleBounds": [
+          12,
+          299,
+          420,
+          153
+        ],
+        "captureSize": [
+          600,
+          600
+        ]
       },
       "playback": {
         "file": "games/the-great-red-herring-chase/game.swf",
@@ -214,8 +252,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/effing-hail-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/effing-hail-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/effing-hail/effing-hail.swf",
+        "background": "#e7e7e7",
+        "titleBounds": [
+          40,
+          86,
+          520,
+          88
+        ],
+        "captureSize": [
+          600,
+          700
+        ]
       }
     },
     {
@@ -264,8 +315,20 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/neverending-light-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/neverending-light-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/neverending-light/neverending-light.swf",
+        "titleBounds": [
+          122,
+          18,
+          306,
+          56
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -319,8 +382,21 @@
         "descriptorFile": "games/platform-racing-2/version.json"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/platform-racing-2-screenprint-v3.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/platform-racing-2-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "https://pr2hub.com/client/",
+        "background": "#acbdd4",
+        "titleBounds": [
+          76,
+          91,
+          400,
+          88
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       },
       "playerType": "iframe",
       "embedUrl": "https://pr2hub.com/client/"
@@ -365,8 +441,18 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/musical-evenizer-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/musical-evenizer-title-screen.webp",
+        "style": "opening-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/musical-evenizer/game.swf",
+        "captionLines": [
+          "Musical",
+          "Evenizer"
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       },
       "playback": {
         "file": "games/musical-evenizer/game.swf",
@@ -414,8 +500,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/uber-space-shooter-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/uber-space-shooter-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/uber-space-shooter/uber-space-shooter.swf",
+        "background": "#151519",
+        "titleBounds": [
+          186,
+          175,
+          140,
+          25
+        ],
+        "captureSize": [
+          500,
+          500
+        ]
       }
     },
     {
@@ -460,8 +559,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/platform-racing-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/platform-racing-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/platform-racing/platform-racing.swf",
+        "background": "#99d9eb",
+        "titleBounds": [
+          64,
+          35,
+          444,
+          120
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -507,8 +619,18 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/kongregate-racing-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/kongregate-racing-title-screen.webp",
+        "style": "opening-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/kongregate-racing/kongregate-racing.swf",
+        "captionLines": [
+          "Kongregate",
+          "Racing"
+        ],
+        "captureSize": [
+          565,
+          365
+        ]
       }
     },
     {
@@ -556,8 +678,20 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/orbit-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/orbit-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/orbit/orbit.swf",
+        "titleBounds": [
+          173,
+          96,
+          210,
+          72
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -603,8 +737,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/beat-master-3000-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/beat-master-3000-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/beat-master-3000/beat-master-3000.swf",
+        "background": "#101116",
+        "titleBounds": [
+          28,
+          23,
+          269,
+          99
+        ],
+        "captureSize": [
+          320,
+          500
+        ]
       }
     },
     {
@@ -649,8 +796,18 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/click-upon-dots-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/click-upon-dots-title-screen.webp",
+        "style": "opening-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/click-upon-dots/click-upon-dots.swf",
+        "captionLines": [
+          "Click Upon",
+          "Dots"
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -698,8 +855,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/rolley-ball-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/rolley-ball-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/rolley-ball/rolley-ball.swf",
+        "background": "#ededed",
+        "titleBounds": [
+          22,
+          20,
+          488,
+          113
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -750,8 +920,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/the-game-of-disorientation-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/the-game-of-disorientation-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "https://jiggmin2.com/games/the-game-of-disorientation/",
+        "background": "#dadaef",
+        "titleBounds": [
+          6,
+          28,
+          486,
+          125
+        ],
+        "captureSize": [
+          500,
+          400
+        ]
       }
     },
     {
@@ -803,8 +986,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/uber-pool-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/uber-pool-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/uber-pool/uber-pool.swf",
+        "background": "#43936b",
+        "titleBounds": [
+          160,
+          191,
+          323,
+          149
+        ],
+        "captureSize": [
+          650,
+          540
+        ]
       }
     },
     {
@@ -856,8 +1052,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/mines-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/mines-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/mines/mines.swf",
+        "background": "#4f4246",
+        "titleBounds": [
+          72,
+          31,
+          409,
+          201
+        ],
+        "captureSize": [
+          550,
+          300
+        ]
       }
     },
     {
@@ -905,8 +1114,20 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/cooties-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/cooties-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/cooties/cooties.swf",
+        "titleBounds": [
+          130,
+          10,
+          384,
+          82
+        ],
+        "captureSize": [
+          650,
+          200
+        ]
       }
     },
     {
@@ -952,8 +1173,22 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/uber-breakout-2-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/uber-breakout-2-title-screen-v2.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/uber-breakout-2/uber-breakout-2.swf",
+        "background": "#9d99f2",
+        "titleBounds": [
+          30,
+          49,
+          477,
+          270
+        ],
+        "cleanup": "Four menu button texts removed with imagegen; only those small rectangles composited into the original capture.",
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -1008,8 +1243,21 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/uber-breakout-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/uber-breakout-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/uber-breakout/uber-breakout.swf",
+        "background": "#c4c3f3",
+        "titleBounds": [
+          111,
+          155,
+          328,
+          92
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -1059,8 +1307,20 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/kimblis-the-blue-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/kimblis-the-blue-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/kimblis-the-blue/kimblis-the-blue.swf",
+        "titleBounds": [
+          80,
+          13,
+          492,
+          252
+        ],
+        "captureSize": [
+          650,
+          550
+        ]
       }
     },
     {
@@ -1103,8 +1363,20 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/red-earth-2-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/red-earth-2-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/red-earth-2/red-earth-2.swf",
+        "titleBounds": [
+          10,
+          22,
+          225,
+          53
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -1146,8 +1418,20 @@
         "scale": "noscale"
       },
       "cartridgeLabel": {
-        "file": "web/assets/labels/red-earth-screenprint.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/red-earth-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "games/red-earth/red-earth.swf",
+        "titleBounds": [
+          8,
+          21,
+          229,
+          50
+        ],
+        "captureSize": [
+          550,
+          400
+        ]
       }
     },
     {
@@ -1164,8 +1448,21 @@
       },
       "offlineCompleteness": "Online HTML5 game, loaded from bubbleracing.com; requires an internet connection.",
       "cartridgeLabel": {
-        "file": "web/assets/labels/bubble-racing-screenprint-v2.webp",
-        "style": "screenprint"
+        "file": "web/assets/labels/bubble-racing-title-screen.webp",
+        "style": "title-screen",
+        "capturedAt": "2026-10-13",
+        "source": "https://bubbleracing.com/",
+        "background": "#2ca9dc",
+        "titleBounds": [
+          228,
+          68,
+          184,
+          175
+        ],
+        "captureSize": [
+          640,
+          420
+        ]
       }
     }
   ],

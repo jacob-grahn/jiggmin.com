@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {drawCartridgeLabel} from './cartridge-label.js?v=title-zoom-3';
 import {addSurfacePatina,agePaper,seededRandom} from './surface-patina.js';
 
 // Shared molded parts keep the detail inexpensive across the whole collection.
@@ -49,9 +50,9 @@ export async function remodelCartridge(root,game){
  const front=document.createElement('canvas');front.width=512;front.height=512;
  const f=front.getContext('2d');f.fillStyle='#d0cfb5';f.fillRect(0,0,512,512);f.fillStyle='#233533';f.fillRect(12,12,488,46);f.fillStyle='#dedbc3';f.font='20px monospace';f.fillText('J / 0 1   •   ARCHIVE',28,43);f.drawImage(image,24,80,464,232);f.fillStyle='#253a35';textFit(f,game.title,464,30);f.fillText(game.title,24,358);f.font='17px monospace';f.fillText('J I G G M I N',24,462);
  // Finished artwork fills the inset; the original thumbnail remains on the spine.
- if(label)f.drawImage(label,0,0,512,512);
+ if(label)drawCartridgeLabel(f,label,game.cartridgeLabel,game.title);
  agePaper(f,512,512,seed);
- if(broken){f.save();f.translate(256,395);f.rotate(-.13);f.fillStyle='#b5a55e';f.fillRect(-256,-29,512,58);f.fillStyle='#282c22';f.font='italic 46px "Bradley Hand", "Comic Sans MS", cursive';f.textAlign='center';f.fillText('broken',0,15);f.restore();}
+ if(broken){f.save();f.translate(256,game.cartridgeLabel?.style==='opening-screen'?315:395);f.rotate(-.13);f.fillStyle='#b5a55e';f.fillRect(-256,-29,512,58);f.fillStyle='#282c22';f.font='italic 46px "Bradley Hand", "Comic Sans MS", cursive';f.textAlign='center';f.fillText('broken',0,15);f.restore();}
 
  const map=new THREE.CanvasTexture(front);map.colorSpace=THREE.SRGBColorSpace;
  part(root,plane,new THREE.MeshStandardMaterial({map,roughness:.8}),[0,.25,.075],[.385,.313,1]);

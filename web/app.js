@@ -11,7 +11,7 @@ import {resolveRoute,writeGameUrl} from './routes.js';
 import {CartridgePhysics,CARTRIDGE_DEPTH_SCALE} from './physics.js?v=responsive-1';
 import {prepareRoom,addCartridgeLighting,optimizeCartridge} from './room-renderer.js?v=crt-scanlines-1';
 import {createControllerCord} from './controller-cord.js?v=2';
-import {remodelCartridge} from './cartridge-model.js?v=screenprint-3';
+import {remodelCartridge} from './cartridge-model.js?v=title-zoom-3';
 import {SHELF_SLOTS,SHELF_FILL_ORDER,remapShelfAssignments,shuffled,RecoveryQueue,ease} from './library-behavior.js?v=visible-shelf-1';
 import {UPPER_SLOTS,framing,captureSceneAnchors,composeCamera,projectWorld,createUpperShelf,cartridgeVisible} from './responsive-scene.js?v=painted-brick-1';
 import {createControllerDock} from './controller-dock.js';
@@ -380,7 +380,7 @@ async function loadDen(){
  const denLighting=new URLSearchParams(location.search).get('denLighting');
  const denModel=denLighting==='transfer'?'/web/assets/den-transferred.glb':denLighting==='uv'?'/web/assets/den-baked.glb':'/web/assets/room.glb?v=painted-brick-1';
  const [manifest,metadata,carts,roomModel,lighting,colliders,controllerModel,propLighting,profiles,crtLighting]=await Promise.all([
-  json('/data/games.json?v=swf-compat-1'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync(denModel),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=painted-brick-1'),json('/web/assets/colliders.json?v=painted-brick-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=painted-brick-1'),json('/data/gameplay.json?v=swf-compat-1'),new THREE.TextureLoader().loadAsync('/web/assets/crt-screen.webp?v=crt-atlas-1')
+  json('/data/games.json?v=title-zoom-3'),json('/web/assets/scene.json'),loader.loadAsync('/web/assets/cartridges.glb'),loader.loadAsync(denModel),new THREE.TextureLoader().loadAsync('/web/assets/room-lighting.webp?v=painted-brick-1'),json('/web/assets/colliders.json?v=painted-brick-1'),loader.loadAsync('/web/assets/controller.glb?v=beveled'),new THREE.TextureLoader().loadAsync('/web/assets/room-props.webp?v=painted-brick-1'),json('/data/gameplay.json?v=swf-compat-1'),new THREE.TextureLoader().loadAsync('/web/assets/crt-screen.webp?v=crt-atlas-1')
  ]);
  games=manifest.games;for(const game of games){game.gameplay=profiles.games[game.id];if(!game.gameplay)throw Error(`Missing gameplay profile: ${game.id}`);}meta=metadata;scene=new THREE.Scene();scene.add(carts.scene);camera=carts.cameras[0];camera.aspect=meta.cameraAspect;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
  anchors=captureSceneAnchors(camera,meta.screen,meta.slot);baseCameraHeight=camera.position.y;

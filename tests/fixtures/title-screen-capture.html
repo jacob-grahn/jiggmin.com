@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><title>Title screen capture</title>
+<style>body{margin:0;background:#182025;color:white;font:14px system-ui}header{height:48px;display:flex;align-items:center;gap:16px;padding:0 12px}select{padding:5px}#stage{margin:0}ruffle-player,iframe{display:block;width:100%;height:100%;border:0}</style>
+<header><select aria-label="Game"></select><span id="note"></span></header><div id="stage"></div>
+<script src="/web/vendor/ruffle/ruffle.js"></script><script type="module">
+import {playbackFile} from '/web/interaction.js';
+const {games}=await(await fetch('/data/games.json')).json();
+const select=document.querySelector('select'),stage=document.querySelector('#stage');
+for(const g of games)select.add(new Option(g.title,g.id));
+const g=games.find(g=>g.id===new URLSearchParams(location.search).get('game'))||games[0];
+select.value=g.id;select.onchange=()=>location.search='?game='+select.value;
+stage.style.width=g.embedWidth+'px';stage.style.height=g.embedHeight+'px';
+document.querySelector('#note').textContent=g.title;
+if(g.playerType==='iframe'){const frame=document.createElement('iframe');frame.src=g.embedUrl;stage.append(frame);}else{const player=window.RufflePlayer.newest().createPlayer();stage.append(player);await player.ruffle().load({url:'/'+playbackFile(g),autoplay:'on',unmuteOverlay:'hidden',allowScriptAccess:false,logLevel:'error',scale:'showAll'});}
+</script>

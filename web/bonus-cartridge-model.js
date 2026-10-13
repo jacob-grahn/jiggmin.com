@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {remodelCartridge} from './cartridge-model.js?v=screenprint-3';
+import {remodelCartridge} from './cartridge-model.js?v=title-zoom-3';
 import {copyCartridges} from './cartridge-storage.js';
 import {getBonusGame} from './bonus-collection.js';
 import {CARTRIDGE_DEPTH_SCALE} from './physics.js';

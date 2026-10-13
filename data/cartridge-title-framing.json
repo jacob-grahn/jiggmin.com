@@ -1,0 +1,201 @@
+{
+  "effing-meteors": {
+    "titleBounds": [
+      32,
+      28,
+      338,
+      160
+    ]
+  },
+  "platform-racing-3": {
+    "background": "#172860",
+    "titleBounds": [
+      130,
+      22,
+      500,
+      226
+    ]
+  },
+  "the-great-red-herring-chase": {
+    "titleBounds": [
+      12,
+      299,
+      420,
+      153
+    ]
+  },
+  "effing-hail": {
+    "background": "#e7e7e7",
+    "titleBounds": [
+      40,
+      86,
+      520,
+      88
+    ]
+  },
+  "neverending-light": {
+    "titleBounds": [
+      122,
+      18,
+      306,
+      56
+    ]
+  },
+  "platform-racing-2": {
+    "background": "#acbdd4",
+    "titleBounds": [
+      76,
+      91,
+      400,
+      88
+    ]
+  },
+  "musical-evenizer": {
+    "captionLines": [
+      "Musical",
+      "Evenizer"
+    ]
+  },
+  "uber-space-shooter": {
+    "background": "#151519",
+    "titleBounds": [
+      186,
+      175,
+      140,
+      25
+    ]
+  },
+  "platform-racing": {
+    "background": "#99d9eb",
+    "titleBounds": [
+      64,
+      35,
+      444,
+      120
+    ]
+  },
+  "kongregate-racing": {
+    "captionLines": [
+      "Kongregate",
+      "Racing"
+    ]
+  },
+  "orbit": {
+    "titleBounds": [
+      173,
+      96,
+      210,
+      72
+    ]
+  },
+  "beat-master-3000": {
+    "background": "#101116",
+    "titleBounds": [
+      28,
+      23,
+      269,
+      99
+    ]
+  },
+  "click-upon-dots": {
+    "captionLines": [
+      "Click Upon",
+      "Dots"
+    ]
+  },
+  "rolley-ball": {
+    "background": "#ededed",
+    "titleBounds": [
+      22,
+      20,
+      488,
+      113
+    ]
+  },
+  "the-game-of-disorientation": {
+    "background": "#dadaef",
+    "titleBounds": [
+      6,
+      28,
+      486,
+      125
+    ]
+  },
+  "uber-pool": {
+    "background": "#43936b",
+    "titleBounds": [
+      160,
+      191,
+      323,
+      149
+    ]
+  },
+  "mines": {
+    "background": "#4f4246",
+    "titleBounds": [
+      72,
+      31,
+      409,
+      201
+    ]
+  },
+  "cooties": {
+    "titleBounds": [
+      130,
+      10,
+      384,
+      82
+    ]
+  },
+  "uber-breakout-2": {
+    "background": "#9d99f2",
+    "titleBounds": [
+      30,
+      49,
+      477,
+      270
+    ]
+  },
+  "uber-breakout": {
+    "background": "#c4c3f3",
+    "titleBounds": [
+      111,
+      155,
+      328,
+      92
+    ]
+  },
+  "kimblis-the-blue": {
+    "titleBounds": [
+      80,
+      13,
+      492,
+      252
+    ]
+  },
+  "red-earth-2": {
+    "titleBounds": [
+      10,
+      22,
+      225,
+      53
+    ]
+  },
+  "red-earth": {
+    "titleBounds": [
+      8,
+      21,
+      229,
+      50
+    ]
+  },
+  "bubble-racing": {
+    "background": "#2ca9dc",
+    "titleBounds": [
+      228,
+      68,
+      184,
+      175
+    ]
+  }
+}
