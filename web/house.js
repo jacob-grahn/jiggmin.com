@@ -123,9 +123,8 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     const cartridge=el('figure','house-found-cartridge'),image=el('img');
     image.src='/games/bonus/destroyers-of-planets/title-screen.jpg';image.alt='Destroyers of Planets cartridge';
     cartridge.append(image);modalBody.append(cartridge);
-    modalBody.append(el('p','','You followed the ball all the way to ten cups! You earned Destroyers of Planets, an old unfinished demo rescued from the Wayback Machine.'));
+    modalBody.append(el('p','','Beneath the final cup, you found an old cartridge filled with spiderwebs. Wiping it off, a label with the words "Destroyers of Planets" was revealed...'));
     modalBody.append(el('p','house-discovery','Your cartridge will be waiting on the den table when you return. Insert it into the console to play.'));
-    modalBody.append(el('p','','Arrow keys move. A runs or interacts, S changes weapons, and D changes characters.'));
   }
   function showJournal() {
     if (!data) return;
