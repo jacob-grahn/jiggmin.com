@@ -41,3 +41,24 @@ test('portrait exploration preserves the room horizontal field of view',()=>{
  }
  assert.equal(camera.fov,42);
 });
+
+test('cup rounds and pyramid stay centered and clear of bottom navigation across screen sizes',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const {cupLayout,cupPyramid}=await import('../web/hallway-cups.js');
+ const layout=JSON.parse(await readFile(new URL('../web/assets/house/release/layout.json',import.meta.url)));
+ const view=layout.views['private-hall'];
+ assert.deepEqual(layout.routes['private-hall'].at(-1),view.position,'travel reaches the cup camera');
+ for(const [width,height] of [[320,568],[390,844],[844,390],[1440,900]]){
+  const camera=new THREE.PerspectiveCamera(view.fov,view.aspect,.035,250);
+  camera.position.fromArray(view.position);camera.lookAt(...view.target);
+  camera.userData.explorationLens={fov:view.fov,aspect:view.aspect};
+  resizeHouseCamera(camera,width/height);camera.updateMatrixWorld();
+  for(const positions of [...Array.from({length:8},(_,i)=>cupLayout(i+3)),cupPyramid()])for(const position of positions){
+   const points=[];
+   for(const x of [-.116,.116])for(const y of [-.135,.135])for(const z of [-.116,.116])points.push(position.clone().add(new THREE.Vector3(x,y,z)).project(camera));
+   assert.ok(points.every(p=>Math.abs(p.x)<.95&&Math.abs(p.y)<.8),'every cup fits with margin');
+   assert.ok(Math.max(...points.map(p=>(1-p.y)*height/2))<height-100,'cups clear the bottom controls');
+   if(width<height)assert.ok((Math.max(...points.map(p=>p.x))-Math.min(...points.map(p=>p.x)))*width/2>34,'portrait cups remain individually tappable');
+  }
+ }
+});

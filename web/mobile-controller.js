@@ -1,4 +1,4 @@
-import {TouchKeys,joystickKeys,sendRuffleKey} from './touch-input.js?v=profiles-1';
+import {TouchKeys,joystickKeys,sendRuffleKey} from './touch-input.js?v=rotated-stick-1';
 import {VirtualPointer} from './virtual-pointer.js';
 const DEFAULT={stick:'arrows',a:['Space'],b:['Space']};
 const label=keys=>keys.length?keys.map(k=>({Space:'SPACE',MouseLeft:'CLICK',ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',ShiftLeft:'SHIFT'}[k]||k.replace(/^Key|^Digit/,''))).join('+'):'—';
@@ -17,7 +17,7 @@ export function createMobileController({getPlayer,getAspect=()=>4/3,onQuit,onGes
    state.knob.style.transform=`translate(${x*radius*.5}px,${y*radius*.5}px)`;
    if(isAim||profile.stick==='mouse'){mouse.aim(x,y);mouse.activate();if(isAim)keys.set('aim-fire',Math.hypot(x,y)>.22?['MouseLeft']:[]);return;}
    const mapping=profile.stick==='wasd'?{ArrowLeft:'KeyA',ArrowRight:'KeyD',ArrowUp:'KeyW',ArrowDown:'KeyS'}:{};
-   keys.set('joystick',joystickKeys(x,y).map(k=>mapping[k]||k));
+   keys.set('joystick',joystickKeys(x,y,profile.stickRotation??0).map(k=>mapping[k]||k));
   };
   element.addEventListener('pointerdown',e=>{if(!visible||state.pointer!==null)return;e.preventDefault();focus();state.pointer=e.pointerId;element.setPointerCapture(e.pointerId);move(e);});
   element.addEventListener('pointermove',e=>{if(e.pointerId===state.pointer){e.preventDefault();move(e);}});

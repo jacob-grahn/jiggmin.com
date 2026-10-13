@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import * as THREE from 'three';
 import {createBonusCollection,normalizeBonusGame,BONUS_KEY} from '../web/bonus-collection.js';
 import {JOURNAL_KEY} from '../web/house-state.js';
@@ -32,7 +33,7 @@ test('corrupt storage is ignored and unavailable storage still works during the 
 });
 test('bonus games use ordinary cartridge artwork, console playback, and built routes',()=>{
  for(const original of JSON.parse(readFileSync('data/bonus-games.json')).games){
-  const game=normalizeBonusGame(original);assert.equal(game.thumbnail.file,original.thumbnail);assert.equal(playbackFile(game),original.file);assert.equal(game.gameplay.mode,'touch');
+  const game=normalizeBonusGame(original);assert.equal(game.thumbnail.file,original.thumbnail);assert.equal(playbackFile(game),original.file);assert.equal(game.gameplay.mode,original.gameplay?.mode??'touch');
   assert.equal(resolveRoute('/'+game.id,[game]).game,game);
   assert.match(readFileSync(`dist/${game.id}/index.html`,'utf8'),/<base href="\/">/);
  }
@@ -47,4 +48,22 @@ test('both delivery paths start near the viewer and drop cartridges onto the tab
  }
  for(let i=0;i<480;i++)physics.step(1/120);
  for(const id of ['0','1']){const body=physics.items.get(id).body;assert.ok(body.position.y>.69&&body.position.y<.82);assert.ok(Math.abs(body.position.x)<2);}
+});
+
+test('cup prize persists, delivers once, and retains its keyboard controls',()=>{
+ const storage=memory(),first=createBonusCollection(storage),id='destroyers-of-planets';
+ assert.equal(first.collect(id),true);assert.equal(first.collect(id),false);
+ const returning=createBonusCollection(storage);assert.equal(returning.pending(id),true);returning.delivered(id);
+ const restored=createBonusCollection(storage);assert.ok(restored.found.includes(id));assert.equal(restored.pending(id),false);assert.equal(restored.collect(id),false);
+ const game=normalizeBonusGame(JSON.parse(readFileSync('data/bonus-games.json')).games.find(g=>g.id===id));
+ assert.deepEqual(game.gameplay.controller,{stick:'arrows',a:['KeyA'],b:['KeyD'],stickRotation:45});
+});
+
+test('recovered cup prize ships its verified original SWF and title capture',()=>{
+ const game=JSON.parse(readFileSync('data/bonus-games.json')).games.find(g=>g.id==='destroyers-of-planets');
+ const bytes=readFileSync(game.file);
+ assert.equal(bytes.length,game.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),game.sha256);
+ assert.equal(bytes.subarray(0,3).toString(),'CWS');assert.equal(game.swf.stageWidth,550);assert.equal(game.swf.stageHeight,350);
+ assert.ok(readFileSync(game.cartridgeLabel.file).length>1000);
+ assert.deepEqual(readFileSync('dist/'+game.file),bytes);
 });

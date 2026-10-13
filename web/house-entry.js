@@ -16,7 +16,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,ensureDen,un
  const update=()=>{const visible=!active&&ready&&!playing&&!loading;nav.inert=!visible;nav.setAttribute('aria-hidden',String(!visible));fadeNavigation(nav,visible);};
  function styles(){
   return stylesheet??=new Promise((resolve,reject)=>{
-   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=hotspot-style-fix-1';
+   const link=document.createElement('link');link.rel='stylesheet';link.href='/web/house.css?v=cup-framing-1';
    link.onload=resolve;link.onerror=()=>{link.remove();stylesheet=null;reject(new Error('The house styles could not load. Try the arrow again.'));};document.head.append(link);
   });
  }
@@ -26,7 +26,7 @@ export function createHouseEntry({host,onOpen,onExit,onError,getDen,ensureDen,un
   nav.inert=true;nav.setAttribute('aria-hidden','true');
   loading=(async()=>{
    await fadeNavigation(nav,false);
-   if(!instance){const [module]=await Promise.all([import('./house.js?v=source-models-1'),styles()]);instance=await module.createHouse({getDen,ensureDen,unloadDen,loadBasementCartridges,onCollectBonus,
+   if(!instance){const [module]=await Promise.all([import('./house.js?v=cup-prize-1'),styles()]);instance=await module.createHouse({getDen,ensureDen,unloadDen,loadBasementCartridges,onCollectBonus,
     onOpen(){active=true;update();onOpen?.();},
     onExit(){active=false;update();onExit?.();if(origin?.isConnected&&ready&&!playing)origin.focus();},
    });}

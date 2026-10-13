@@ -53,3 +53,17 @@ test('Ruffle adapter supplies legacy key codes and bubbling composed events',()=
   assert.equal(player.focused,true);assert.equal(events[0].keyCode,32);assert.equal(events[1].which,38);assert.equal(events[0].bubbles,true);assert.equal(events[0].composed,true);
  }finally{globalThis.KeyboardEvent=Original;}
 });
+
+test('rotated joystick maps isometric directions and releases keys when centered',()=>{
+ const directions=[
+  [.7,-.7,['ArrowUp']],[.7,.7,['ArrowRight']],[-.7,.7,['ArrowDown']],[-.7,-.7,['ArrowLeft']],
+  [0,-1,['ArrowLeft','ArrowUp']],[1,0,['ArrowRight','ArrowUp']],
+  [0,1,['ArrowRight','ArrowDown']],[-1,0,['ArrowLeft','ArrowDown']],
+ ];
+ for(const [x,y,expected] of directions)assert.deepEqual(joystickKeys(x,y,45),expected);
+ assert.deepEqual(joystickKeys(.05,.1,45),[]);
+ assert.deepEqual(joystickKeys(.7,-.7),['ArrowRight','ArrowUp'],'ordinary games keep the standard mapping');
+ const events=[],keys=new TouchKeys((...event)=>events.push(event));
+ keys.set('joystick',joystickKeys(.7,-.7,45));keys.set('joystick',joystickKeys(.7,.7,45));keys.set('joystick',joystickKeys(0,0,45));
+ assert.deepEqual(events,[['keydown','ArrowUp'],['keyup','ArrowUp'],['keydown','ArrowRight'],['keyup','ArrowRight']]);
+});

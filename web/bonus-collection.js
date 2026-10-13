@@ -2,7 +2,8 @@ import {readJournal} from './house-state.js';
 
 export const BONUS_KEY='jiggmin.house.cartridges.v1';
 export const BONUS_NOTES={inkclipse:'inkclipse',crowland:'a-murder-in-crowland'};
-export const BONUS_IDS=Object.values(BONUS_NOTES);
+export const CUP_PRIZE_ID='destroyers-of-planets';
+export const BONUS_IDS=[...Object.values(BONUS_NOTES),CUP_PRIZE_ID];
 export function createBonusCollection(storage){
  let saved;try{saved=JSON.parse(storage?.getItem(BONUS_KEY)??'null');}catch{}
  const valid=values=>Array.isArray(values)?values.filter(id=>BONUS_IDS.includes(id)):[];
@@ -21,7 +22,7 @@ export function createBonusCollection(storage){
 
 export function normalizeBonusGame(game){
  if(!BONUS_IDS.includes(game?.id)||!/^games\/bonus\/[a-z0-9-]+\/game\.swf$/.test(game.file))throw Error('This bonus cartridge is unavailable.');
- return {...game,thumbnail:{file:game.thumbnail},playerType:'swf',gameplay:{mode:'touch',controller:{stick:'arrows',a:[],b:[]}}};
+ return {...game,thumbnail:{file:game.thumbnail},playerType:'swf',gameplay:game.gameplay??{mode:'touch',controller:{stick:'arrows',a:[],b:[]}}};
 }
 let catalog;
 export async function getBonusGame(id){

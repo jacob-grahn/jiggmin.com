@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {createHouseProps} from '../web/house-props.js';
 import {createHallwayCups,cupLayout,cupPyramid,CUP_FLOOR_Y,CUP_WINDOW_LIGHT} from '../web/hallway-cups.js';
-function setup(){
+function setup(options={}){
  const scene=new THREE.Scene(),model=new THREE.Group();scene.add(model);
  const system=createHouseProps(model,scene,{floorY:CUP_FLOOR_Y,roomBounds:[4.8,0,6.3,6.8]});
- const game=createHallwayCups(scene,system,{texture:new THREE.Texture(),random:()=>.37});
+ const game=createHallwayCups(scene,system,{texture:new THREE.Texture(),random:()=>.37,...options});
  const advance=seconds=>{for(let i=0;i<seconds*60;i++)system.update(1/60);};
  const until=phase=>{for(let i=0;i<3000&&game.state.phase!==phase;i++)system.update(1/60);assert.equal(game.state.phase,phase);};
  return {system,game,advance,until};
@@ -117,4 +117,15 @@ test('winning cup lifts off a nested cup and moves aside while the new cup stays
  assert.ok(Math.abs(upper.position.y-origin.y)<1e-6,'upper cup settles on the floor');
  assert.ok(upper.position.distanceTo(origin)>.39,'upper cup moves clear of the new cup');
  until('choose');assert.equal(game.state.count,4);
+});
+
+test('prize is awarded once after the final round, never on a miss or early win',()=>{
+ let awards=0;const {game,until,advance}=setup({onComplete:()=>awards++});
+ game.press(0);until('choose');game.press((game.state.winner+1)%3);until('idle');assert.equal(awards,0);
+ game.press(0);until('choose');
+ for(let n=3;n<=10;n++){
+  assert.equal(awards,0);game.press(game.state.winner);
+  if(n<10)until('choose');else{until('stack');assert.equal(awards,0);until('done');}
+ }
+ assert.equal(awards,1);advance(5);game.press(0);assert.equal(awards,1);
 });

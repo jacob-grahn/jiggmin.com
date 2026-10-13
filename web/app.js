@@ -18,7 +18,7 @@ import {createControllerDock} from './controller-dock.js';
 import {detailController} from './controller-detail.js';
 import {addSurfacePatina} from './surface-patina.js';
 import {illustrateObject} from './den-illustration.js?v=midnight-ink-target-1';
-import {createMobileController} from './mobile-controller.js?v=profiles-2';
+import {createMobileController} from './mobile-controller.js?v=rotated-stick-1';
 import {fitGameViewport} from './game-viewport.js';
 const $=id=>document.getElementById(id),room=$('room'),canvas=$('cartridges'),status=$('status'),screen=$('screen'),slot=$('slot'),tip=$('tooltip');
 const say=text=>status.textContent=text;

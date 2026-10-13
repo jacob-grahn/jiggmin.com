@@ -11,7 +11,7 @@ import {illustrateHouse} from './house-illustration.js';
 import {createRoomResources} from './house-resources.js';
 import {createHouseProps,collectHouseStructureColliders} from './house-props.js?v=ceiling-collision-1';
 import {createHousePropInput} from './house-prop-input.js?v=hallway-cups-1';
-import {createHallwayCups,CUP_FLOOR_Y} from './hallway-cups.js?v=cup-nested-reveal-8';
+import {createHallwayCups,CUP_FLOOR_Y} from './hallway-cups.js?v=cup-prize-1';
 import {createHiddenScraps} from './house-scraps.js?v=prop-cleanup-1';
 import {createBonusCartridge} from './bonus-cartridge-model.js';
 import {createBasementCartridges} from './cartridge-storage.js';
@@ -19,7 +19,7 @@ import {createRoute} from './house-layout.js?v=house-reference-38';
 import {resizeHouseCamera} from './house-camera.js';
 import {travelPose,travelDuration} from './house-travel.js?v=house-reference-38';
 import {doorMotion,ladderMotion} from './house-access.js';
-export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unloadDen,loadBasementCartridges,collected=new Set(),layoutURL='/web/assets/house/release/layout.json?v=source-models-1'}={}) {
+export function createHouseRenderer(host,{onActivate=()=>{},onCupsComplete=()=>{},getDen,ensureDen,unloadDen,loadBasementCartridges,collected=new Set(),layoutURL='/web/assets/house/release/layout.json?v=source-models-1'}={}) {
  const debugParams=new URLSearchParams(location.search),slowValue=debugParams.get('slowHouseTravel');
  // Copy diagnostic frames during travel; defer PNG encoding until the burst ends.
  const captureEnabled=debugParams.get('captureHouseTravel')==='1';
@@ -115,8 +115,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
  function resize(){input.cancel();const {width,height}=host.getBoundingClientRect();renderer.setSize(width,height,false);if(camera){resizeHouseCamera(camera,width/height);render();}}
  function roomAsset(id){return layout.assets[id];}
  function viewFor(id){
-  const v=layout.views[id==='hallway'?'hub':id],view=new THREE.PerspectiveCamera(v.fov,layout.aspect,.035,250);
-  view.position.fromArray(v.position);view.lookAt(new THREE.Vector3(...v.target));view.userData.explorationLens={fov:v.fov,aspect:layout.aspect};return view;
+  const v=layout.views[id==='hallway'?'hub':id],view=new THREE.PerspectiveCamera(v.fov,v.aspect??layout.aspect,.035,250);
+  view.position.fromArray(v.position);view.lookAt(new THREE.Vector3(...v.target));view.userData.explorationLens={fov:v.fov,aspect:v.aspect??layout.aspect};return view;
  }
  function materials(root){
   root.traverse(o=>{
@@ -151,7 +151,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
   }
   const resources=createRoomResources();resources.capture(gltf.scene);const view=viewFor(id);
   const props=id==='den'?{props:[],cancel(){},update(){return {};}}:createHouseProps(gltf.scene,world,{floorY:id==='basement'?-4:id==='attic'?2.8:id==='private-hall'?CUP_FLOOR_Y:0,roomBounds:id==='workshop'?[12,0,17,7]:id==='hallway'?[4.8,6.8,12,12]:id==='private-hall'?[4.8,0,6.3,6.8]:[0,0,12,12],structureColliders:connections.structureColliders});
-  const cups=id==='private-hall'?createHallwayCups(world,props,{texture:gltf.cupsAtlas}):null;
+  const cups=id==='private-hall'?createHallwayCups(world,props,{texture:gltf.cupsAtlas,onComplete:onCupsComplete}):null;
   if(cups)resources.capture(cups.root);
   const glass=id==='basement'?configureWindowGlass(gltf.scene):[];
   const scraps=createHiddenScraps(props.props,view,world,collected);
@@ -275,8 +275,8 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
     denProgress=branch==='den'?THREE.MathUtils.smoothstep(camera.position.z,8.0,8.7):0;
     if(!continuousDen||branch!=='den'){
      camera.matrixAutoUpdate=true;camera.scale.set(1,1,1);camera.zoom=1;
-     const fit=fov=>2*Math.atan(Math.tan(fov*Math.PI/360)*Math.max(1,layout.aspect/camera.aspect))*180/Math.PI;
-     camera.fov=THREE.MathUtils.lerp(fit(layout.views.hub.fov),fit(layout.views[branch].fov),THREE.MathUtils.smoothstep(p,.75,1));camera.updateProjectionMatrix();
+     const fit=view=>2*Math.atan(Math.tan(view.fov*Math.PI/360)*Math.max(1,(view.aspect??layout.aspect)/camera.aspect))*180/Math.PI;
+     camera.fov=THREE.MathUtils.lerp(fit(layout.views.hub),fit(layout.views[branch]),THREE.MathUtils.smoothstep(p,.75,1));camera.updateProjectionMatrix();
     }
     if(continuousDen&&branch==='den'){
      const endpoint=continuousDen.endpointCamera();
@@ -292,7 +292,7 @@ export function createHouseRenderer(host,{onActivate=()=>{},getDen,ensureDen,unl
     if(t<1)frame=requestAnimationFrame(step);else{finish=null;resolve();}
    };frame=requestAnimationFrame(step);
   });
-  if(ticket===revision){current=destination;camera.userData.explorationLens={fov:destination.view.fov,aspect:layout.aspect};}
+  if(ticket===revision){current=destination;camera.userData.explorationLens={fov:destination.view.fov,aspect:destination.view.aspect};}
  }
  async function travel(id,onReady=()=>{}){
   revealRevision++;setActive(false);targets.clear();const ticket=revision;await load();if(ticket!==revision)return;

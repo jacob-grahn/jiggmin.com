@@ -2,7 +2,10 @@ export const KEY_INFO={Space:{key:' ',keyCode:32},ArrowLeft:{key:'ArrowLeft',key
 for(const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')KEY_INFO['Key'+letter]={key:letter.toLowerCase(),keyCode:letter.charCodeAt(0)};
 for(let digit=0;digit<=9;digit++)KEY_INFO['Digit'+digit]={key:String(digit),keyCode:48+digit};
 Object.assign(KEY_INFO,{ShiftLeft:{key:'Shift',keyCode:16},Enter:{key:'Enter',keyCode:13},Escape:{key:'Escape',keyCode:27}});
-export function joystickKeys(x,y){
+export function joystickKeys(x,y,rotation=0){
+ // Rotate the physical direction layout clockwise; screen Y increases downward.
+ // A 45-degree layout places Up at the top right of the stick.
+ if(rotation){const angle=rotation*Math.PI/180,c=Math.cos(angle),s=Math.sin(angle);[x,y]=[x*c+y*s,y*c-x*s];}
  if(Math.hypot(x,y)<.22)return [];
  const keys=[];if(x<-.36)keys.push('ArrowLeft');if(x>.36)keys.push('ArrowRight');if(y<-.36)keys.push('ArrowUp');if(y>.36)keys.push('ArrowDown');return keys;
 }

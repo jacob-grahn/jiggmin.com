@@ -1,5 +1,6 @@
+import {CUP_PRIZE_ID} from './bonus-collection.js';
 import {setRoomNavigation,fadeNavigation} from './room-navigation.js?v=fade-1';
-import {createHouseRenderer} from './house-release-renderer.js?v=cup-nested-reveal-8';
+import {createHouseRenderer} from './house-release-renderer.js?v=cup-prize-1';
 import { readJournal, saveJournal, discoverNotes, validateHouseData } from './house-state.js';
 
 const ROOMS = ['hallway', 'workshop', 'attic', 'basement', 'private-hall'];
@@ -114,6 +115,18 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
     notes.forEach(note => modalBody.append(noteCard(note, notes.length !== 1, true)));
     if (!persistence) modalBody.append(el('p', 'house-save-notice', 'Your journal will stay with you for this visit. This browser could not save it for later.'));
   }
+  function awardCupPrize() {
+    onCollectBonus(CUP_PRIZE_ID);
+    live.textContent = 'Cup challenge complete. Destroyers of Planets cartridge earned!';
+    openModal('A prize from the past', 'prize');
+    close.setAttribute('aria-label', 'Dismiss prize');
+    const cartridge=el('figure','house-found-cartridge'),image=el('img');
+    image.src='/games/bonus/destroyers-of-planets/title-screen.jpg';image.alt='Destroyers of Planets cartridge';
+    cartridge.append(image);modalBody.append(cartridge);
+    modalBody.append(el('p','','You followed the ball all the way to ten cups! You earned Destroyers of Planets, an old unfinished demo rescued from the Wayback Machine.'));
+    modalBody.append(el('p','house-discovery','Your cartridge will be waiting on the den table when you return. Insert it into the console to play.'));
+    modalBody.append(el('p','','Arrow keys move. A runs or interacts, S changes weapons, and D changes characters.'));
+  }
   function showJournal() {
     if (!data) return;
     openModal(`Journal · ${discovered.size}`, 'journal');
@@ -199,7 +212,7 @@ export async function createHouse({ onOpen = () => {}, onExit = () => {}, onRoom
       hotspots.replaceChildren();
       await content();
       if (!open || ticket !== roomTicket) return;
-      view ??= createHouseRenderer(scene,{onActivate:activate,getDen,ensureDen,unloadDen,loadBasementCartridges,collected:new Set(data.notes.filter(note=>data.notes.filter(n=>n.hotspot===note.hotspot).every(n=>discovered.has(n.id))).map(note=>note.hotspot))});
+      view ??= createHouseRenderer(scene,{onActivate:activate,onCupsComplete:awardCupPrize,getDen,ensureDen,unloadDen,loadBasementCartridges,collected:new Set(data.notes.filter(note=>data.notes.filter(n=>n.hotspot===note.hotspot).every(n=>discovered.has(n.id))).map(note=>note.hotspot))});
       await view.load(destination);
       if (!open || ticket !== roomTicket) return;
       await view.travel(destination, () => { loading.hidden = true; });

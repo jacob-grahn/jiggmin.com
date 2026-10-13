@@ -70,7 +70,7 @@ function windowMaterial(texture,color,metallic=false){
  });
 }
 
-export function createHallwayCups(scene,system,{texture,random=Math.random}={}){
+export function createHallwayCups(scene,system,{texture,random=Math.random,onComplete=()=>{}}={}){
  const stage=new THREE.Group();stage.name='Rear hall cups and ball';scene.add(stage);
  const metal=windowMaterial(texture,0xdbe1e8,true);
  const wool=windowMaterial(texture,0xe8c6ca);
@@ -187,7 +187,7 @@ export function createHallwayCups(scene,system,{texture,random=Math.random}={}){
    ball.parent.position.lerp(new THREE.Vector3(CENTER.x+.56,BALL_Y,CENTER.z+.25),e);
    if(t===1){
     for(const p of props){p.mode='throw';p.onPress=undefined;p.home.copy(p.root.position);system.physics.pin(p.id,{position:p.root.position,quaternion:p.root.quaternion},{releaseOnContact:true});}
-    setPhase('done');return {changed:true,animating:false};
+    setPhase('done');onComplete();return {changed:true,animating:false};
    }
   }
   pin();return {changed:true,animating:true};

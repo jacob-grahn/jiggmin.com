@@ -61,6 +61,56 @@
       },
       "compatibilityPatch": "Only Data.allowedURL method body replaced with return true. Original SWF retained. Rebuild with scripts/prepare_bonus_games.py.",
       "playbackNotes": "Title, start, crow animation and shooting/ammo decrement verified in browser with vendored Ruffle. Full completion, reload and shield not verified."
+    },
+    {
+      "id": "destroyers-of-planets",
+      "title": "Destroyers of Planets",
+      "file": "games/bonus/destroyers-of-planets/game.swf",
+      "thumbnail": "games/bonus/destroyers-of-planets/title-screen.jpg",
+      "bytes": 208517,
+      "sha256": "d028837a3e50ec297004986d5dc3a4039197029dde8e723cd83122d9f061c807",
+      "sourcePage": "https://web.archive.org/web/20070302105618/http://jiggmin.com/DoP.html",
+      "sourceSwf": "https://web.archive.org/web/20070302105618id_/http://jiggmin.com/DoP29.swf",
+      "embedWidth": 550,
+      "embedHeight": 350,
+      "swf": {
+        "signature": "CWS",
+        "version": 8,
+        "uncompressedBytes": 291194,
+        "stageWidth": 550.0,
+        "stageHeight": 350.0,
+        "frameRate": 17.0,
+        "embeddedUrlHints": []
+      },
+      "cartridgeLabel": {
+        "file": "games/bonus/destroyers-of-planets/title-screen.jpg",
+        "style": "title-screen",
+        "captureSize": [
+          550,
+          350
+        ],
+        "titleBounds": [
+          40,
+          25,
+          465,
+          215
+        ]
+      },
+      "gameplay": {
+        "mode": "controller",
+        "controller": {
+          "stick": "arrows",
+          "a": [
+            "KeyA"
+          ],
+          "b": [
+            "KeyD"
+          ],
+          "stickRotation": 45
+        }
+      },
+      "playbackTested": true,
+      "playbackNotes": "Original unmodified preview. Title, start and initial playable room verified in vendored Ruffle. Arrow keys move; A runs/interacts; S changes weapons; D changes characters (keyboard). Full demo completion not verified."
     }
   ]
 }
